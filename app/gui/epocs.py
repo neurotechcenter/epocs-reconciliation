@@ -1,8 +1,10 @@
 """
 TODO		
 	on lab machine, the difference between an enabled and a disabled entry in the settings window is not highly visible
-	'use marked timings' button starts off red sometimes
+	'use marked timings' button starts off red sometimes (e.g. in Recruitment curve)
 	reduce overcrowding of xticks in recruitment curve
+	first run: ApplicationMode set to RC but file gets saved as ...-ST.dat
+	
 	parameters ApplicationMode, SessionStamp, BackgroundScaleLimit, ResponseScaleLimit, BaselineResponseLevel:  can they be declared from inside python code?
 	NIDAQmxADC: acquisition of floating-point raw data instead of integers
 	ding! when trying to close main window during modal dialog?
@@ -133,7 +135,8 @@ class Operator( object ):
 		self.remote.Connect()
 	
 	def Launch( self ):
-		if DEVEL: self.bci2000( 'execute script ../src/custom/ReflexConditioningSignalProcessing/run-playback.bat slave' ) # TODO
+		#if DEVEL: self.bci2000( 'execute script ../src/custom/ReflexConditioningSignalProcessing/run-playback.bat slave devel' ) # TODO
+		if DEVEL: self.bci2000( 'execute script ../batch/run-nidaqmx.bat slave devel' ) # TODO
 		else:     self.bci2000( 'execute script ../batch/run-nidaqmx.bat slave' ) # TODO
 	
 	def DataRoot( self ):
@@ -249,7 +252,7 @@ class Operator( object ):
 				self.sessionStamp = time.mktime( time.strptime( value, self.dateFormat ) )
 		
 	def bci2000( self, cmd ):
-		#flush( cmd )
+		flush( cmd )
 		#os.system( os.path.join( '..', '..', '..', 'prog', 'BCI2000Shell' ) + ' -c ' + cmd )
 		return self.remote.Execute( cmd )
 		
@@ -335,6 +338,7 @@ class Operator( object ):
 			self.bci2000( 'set parameter Connector list OutputExpressions= 2 BackgroundFeedbackValue ResponseFeedbackValue' )
 		else:
 			self.bci2000( 'set parameter Connector list OutputExpressions= 0' )
+		
 		self.bci2000( 'setconfig' )
 		self.needSetConfig = False
 		self.WriteSettings()
@@ -854,6 +858,9 @@ class TkMPL( object ):
 		self.colors = Bunch(
 			   figure = '#CCCCCC',
 			       bg = '#CCCCCC',
+			       fg = '#000000',
+			   button = '#DDDDDD',
+			 disabled = '#777777',
 			 backpage = '#888888',
 			   header = '#CCCCCC',
 			   footer = '#DDDDDD',
@@ -931,6 +938,16 @@ class GUI( superclass, TkMPL ):
 				self.update(); time.sleep( 7.0 ); self.destroy(); return
 				return
 		
+		self.tk_setPalette(
+			background=self.colors.button,
+			foreground=self.colors.fg,
+			activeBackground='#FFFFFF',
+			activeForeground='#000000',
+			selectBackground='#FFFFFF',
+			selectForeground='#000000',
+			disabledBackground=self.colors.button,
+			disabledForeground=self.colors.disabled,
+		)
 		self.title( title )
 		self.pendingTasks = {}
 		self.pendingFigures = []
@@ -952,11 +969,10 @@ class GUI( superclass, TkMPL ):
 		if os.path.isfile( self.inifile ):
 			self.operator.Set( **eval( open( self.inifile, 'rt' ).read() ) )		
 		
-		bound = self.bind( "<Escape>", self.destroy )
+		if DEVEL: self.bind( "<Escape>", self.destroy )
 		if not SubjectChooser( self, initialID=self.operator.params.SubjectName ).successful: self.destroy(); return		
 		WriteDict( self.operator.params, self.inifile, 'SubjectName', 'DataDirectory' )
 		
-		self.unbind( bound )
 		label = tkinter.Label( self, text='Launching BCI2000 system...', font=( 'Helvetica', 15 ) )
 		label.grid( row=1, column=1, sticky='nsew', padx=100, pady=100 )
 		self.update()
@@ -964,7 +980,7 @@ class GUI( superclass, TkMPL ):
 		
 		self.protocol( 'WM_DELETE_WINDOW', self.CloseWindow )
 		self.operator.Launch()
-		self.operator.SetConfig()
+		#self.operator.SetConfig()
 		self.GetSignalParameters()
 		
 		
@@ -1089,7 +1105,6 @@ class GUI( superclass, TkMPL ):
 		self.DrawFigures()
 		#self.resizable( True, False ) # STEP 13 from http://sebsauvage.net/python/gui/
 		self.update(); self.geometry( self.geometry().split( '+', 1 )[ 0 ] + '+25+25' ) # prevents Tkinter from resizing the GUI when component parts try to change size (STEP 18 from http://sebsauvage.net/python/gui/ )
-		if DEVEL: self.bind( "<Escape>", self.destroy )
 		self.ready = True
 
 	def TabFocus( self, whichTab='all' ):
@@ -1942,7 +1957,9 @@ class AnalysisWindow( Dialog, TkMPL ):
 		if self.mode in [ 'vc' ]:
 			self.mvc.Update()
 		elif self.mode in [ 'rc' ]:
-			pooling = int( self.widgets.an_entry_pooling.get() )
+			pooling = self.widgets.an_entry_pooling.get()
+			try: pooling = int( pooling )
+			except: pooling = None # no change
 			p2p = self.widgets.an_switch_responsemode.scale.get()
 			self.recruitment.Update( pooling=pooling, p2p=p2p )
 		elif self.mode in [ 'ct', 'tt' ]:
@@ -1952,7 +1969,7 @@ class AnalysisWindow( Dialog, TkMPL ):
 			self.hist.Update( targetpc=targetpc )
 			EnableWidget( [ self.widgets.an_button_upcondition, self.widgets.an_button_downcondition ], self.TimingsSaved() )
 		if self.mode in [ 'rc', 'ct', 'tt' ]:
-			if self.TimingsSaved(): self.widgets.an_button_savetimings.configure( state='disabled', bg='SystemButtonFace' )
+			if self.TimingsSaved(): self.widgets.an_button_savetimings.configure( state='disabled', bg=self.colors.button )
 			else:                   self.widgets.an_button_savetimings.configure( state='normal',   bg='#FF4444' )
 		ax = self.artists.get( 'an_axes_overlay', None )
 		if ax: matplotlib.pyplot.figure( ax.figure.number ).sca( ax )
@@ -2290,7 +2307,6 @@ class SubjectChooser( tkinter.Frame ):
 		self.initialID = initialID
 		self.body( self )
 		self.pack()
-		#self.bind( "<Escape>", self.destroy )
 		self.wait_window()
 		
 	def ok( self ):
@@ -2366,7 +2382,7 @@ if __name__ == '__main__':
 	
 	args = getattr( sys, 'argv', [] )[ 1: ]
 	import getopt
-	opts, args = getopt.getopt( args, '', [ 'log=' ] )
+	opts, args = getopt.getopt( args, '', [ 'log=', 'devel' ] )
 	opts = dict( opts )
 	log = opts.get( '--log', None )
 	if log:
@@ -2374,6 +2390,7 @@ if __name__ == '__main__':
 		logDir = os.path.split( log )[ 0 ]
 		if not os.path.isdir( logDir ): os.mkdir( logDir )
 		sys.stdout = sys.stderr = open( log, 'wt', 0 )
+	if '--devel' in opts: DEVEL = True
 	
 	try: tkinter.ALLWINDOWS
 	except: tkinter.ALLWINDOWS = []

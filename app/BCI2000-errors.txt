@@ -1,0 +1,12 @@
+FilePlayback + custom ReflexConditioningSignalProcessing + DummyApplication
+
+	2014-02-14T16:10:15 - Error in Unhandled exception of type std::bad_alloc:
+	bad allocation
+	Canceling thread of type StateMachine.
+
+but the run continued - i.e. FilePlayback and ReflexConditioningSignalProcessing continued delivering results correctly.
+
+The same behaviour sometimes occurs with an error other than "bad allocation" - e.g. "Win32 access violation" followed by
+a hex code, followed by the same end result, i.e. "Canceling thread of type StateMachine".
+
+

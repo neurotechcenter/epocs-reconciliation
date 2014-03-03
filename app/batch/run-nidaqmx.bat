@@ -2,6 +2,7 @@
 @cls & ..\prog\BCI2000Shell %0 %* #! && exit /b 0 || exit /b 1
 
 system taskkill /F /FI "IMAGENAME eq NIDAQ_mx_Source.exe"
+system taskkill /F /FI "IMAGENAME eq FilePlayback.exe"
 system taskkill /F /FI "IMAGENAME eq ReflexConditioningSignalProcessing.exe"
 system taskkill /F /FI "IMAGENAME eq DummyApplication.exe"
 
@@ -13,9 +14,17 @@ set title ${extract file base $0}
 reset system
 startup system localhost
 
-start executable NIDAQ_mx_Source                    --local
-start executable ReflexConditioningSignalProcessing --local --LogDigiOut=Dev1-000000010000000000000000 --LogAnaOut=Dev1-10 --NumberOfThreads=1
-start executable DummyApplication                   --local
+set environment DEVEL $2
+
+if [ $DEVEL ]
+	start executable FilePlayback                       --local --EvaluateTiming=0 --PlaybackFileName=../../data/sample/akt-2014-01-30-14-25-R11-TT.dat
+	start executable ReflexConditioningSignalProcessing --local --NumberOfThreads=1
+	start executable DummyApplication                   --local
+else
+	start executable NIDAQ_mx_Source                    --local
+	start executable ReflexConditioningSignalProcessing --local --NumberOfThreads=1 --LogDigiOut=Dev1-000000010000000000000000 --LogAnaOut=Dev1-10
+	start executable DummyApplication                   --local
+end
 
 add parameter Storage:Session                        string   SessionStamp=           %     %  % % // 
 add parameter Application:Operant%20Conditioning     string   ApplicationMode=       ST     %  % % // 
@@ -28,6 +37,7 @@ wait for connected
 load parameterfile ../parms/base-nidaqmx.prm
 
 if [ $MODE == master ]
+	set parameter VisualizeTiming 1
 	setconfig
 	set state Running 1
 else
