@@ -16,12 +16,14 @@ import matplotlib, matplotlib.pyplot
 import mmap, struct
 import inspect
 
+import ctypes
+try: ctypes.windll.nicaiu
+except: DEVEL = True
+else:   DEVEL = False
+
 GUIDIR = os.path.dirname( os.path.realpath( inspect.getfile( inspect.currentframe() ) ) )
-for DEVEL, BCI2000LAUNCHDIR in [ ( False, '../prog' ), ( True, '../../../prog' ) ]:
-	BCI2000LAUNCHDIR = os.path.abspath( os.path.join( GUIDIR, BCI2000LAUNCHDIR ) )
-	if os.path.isfile( os.path.join( BCI2000LAUNCHDIR, 'BCI2000Remote.py' ) ): break
-else:
-	raise ImportError( 'could not find the prog directory containing BCI2000Remote.py' )
+BCI2000LAUNCHDIR = os.path.abspath( os.path.join( GUIDIR, '../prog' ) )
+if not os.path.isfile( os.path.join( BCI2000LAUNCHDIR, 'BCI2000Remote.py' ) ): raise ImportError( 'could not find the prog directory containing BCI2000Remote.py' )
 if BCI2000LAUNCHDIR not in sys.path: sys.path.append( BCI2000LAUNCHDIR )
 import BCI2000Remote
 
@@ -82,8 +84,7 @@ class Operator( object ):
 		self.mmfile = None
 		self.mm = None
 		
-		if DEVEL: dataDir = '../data'
-		else: dataDir = '../../data'
+		dataDir = '../../data'
 		
 		self.params = Bunch(
 			SubjectName = '',
@@ -135,9 +136,8 @@ class Operator( object ):
 		self.remote.Connect()
 	
 	def Launch( self ):
-		#if DEVEL: self.bci2000( 'execute script ../src/custom/ReflexConditioningSignalProcessing/run-playback.bat slave devel' ) # TODO
-		if DEVEL: self.bci2000( 'execute script ../batch/run-nidaqmx.bat slave devel' ) # TODO
-		else:     self.bci2000( 'execute script ../batch/run-nidaqmx.bat slave' ) # TODO
+		if DEVEL: self.bci2000( 'execute script ../batch/run-nidaqmx.bat slave devel' )
+		else:     self.bci2000( 'execute script ../batch/run-nidaqmx.bat slave' )
 	
 	def DataRoot( self ):
 		return ResolveDirectory( self.params.DataDirectory, BCI2000LAUNCHDIR )
@@ -331,6 +331,7 @@ class Operator( object ):
 		self.params.SubjectRun = '%02d' % self.NextRunNumber()
 		for p in self.params:
 			if not p.startswith( '_' ): self.SendParameter( p )
+		
 		self.SendConditioningParameters()
 		if self.mmfilename:
 			self.mmfileURL = 'file://' + ( self.mmfilename ).replace( '\\', '/' )
@@ -342,6 +343,7 @@ class Operator( object ):
 		self.bci2000( 'setconfig' )
 		self.needSetConfig = False
 		self.WriteSettings()
+		
 		
 	def Stop( self ):
 		if self.mm:
@@ -980,7 +982,7 @@ class GUI( superclass, TkMPL ):
 		
 		self.protocol( 'WM_DELETE_WINDOW', self.CloseWindow )
 		self.operator.Launch()
-		#self.operator.SetConfig()
+		self.operator.SetConfig()
 		self.GetSignalParameters()
 		
 		

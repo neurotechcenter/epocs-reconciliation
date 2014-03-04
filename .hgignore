@@ -1,0 +1,8 @@
+syntax: glob
+app/gui/epocs.ini
+app/prog/epocs.mmap
+app/prog/Operator.ini
+*.pyc
+system-logs
+syntax: regexp
+data/(?!sample)
