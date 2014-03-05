@@ -1,13 +1,11 @@
 """
 TODO		
-	on lab machine, the difference between an enabled and a disabled entry in the settings window is not highly visible
+	when baseline is set, make the default limit of the response scale equal to twice the baseline
 	'use marked timings' button starts off red sometimes (e.g. in Recruitment curve)
 	reduce overcrowding of xticks in recruitment curve
 	first run: ApplicationMode set to RC but file gets saved as ...-ST.dat
 	
-	parameters ApplicationMode, SessionStamp, BackgroundScaleLimit, ResponseScaleLimit, BaselineResponseLevel:  can they be declared from inside python code?
 	NIDAQmxADC: acquisition of floating-point raw data instead of integers
-	ding! when trying to close main window during modal dialog?
 """
 
 import os, sys, time, math, re, threading
@@ -252,7 +250,7 @@ class Operator( object ):
 				self.sessionStamp = time.mktime( time.strptime( value, self.dateFormat ) )
 		
 	def bci2000( self, cmd ):
-		flush( cmd )
+		#flush( cmd )
 		#os.system( os.path.join( '..', '..', '..', 'prog', 'BCI2000Shell' ) + ' -c ' + cmd )
 		return self.remote.Execute( cmd )
 		
@@ -943,9 +941,9 @@ class GUI( superclass, TkMPL ):
 		self.tk_setPalette(
 			background=self.colors.button,
 			foreground=self.colors.fg,
-			activeBackground='#FFFFFF',
-			activeForeground='#000000',
-			selectBackground='#FFFFFF',
+			#activeBackground='#FFFFFF',
+			#activeForeground='#000000',
+			selectBackground='#FFFF00',
 			selectForeground='#000000',
 			disabledBackground=self.colors.button,
 			disabledForeground=self.colors.disabled,
@@ -1913,7 +1911,7 @@ class AnalysisWindow( Dialog, TkMPL ):
 			if self.mode == 'rc':
 				tkinter.Label( footer, text='Trials to pool: ', bg=footer[ 'bg' ] ).pack( side='left', padx=3, pady=3 )
 				vcmd = ( self.register( self.PoolingEntry ), '%s', '%P' )
-				entry = self.widgets.an_entry_pooling = tkinter.Entry( footer, width=2, validate='key', validatecommand=vcmd, textvariable=tkinter.Variable( footer, value='1' ) )
+				entry = self.widgets.an_entry_pooling = tkinter.Entry( footer, width=2, validate='key', validatecommand=vcmd, textvariable=tkinter.Variable( footer, value='1' ), bg='#FFFFFF' )
 				entry.pack( side='left', padx=3, pady=3 )
 				switch = self.widgets.an_switch_responsemode = Switch( footer, offLabel='mean rect.', onLabel='peak-to-peak', command=self.UpdateResults )
 				switch.pack( side='left', pady=3, padx=10 )
@@ -2036,7 +2034,7 @@ class InfoItem( TkMPL ):
 		self.widgets.label = tkinter.Label( parent, text=self.label, justify='right', bg=parent[ 'bg' ], fg=self.color )
 		if entry:
 			self.widgets.variable = tkinter.Variable( parent, value=self.str() )
-			self.widgets.value = tkinter.Entry( parent, textvariable=self.widgets.variable )
+			self.widgets.value = tkinter.Entry( parent, textvariable=self.widgets.variable, bg='#FFFFFF' )
 		else:
 			self.widgets.variable = None
 			self.widgets.value = tkinter.Label( parent, text=self.str(), bg=parent[ 'bg' ], fg=self.color )
@@ -2081,7 +2079,7 @@ class LabelledEntry( tkinter.Frame ):
 		tkinter.Frame.__init__( self, parent, bg=bg )
 		self.label = tkinter.Label( self, text=label, bg=bg, justify='right' )
 		self.variable = tkinter.StringVar()
-		self.entry = tkinter.Entry( self, width=width, textvariable=self.variable )
+		self.entry = tkinter.Entry( self, width=width, textvariable=self.variable, bg='#FFFFFF' )
 		if len( label ):
 			self.label.pack( side='left', padx=3 )
 			self.entry.pack( side='left', padx=3 )
@@ -2324,7 +2322,7 @@ class SubjectChooser( tkinter.Frame ):
 		self.menuVar = v = tkinter.StringVar(); v.set( self.menuTitle ); v.trace( 'w', self.SelectFromMenu )
 		self.menu = w = tkinter.OptionMenu( frame, v, self.menuTitle, *self.parent.operator.Subjects() ); w.configure( width=10, font=font ); w.grid( row=1, column=2, sticky='ew', pady=5 )
 		self.subjectVar = v = tkinter.StringVar(); vcmd = ( self.register( self.ValidateKeyPress ), '%d', '%S', '%P' )
-		self.entry = w = tkinter.Entry( frame, width=15, textvariable=v, validatecommand=vcmd, validate='key', font=font ); w.grid( row=1, column=3, sticky='ew', pady=5, padx=5 )
+		self.entry = w = tkinter.Entry( frame, width=15, textvariable=v, validatecommand=vcmd, validate='key', font=font, bg='#FFFFFF' ); w.grid( row=1, column=3, sticky='ew', pady=5, padx=5 )
 		self.newButton = w = tkinter.Button( frame, text='Start New Session', command=self.NewSession, state='disabled', font=font ); w.grid( row=1, column=4, sticky='ew', pady=5 )
 		self.sessionInfo = w = tkinter.Label( frame, justify='center', bg=bg, font=font ); w.grid( row=2, column=1, columnspan=3, padx=20, sticky='ew' )
 		self.continueButton = w = tkinter.Button( frame, text='Continue Session', command=self.ContinueSession, state='disabled', font=font ); w.grid( row=2, column=4, sticky='ew', pady=5 )

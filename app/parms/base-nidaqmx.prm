@@ -1,10 +1,10 @@
 Source        int        SamplingRate=                  1600
 Source        int        SampleBlockSize=                 64
 Source        int        SourceCh=                   3
-Source        floatlist  SourceChOffset=             3     0         0         0     
-Source        floatlist  SourceChGain=               3   162.07    162.07    162.07 // TODO: NB: this will have to be calibrated for each setup. Also calibration not yet verified for channels that go through the AMT-8 amp
-Source        list       ChannelNames=               3   EMG1      EMG2      TRIG 
-Trigger       list       ChannelsToTrap=             2   EMG1      EMG2      TRIG   // names or indices of the input channels to be trapped
+Source        floatlist  SourceChOffset=             3     0         0         0         0     
+Source        floatlist  SourceChGain=               3   162.07    162.07    162.07    162.07   // TODO: NB: this will have to be calibrated for each setup. Also calibration not yet verified for channels that go through the AMT-8 amp
+Source        list       ChannelNames=               3   EMG1      EMG2      TRIG      FOOT     // 
+Trigger       list       ChannelsToTrap=             2   EMG1      EMG2      TRIG      FOOT     // names or indices of the input channels to be trapped
 
 
 Filtering     float      HighPassCorner=                   0.5Hz
