@@ -1,4 +1,3 @@
--------------
 
 sporadic behaviour:
 	FilePlayback + custom ReflexConditioningSignalProcessing + DummyApplication
@@ -11,16 +10,3 @@ sporadic behaviour:
 
 	The same behaviour sometimes occurs with an error other than "bad allocation" - e.g. "Win32 access violation" followed by
 	a hex code, followed by the same end result, i.e. "Canceling thread of type StateMachine".
-
-
--------------
-
-set parameter DataFile  foo-R${SubjectRun}.${FileFormat}
-setconfig   #A
-set parameter DataFile  bar-R${SubjectRun}.${FileFormat}  #B
-setconfig
-set state Running 1  #C
-
-The name of the data file actually produced at #C will contain 'foo', not 'bar', unless a data file has been recorded between #A and #B
-
--------------

@@ -4,5 +4,6 @@ app/prog/epocs.mmap
 app/prog/Operator.ini
 *.pyc
 system-logs
+*.psftp
 syntax: regexp
 data/(?!sample)

@@ -1,5 +1,5 @@
-Source        int        SamplingRate=                  1600
-Source        int        SampleBlockSize=                 64
+Source        int        SamplingRate=                  3200
+Source        int        SampleBlockSize=                128
 Source        int        SourceCh=                   3
 Source        floatlist  SourceChOffset=             3     0         0         0         0     
 Source        floatlist  SourceChGain=               3   162.07    162.07    162.07    162.07   // TODO: NB: this will have to be calibrated for each setup. Also calibration not yet verified for channels that go through the AMT-8 amp

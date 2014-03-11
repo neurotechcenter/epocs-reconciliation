@@ -1,23 +1,31 @@
 """
-TODO		
+TODO
 	when baseline is set, make the default limit of the response scale equal to twice the baseline
-	'use marked timings' button starts off red sometimes (e.g. in Recruitment curve)
-	reduce overcrowding of xticks in recruitment curve
-	first run: ApplicationMode set to RC but file gets saved as ...-ST.dat
 	
+	resume-after-crash loading of trials from a temporary pickle file
+	track down source of "pythonw has stopped working" crash
+	
+	'use marked timings' button starts off red sometimes (e.g. in Recruitment curve)
+		
 	NIDAQmxADC: acquisition of floating-point raw data instead of integers
 """
 
 import os, sys, time, math, re, threading
-import Tkinter as tkinter, Tix
-import matplotlib, matplotlib.pyplot
 import mmap, struct
 import inspect
+import Tkinter as tkinter
+import matplotlib, matplotlib.pyplot
 
+tksuperclass = tkinter.Tk
+try: import ttk
+except ImportError: import Tix; tksuperclass = Tix.Tk  # ...because Python 2.5 does not have ttk
+	
 import ctypes
 try: ctypes.windll.nicaiu
 except: DEVEL = True
 else:   DEVEL = False
+
+DEBUG = False
 
 GUIDIR = os.path.dirname( os.path.realpath( inspect.getfile( inspect.currentframe() ) ) )
 BCI2000LAUNCHDIR = os.path.abspath( os.path.join( GUIDIR, '../prog' ) )
@@ -226,6 +234,8 @@ class Operator( object ):
 	def LogFile( self, autoCreate=False ):
 		logfile = os.path.join( self.DataDirectory(), '%s-%s-log.txt' % ( self.params.SubjectName, self.params.SessionStamp ) )
 		if autoCreate and not os.path.isfile( logfile ):
+			parent = os.path.split( logfile )[ 0 ]
+			if not os.path.isdir( parent ): os.makedirs( parent ) # in theory setconfig should have done this for us, but a bug in BCI2000 means we cannot setconfig twice in a row without performing a run in between (if we do, the parameter values are not all updated correctly from the first to the second time)
 			f = open( logfile, 'at' )
 			f.write( 'Patient Code: %s\nSession Code: %s\n\n' % ( self.params.SubjectName, self.params.SessionStamp ) )
 			f.close()
@@ -325,7 +335,7 @@ class Operator( object ):
 		elif lower != None and upper == None: return lower * 2.0
 		else: return lower + upper
 	
-	def SetConfig( self ):
+	def SetConfig( self, work_around_bci2000_bug=False ):
 		self.params.SubjectRun = '%02d' % self.NextRunNumber()
 		for p in self.params:
 			if not p.startswith( '_' ): self.SendParameter( p )
@@ -338,7 +348,7 @@ class Operator( object ):
 		else:
 			self.bci2000( 'set parameter Connector list OutputExpressions= 0' )
 		
-		self.bci2000( 'setconfig' )
+		if not work_around_bci2000_bug: self.bci2000( 'setconfig' )
 		self.needSetConfig = False
 		self.WriteSettings()
 		
@@ -913,12 +923,11 @@ class TkMPL( object ):
 		fig.subplots_adjust( bottom=0.06, top=0.94, right=0.92 )
 		return fig, widget, container
 
-superclass = Tix.Tk
-class GUI( superclass, TkMPL ):
+class GUI( tksuperclass, TkMPL ):
 	
 	def __init__( self, operator=None ):
 		
-		superclass.__init__( self )
+		tksuperclass.__init__( self )
 		TkMPL.__init__( self )
 
 		try: tkinter.ALLWINDOWS # TODO: remove this section
@@ -980,28 +989,16 @@ class GUI( superclass, TkMPL ):
 		
 		self.protocol( 'WM_DELETE_WINDOW', self.CloseWindow )
 		self.operator.Launch()
-		self.operator.SetConfig()
+		self.operator.SetConfig( work_around_bci2000_bug=True )
 		self.GetSignalParameters()
 		
-		
-		# We use these options to set the sizes of the subwidgets inside the
-		# notebook, so that they are well-aligned on the screen.
-		prefix = Tix.OptionName( self )
-		if prefix:
-			prefix = '*' + prefix
+		if 'ttk' in sys.modules:
+			notebook = self.widgets.notebook = ttk.Notebook( self )
 		else:
-			prefix = ''
-		self.option_add( prefix + '*TixControl*entry.width', 10 )
-		self.option_add( prefix + '*TixControl*label.width', 18 )
-		self.option_add( prefix + '*TixControl*label.anchor', 'e' )
-		self.option_add( prefix + '*TixNoteBook*tagPadX', 8 )
-
-		# Create the notebook widget and set its backpagecolor to gray.
-		# Note that the -backpagecolor option belongs to the "nbframe"
-		# subwidget.
-		notebook = self.widgets.notebook = Tix.NoteBook( self, name='notebook', ipadx=6, ipady=6 )
-		notebook[ 'bg' ] = notebook.nbframe[ 'bg' ] = self.colors.bg
-		notebook.nbframe[ 'backpagecolor' ] = self.colors.backpage
+			notebook = self.widgets.notebook = Tix.NoteBook( self, name='notebook', ipadx=6, ipady=6 )
+			notebook[ 'bg' ] = notebook.nbframe[ 'bg' ] = self.colors.bg
+			notebook.nbframe[ 'backpagecolor' ] = self.colors.backpage
+		
 		notebook.pack( expand=1, fill='both', padx=5, pady=5 ,side='top' )
 		
 		self.modenames = Bunch( st='Stimulus Test', vc='Voluntary Contraction', rc='Recruitment Curve', ct='Control Trials', tt='Training Trials' )
@@ -1009,10 +1006,10 @@ class GUI( superclass, TkMPL ):
 		v = self.operator.params._TraceLimitVolts
 		self.axiscontrollers_emg1 = []
 		self.axiscontrollers_emg2 = []
-				
-		tab   = self.widgets.st_tab = notebook.add( 'st_tab', label=self.modenames.st, underline=0 )
-		frame = self.widgets.st_frame_main = tkinter.Frame( tab )
-		tab[ 'bg' ] = frame[ 'bg' ] = self.colors.bg
+		
+		matplotlib.pyplot.close( 'all' )
+		
+		frame = self.AddTab( 'st', title=self.modenames.st )
 		fig, widget, container = self.NewFigure( parent=frame, prefix='st', suffix='emg' )
 		self.FooterFrame( 'st', analysis=False )
 		self.HeaderFrame( 'st', success=False )
@@ -1029,24 +1026,18 @@ class GUI( superclass, TkMPL ):
 		self.widgets.st_xadjust_emg  = PlusMinusTk( parent=frame, controllers=[ AxisController( ax, 'x', units='s', start=( -0.020,  +0.100  ), narrowest=( -0.002,  +0.010  ), widest=(  -0.100, + 0.500 ) ) for ax in self.MatchArtists( 'st', 'axes' ) ] ).place( in_=widget, width=40, height=20, relx=0.92, rely=0.05, anchor='se' )
 		container.pack( side='top', fill='both', expand=True, padx=20, pady=5 )
 		frame.pack( side='left', padx=2, pady=2, fill='both', expand=1 )
-		#frame.grid( row=1, column=1, sticky='nsew' ); tab.grid_rowconfigure( 1, weight=1 ); tab.grid_columnconfigure( 1, weight=1 )
 		
 		
-		tab   = self.widgets.vc_tab = notebook.add( 'vc_tab', label=self.modenames.vc, underline=0 )
-		frame = self.widgets.vc_frame_main = tkinter.Frame( tab )
-		tab[ 'bg' ] = frame[ 'bg' ] = self.colors.bg
+		frame = self.AddTab( 'vc', title=self.modenames.vc )
 		fig, widget, container = self.NewFigure( parent=frame, prefix='vc', suffix='emg' )
 		self.FooterFrame( 'vc' )
 		self.HeaderFrame( 'vc', trials=False, success=False )
 		self.NewBar( parent=frame, figure=fig, axes=( 1, 2, 1 ), prefix='vc', suffix='background', title='Muscle Activity' )
 		container.pack( side='top', fill='both', expand=True, padx=20, pady=5 )
 		frame.pack( side='left', padx=2, pady=2, fill='both', expand=1 )
-		#frame.grid( row=1, column=1, sticky='nsew' ); tab.grid_rowconfigure( 1, weight=1 ); tab.grid_columnconfigure( 1, weight=1 )
 
 		
-		tab   = self.widgets.rc_tab = notebook.add( 'rc_tab', label=self.modenames.rc, underline=0 )
-		frame = self.widgets.rc_frame_main = tkinter.Frame( tab )
-		tab[ 'bg' ] = frame[ 'bg' ] = self.colors.bg
+		frame = self.AddTab( 'rc', title=self.modenames.rc )
 		fig, widget, container = self.NewFigure( parent=frame, prefix='rc', suffix='emg' )
 		self.FooterFrame( 'rc' )
 		self.HeaderFrame( 'rc', success=False )
@@ -1064,24 +1055,18 @@ class GUI( superclass, TkMPL ):
 		self.widgets.rc_xadjust_emg  = PlusMinusTk( parent=frame, controllers=[ AxisController( ax, 'x', units='s', start=( -0.020, +0.100 ), narrowest=( -0.002,  +0.010  ), widest=( -0.100, +0.500 ) ) for ax in self.MatchArtists( 'rc', 'axes' ) ] ).place( in_=widget, width=40, height=20, relx=0.92, rely=0.05, anchor='se' ) # rely=0.52 for subplot( 2, 2, 4 ) only, or rely=0.06 for subplot( 2, 2, 2 ) only / both
 		container.pack( side='top', fill='both', expand=True, padx=20, pady=5 )
 		frame.pack( side='left', padx=2, pady=2, fill='both', expand=1 )
-		#frame.grid( row=1, column=1, sticky='nsew' ); tab.grid_rowconfigure( 1, weight=1 ); tab.grid_columnconfigure( 1, weight=1 )
 
 
-		tab   = self.widgets.ct_tab = notebook.add( 'ct_tab', label=self.modenames.ct, underline=0 )
-		frame = self.widgets.ct_frame_main = tkinter.Frame( tab )
-		tab[ 'bg' ] = frame[ 'bg' ] = self.colors.bg
+		frame = self.AddTab( 'ct', title=self.modenames.ct )
 		fig, widget, container = self.NewFigure( parent=frame, prefix='ct', suffix='emg' )
 		self.FooterFrame( 'ct' )
 		self.HeaderFrame( 'ct', success=False )
 		self.NewBar( parent=frame, figure=fig, axes=( 1, 2, 1 ), prefix='ct', suffix='background', title='Muscle Activity' )
 		container.pack( side='top', fill='both', expand=True, padx=20, pady=5 )
 		frame.pack( side='left', padx=2, pady=2, fill='both', expand=1 )
-		#frame.grid( row=1, column=1, sticky='nsew' ); tab.grid_rowconfigure( 1, weight=1 ); tab.grid_columnconfigure( 1, weight=1 )
 
 		
-		tab   = self.widgets.tt_tab = notebook.add( 'tt_tab', label=self.modenames.tt, underline=0 )
-		frame = self.widgets.tt_frame_main = tkinter.Frame( tab )
-		tab[ 'bg' ] = frame[ 'bg' ] = self.colors.bg
+		frame = self.AddTab( 'tt', title=self.modenames.tt )
 		fig, widget, container = self.NewFigure( parent=frame, prefix='tt', suffix='emg' )
 		self.FooterFrame( 'tt' )
 		self.HeaderFrame( 'tt', success=True )
@@ -1090,13 +1075,11 @@ class GUI( superclass, TkMPL ):
 		self.artists.tt_line_baseline = matplotlib.pyplot.plot( ( 0, 1 ), ( -1, -1 ), color='#000088', alpha=0.7, linewidth=4, transform=fig.gca().get_yaxis_transform() )[ 0 ]
 		container.pack( side='top', fill='both', expand=True, padx=20, pady=5 )
 		frame.pack( side='left', padx=2, pady=2, fill='both', expand=1 )
-		#frame.grid( row=1, column=1, sticky='nsew' ); tab.grid_rowconfigure( 1, weight=1 ); tab.grid_columnconfigure( 1, weight=1 ); tab.grid_columnconfigure( 2, minsize=300 )
 
 
-		tab   = self.widgets.log_tab = notebook.add( 'log_tab', label="Log", underline=0 )
+		tab = self.AddTab( 'log', title='Log', makeframe=False )
 		logfile = self.operator.LogFile( autoCreate=True )
-		frame = self.widgets.log_scrolledtext = ScrolledText( parent=tab, filename=logfile, font='{Courier} 12' )
-		tab[ 'bg' ] = frame[ 'bg' ] = self.colors.bg
+		frame = self.widgets.log_scrolledtext = ScrolledText( parent=tab, filename=logfile, font='{Courier} 12', bg='#FFFFFF' )
 		frame.pack( side='top', padx=2, pady=2, fill='both', expand=1 )
 		
 		
@@ -1107,12 +1090,28 @@ class GUI( superclass, TkMPL ):
 		self.update(); self.geometry( self.geometry().split( '+', 1 )[ 0 ] + '+25+25' ) # prevents Tkinter from resizing the GUI when component parts try to change size (STEP 18 from http://sebsauvage.net/python/gui/ )
 		self.ready = True
 
+	def AddTab( self, key, title, makeframe=True ):
+		if 'ttk' in sys.modules:
+			tab = self.widgets[ key + '_tab' ] = tkinter.Frame( self, bg=self.colors.bg )
+			tab.pack()
+			self.widgets.notebook.add( tab, text=' ' + title + ' ', underline=1, padding=10 )
+			if not makeframe: return tab
+			frame = self.widgets[ key + '_frame_main'] = tkinter.Frame( tab, bg=self.colors.bg )
+			return frame
+		else:
+			tab   = self.widgets[ key + '_tab' ] = self.widgets.notebook.add( name=key + '_tab', label=title, underline=0 )
+			tab[ 'bg' ] = self.colors.bg
+			if not makeframe: return tab
+			frame = self.widgets[ key + '_frame_main' ] = tkinter.Frame( tab, bg=self.colors.bg )
+			return frame
+		
 	def TabFocus( self, whichTab='all' ):
 		tabNames = [ k for k in self.widgets.keys() if 'tab' in k.lower().split( '_' ) ]
 		for tabName in tabNames:
 			if whichTab == 'all' or whichTab.lower() in tabName.lower().split( '_' ): state = 'normal'
 			else: state = 'disabled'
-			self.widgets.notebook.tk.call( self.widgets.notebook._w, 'pageconfigure', tabName, '-state', state )
+			if 'ttk' in sys.modules: self.widgets.notebook.tab( self.widgets[ tabName ], state=state )
+			else: self.widgets.notebook.tk.call( self.widgets.notebook._w, 'pageconfigure', tabName, '-state', state )
 	
 	def GetSignalParameters( self ):
 		self.fs = float( self.operator.remote.GetParameter( 'SamplingRate' ).lower().strip( 'hz' ) )
@@ -1265,7 +1264,9 @@ class GUI( superclass, TkMPL ):
 		pos[ 2 ] = width
 		axes.set_position( pos )
 		self.artists[ prefix + '_axiscontroller_' + suffix ] = AxisController( axes, 'y', units='V', start=ylim )
-		target = self.artists[ prefix + '_target_' + suffix ] = matplotlib.patches.Rectangle( xy=( 0, targetMin ), width=1, height=targetMax - targetMin, hatch='x', facecolor='#FFFFFF', edgecolor='#000000', transform=axes.get_yaxis_transform() )
+		hatch = 'x'
+		if matplotlib.__version__ >= '1.3': hatch = 'xx'
+		target = self.artists[ prefix + '_target_' + suffix ] = matplotlib.patches.Rectangle( xy=( 0, targetMin ), width=1, height=targetMax - targetMin, hatch=hatch, facecolor='#FFFFFF', edgecolor='#000000', transform=axes.get_yaxis_transform() )
 		# NB: a bug in matplotlib seems to cause a rectangle with hatch='x', facecolor='none', edgecolor='none' to appear only partially
 		# filled under some circumstances e.g. when its bounds exceed those of the axes it's on).  Setting facecolor='#FFFFFF' is a workaround for this)
 		axes.add_patch( target )
@@ -1331,7 +1332,7 @@ class GUI( superclass, TkMPL ):
 		if getattr( self, 'afterIDs', None ):
 			for k in self.afterIDs.keys():
 				self.after_cancel( self.afterIDs.pop( k ) )
-		try: superclass.destroy( self )
+		try: tksuperclass.destroy( self )
 		except: pass
 		self.quit()
 	
@@ -1453,7 +1454,7 @@ class GUI( superclass, TkMPL ):
 
 class Dialog( tkinter.Toplevel ):
 	""" Modal dialog box courtesy of Fredrik Lundh: http://effbot.org/tkinterbook/tkinter-dialog-windows.htm """
-	def __init__( self, parent, title=None, icon=None ):
+	def __init__( self, parent, title=None, icon=None, geometry=None ):
 
 		tkinter.Toplevel.__init__( self, parent )
 		self.transient( parent )
@@ -1469,7 +1470,8 @@ class Dialog( tkinter.Toplevel ):
 		self.grab_set()
 		if not self.initial_focus: self.initial_focus = self
 		self.protocol( "WM_DELETE_WINDOW", self.cancel )
-		self.geometry( "+%d+%d" % ( parent.winfo_rootx() + 10, parent.winfo_rooty() + 30 ) )
+		if geometry == None: geometry = "+%d+%d" % ( parent.winfo_rootx() + 10, parent.winfo_rooty() + 30 )
+		self.geometry( geometry )
 		self.initial_focus.focus_set()
 		self.wait_window( self )
 
@@ -1696,7 +1698,7 @@ class RecruitmentCurve( object ):
 			for row in range( 3 ): self.frame.grid_rowconfigure( row + 1, weight = 1 )
 			self.frame.grid_columnconfigure( 2, weight = 1 )
 			p = AxesPosition( self.axes ); rgap = 1.0 - p.right
-			self.frame.place( in_=widget, relx=1.0 - rgap / 2.0, rely=1.0 - p.bottom, relheight=p.height, anchor='s' )
+			self.frame.place( in_=widget, relx=1.0 - rgap / 2.0, rely=1.0 - p.bottom - p.height/2, relheight=p.height*1.1, anchor='center' )
 		self.Update()
 					
 	def Update( self, pooling=None, p2p=None ):
@@ -1720,7 +1722,9 @@ class RecruitmentCurve( object ):
 		self.yController = AxisController( self.axes, 'y', units='V', fmt='%g', start=self.axes.get_ylim() )
 		self.yController.ChangeAxis( start=( 0, max( self.axes.get_ylim() ) ) )
 		self.axes.grid( True )
-		self.axes.set( xlim=( 0	, max( xh ) + 1 ), xticks=xh )
+		xt = list( xh )
+		while len( xt ) > 15: xt = xt[ 1::2 ]
+		self.axes.set( xlim=( 0	, max( xh ) + 1 ), xticks=xt )
 		self.panel.bg.set( sum( b ) / float( len( b ) ) )
 		self.panel.mmax.set( max( m ) )
 		self.panel.hmax.set( max( h ) )
@@ -1736,34 +1740,47 @@ class ResponseHistogram( object ):
 		self.nbins = nbins
 		self.p2p = p2p
 		self.frame = None
+		prestimColor = self.overlay.backgroundSelector.rectprops[ 'facecolor' ]
+		comparisonColor = self.overlay.comparisonSelector.rectprops[ 'facecolor' ]
+		responseColor = self.overlay.responseSelector.rectprops[ 'facecolor' ]
 		if tk:
 			widget = self.axes.figure.canvas.get_tk_widget()
-			self.frame = tkinter.Frame( widget, bg=widget[ 'bg' ] )
+			self.frame = tkinter.Frame( widget.master, bg=widget[ 'bg' ] )
 		self.panel = Bunch(
-			         n=InfoItem( 'Number\nof Trials', 0, fmt='%g'              ).tk( self.frame, row=1 ),
-			      mean=InfoItem( 'Mean\nResponse',    0, fmt='%.1f', units='V' ).tk( self.frame, row=2 ),
-			    median=InfoItem( 'Median\nResponse',  0, fmt='%.1f', units='V' ).tk( self.frame, row=3 ),
-			  uptarget=InfoItem( 'Upward\nTarget',    0, fmt='%.1f', units='V' ).tk( self.frame, row=5 ),
-			downtarget=InfoItem( 'Downward\nTarget',  0, fmt='%.1f', units='V' ).tk( self.frame, row=6 ),
+			         n=InfoItem( 'Number\nof Trials',                  0, fmt='%g'                                     ).tk( self.frame, row=1 ),
+			background=InfoItem( 'Pre-stimulus\n(Median, Mean)',       0, fmt='%.1f', units='V', color=prestimColor    ).tk( self.frame, row=2 ),
+			comparison=InfoItem( 'Reference Response\n(Median, Mean)', 0, fmt='%.1f', units='V', color=comparisonColor ).tk( self.frame, row=3 ),
+			  response=InfoItem( 'Target Response\n(Median, Mean)',    0, fmt='%.1f', units='V', color=responseColor   ).tk( self.frame, row=4 ),
+			  uptarget=InfoItem( 'Upward\nTarget',                     0, fmt='%.1f', units='V'                        ).tk( self.frame, row=6 ),
+			downtarget=InfoItem( 'Downward\nTarget',                   0, fmt='%.1f', units='V'                        ).tk( self.frame, row=7 ),
 		)
-		AxesPosition( self.axes, right=0.75 )
+		AxesPosition( self.axes, right=0.65 )
 		if self.frame:
-			self.entry = InfoItem( 'Target\nPercentile', self.targetpc, fmt='%g' ).tk( self.frame, row=4, entry=True )
+			self.entry = InfoItem( 'Target\nPercentile', self.targetpc, fmt='%g' ).tk( self.frame, row=5, entry=True )
 			for row in range( 6 ): self.frame.grid_rowconfigure( row + 1, weight = 1 )
 			self.frame.grid_columnconfigure( 2, weight = 1 )
 			p = AxesPosition( self.axes ); rgap = 1.0 - p.right
-			self.frame.place( in_=widget, relx=( p.right + 1.0 ) / 2.0, rely=1.0 - p.bottom, relheight=p.height, anchor='s' )
+			self.frame.place( in_=widget, relx=1.0 - rgap * 0.4, rely=1.0 - p.bottom - p.height/2, relheight=p.height*1.1, anchor='center' )
 		self.Update()
 					
 	def Update( self, nbins=None, targetpc=None, p2p=None ):
 		if nbins != None: self.nbins = nbins
 		if targetpc != None: self.targetpc = targetpc
 		if p2p != None: self.p2p = p2p
-		r = self.overlay.ResponseMagnitudes( p2p=self.p2p )
-		rSorted = sorted( r )
+			
+		def ResponseStats( type ):
+			x = self.overlay.ResponseMagnitudes( p2p=self.p2p, type=type )
+			xSorted = sorted( x )
+			if len( x ) == 0: xMedian = xMean = 0.0
+			else:
+				xMean = sum( x ) / float( len ( x ) )
+				xMedian = Quantile( xSorted, 0.5, alreadySorted=True )
+			return x, xSorted, xMean, xMedian
+		
+		r, rSorted, rMean, rMedian = ResponseStats( 'response' )
+		c, cSorted, cMean, cMedian = ResponseStats( 'comparison' )
+		b, bSorted, bMean, bMedian = ResponseStats( 'background' )
 		n = len( r )
-		mean = sum( r ) / float( n )
-		median = Quantile( rSorted, 0.5, alreadySorted=True )
 		targets = Quantile( rSorted, ( self.targetpc / 100.0, 1.0 - self.targetpc / 100.0 ), alreadySorted=True )
 		downtarget, uptarget = max( targets ), min( targets )
 		matplotlib.pyplot.figure( self.axes.figure.number ).sca( self.axes )
@@ -1773,13 +1790,12 @@ class ResponseHistogram( object ):
 		else: self.counts, self.binCenters, self.patches = [], [], []
 		self.xController = AxisController( self.axes, 'x', units='V', fmt='%g', start=self.axes.get_xlim() )
 		self.xController.Home()
-		vals = [ downtarget, uptarget, mean ]
+		vals = [ downtarget, uptarget, rMean ]
 		self.downline, self.upline, self.meanline = matplotlib.pyplot.plot( [ vals, vals ], [ [ 0 for v in vals ], [ 1 for v in vals ] ], color='#FF0000', linewidth=4, alpha=0.5, transform=self.axes.get_xaxis_transform() )
-		if self.frame == None:
-			for k, y in dict( n=0.9, mean=0.7, median=0.5, uptarget=0.3, downtarget=0.1 ).items(): self.panel[ k ].mpl( axes=self.axes, y=y )
 		self.panel.n.set( n )
-		self.panel.mean.set( mean )
-		self.panel.median.set( median )
+		self.panel.background.set( [ bMedian, bMean ] )
+		self.panel.comparison.set( [ cMedian, cMean ] )
+		self.panel.response.set(   [ rMedian, rMean ] )
 		self.panel.uptarget.set( uptarget )
 		self.panel.downtarget.set( downtarget )
 		
@@ -1792,7 +1808,7 @@ class AnalysisWindow( Dialog, TkMPL ):
 		self.data = parent.data[ mode ]
 		self.acceptMode = None
 		TkMPL.__init__( self )
-		Dialog.__init__( self, parent=parent, title='%s Analysis' % parent.modenames[ mode ], icon=os.path.join( GUIDIR, 'epocs.ico' ) )
+		Dialog.__init__( self, parent=parent, title='%s Analysis' % parent.modenames[ mode ], icon=os.path.join( GUIDIR, 'epocs.ico' ), geometry=parent.geometry() )
 		# NB: Dialog.__init__ will not return until the dialog is destroyed
 		
 	def buttonbox( self ): # override default OK + cancel buttons (and <Return> key binding)
@@ -1885,15 +1901,15 @@ class AnalysisWindow( Dialog, TkMPL ):
 			button.pack( side='left', pady=3 )
 			if self.mode in [ 'ct', 'tt' ]:
 				conditioning = tkinter.Frame( header, bg=header[ 'bg' ] )
-				w = self.widgets.an_button_upcondition = tkinter.Button( conditioning, text="Up-Condition", width=10, command=self.ok_up ); w.pack( side='top', padx=5, pady=2, ipadx=8 )
-				w = self.widgets.an_button_downcondition = tkinter.Button( conditioning, text="Down-Condition", width=10, command=self.ok_down ); w.pack( side='bottom', padx=5, pady=2, ipadx=8 )
+				w = self.widgets.an_button_upcondition = tkinter.Button( conditioning, text="Up-Condition", width=10, command=self.ok_up ); w.pack( side='top', padx=5, pady=2, ipadx=16, fill='both', expand=1 )
+				w = self.widgets.an_button_downcondition = tkinter.Button( conditioning, text="Down-Condition", width=10, command=self.ok_down ); w.pack( side='bottom', padx=5, pady=2, ipadx=16, fill='both', expand=1 )
 				conditioning.pack( side='right' )
 				
 			ax1 = self.artists.an_axes_overlay = matplotlib.pyplot.subplot( 2, 1, 1 )
 			responseInterval   = self.parent.operator.params._ResponseStartMsec[ self.channel ] / 1000.0, self.parent.operator.params._ResponseEndMsec[ self.channel ] / 1000.0
 			comparisonInterval = self.parent.operator.params._ComparisonStartMsec[ self.channel ] / 1000.0, self.parent.operator.params._ComparisonEndMsec[ self.channel ] / 1000.0
 			backgroundInterval = self.parent.operator.params._PrestimulusStartMsec[ self.channel ] / 1000.0, self.parent.operator.params._PrestimulusEndMsec[ self.channel ] / 1000.0
-			if self.mode not in [ 'rc' ]: comparisonInterval = backgroundInterval = None
+			#if self.mode not in [ 'rc' ]: comparisonInterval = backgroundInterval = None
 			self.overlay = ResponseOverlay(
 				data=self.data, channel=self.channel, 
 				fs=self.parent.fs, lookback=self.parent.lookback,
@@ -1996,14 +2012,15 @@ class AnalysisWindow( Dialog, TkMPL ):
 		elif self.mode in [ 'ct', 'tt' ]:
 			start, end = [ sec * 1000.0 for sec in self.overlay.responseSelector.get() ]
 			self.parent.Log( 'From %s trials using target response interval from %g to %gmsec and aiming at percentile %s: ' % ( self.hist.panel.n.str(), start, end, self.hist.entry.str() ) )
-			self.parent.Log( '   mean = %s' % self.hist.panel.mean.str() )
-			self.parent.Log( '   median = %s' % self.hist.panel.median.str() )
+			self.parent.Log( '   pre-stimulus activity (mean, median) = %s' % self.hist.panel.background.str() )
+			self.parent.Log( '   reference response    (mean, median) = %s' % self.hist.panel.comparison.str() )
+			self.parent.Log( '   target response       (median, mean) = %s' % self.hist.panel.response.str() )
 			self.parent.Log( '   upward target = %s' % self.hist.panel.uptarget.str() )
 			self.parent.Log( '   downward target = %s\n' % self.hist.panel.downtarget.str() )
 			if self.mode in [ 'ct' ] and self.parent.operator.params._BaselineResponse == None:
-				info = self.hist.panel.median
+				info = self.hist.panel.response
 				baselines = self.parent.operator.params._EarlyLoggedCTBaselines
-				baselines[ self.parent.operator.LastRunNumber( mode=self.mode ) ] = info.value
+				baselines[ self.parent.operator.LastRunNumber( mode=self.mode ) ] = info.value[ 0 ]
 				meanOfMedians = sum( baselines.values() ) / float( len( baselines ) )
 				self.parent.Log( 'Estimated baseline so far = %s    *****\n' % info.str( meanOfMedians ) )
 		self.widgets.an_button_log[ 'state' ] = 'disabled'
@@ -2028,6 +2045,7 @@ class InfoItem( TkMPL ):
 		self.color = color
 	def str( self, value=None, appendUnits=True ): # do not call this  __str__ : in Python 2.5, that gives a unicode conversion error when there's a microVolt symbol in the string
 		if value == None: value = self.value
+		if isinstance( value, ( tuple, list ) ): return ', '.join( self.str( value=v, appendUnits=appendUnits ) for v in value )
 		return FormatWithUnits( value, units=self.units, fmt=self.fmt, appendUnits=appendUnits )
 	def tk( self, parent, row, entry=False ):
 		if parent == None: return self
@@ -2398,6 +2416,12 @@ if __name__ == '__main__':
 		try: tkinter.ALLWINDOWS.pop( 0 ).destroy()
 		except: pass
 
+	if DEBUG:
+		flush( 'Python ' + sys.version )
+		flush( 'matplotlib ' + str( matplotlib.__version__ ) )
+		flush( tkinter.__name__ + ' ' + str( tkinter.__version__ ) )
+		if 'ttk' in sys.modules: flush( 'ttk ' + str( ttk.__version__ ) )
+	
 	self = GUI()
 	#self.operator.remote.WindowVisible = 1
 	if DEVEL:

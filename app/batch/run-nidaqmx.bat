@@ -34,10 +34,17 @@ add parameter Application:Operant%20Conditioning     float    BaselineResponseLe
 
 wait for connected
 
+if [ $DEVEL ] ;  set environment fs ${get parameter SamplingRate} ; set environment sbs ${get parameter SampleBlockSize} ; end
+
 load parameterfile ../parms/base-nidaqmx.prm
+
+if [ $DEVEL ] ; set parameter SamplingRate $fs ; set parameter SampleBlockSize $sbs ; end  # re-establish parameters from playback file even if overwritten by .prm file
 
 if [ $MODE == master ]
 	set parameter VisualizeTiming 1
+	set parameter VisualizeSource 1
+	set parameter VisualizeTrapFilter 1
+	set parameter VisualizeBackgroundAverages 1
 	setconfig
 	set state Running 1
 else
