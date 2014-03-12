@@ -70,9 +70,15 @@ def ResolveDirectory( d, startDir=None ):
 	os.chdir( oldDir )
 	return result
 
+def MakeWayFor( filepath ):
+	# we were relying on setconfig to do this for us, but a bug in BCI2000 means we cannot setconfig twice in a row without performing a run in between (if we do, the parameter values are not all updated correctly from the first to the second time)
+	parent = os.path.split( filepath )[ 0 ]
+	if len( parent ) and not os.path.isdir( parent ): os.makedirs( parent )
+	return filepath
+
 def WriteDict( d, filename, *fields ):
 	if len( fields ): d = dict( ( k, v ) for k, v in d.items() if k in fields )
-	file = open( filename, 'wt' )
+	file = open( MakeWayFor( filename ), 'wt' )
 	file.write( '{\n' )
 	for k, v in sorted( d.items() ): file.write( '\t%s : %s,\n' % ( repr( k ), repr( v ) ) )
 	file.write( '}\n' )
@@ -234,9 +240,7 @@ class Operator( object ):
 	def LogFile( self, autoCreate=False ):
 		logfile = os.path.join( self.DataDirectory(), '%s-%s-log.txt' % ( self.params.SubjectName, self.params.SessionStamp ) )
 		if autoCreate and not os.path.isfile( logfile ):
-			parent = os.path.split( logfile )[ 0 ]
-			if not os.path.isdir( parent ): os.makedirs( parent ) # in theory setconfig should have done this for us, but a bug in BCI2000 means we cannot setconfig twice in a row without performing a run in between (if we do, the parameter values are not all updated correctly from the first to the second time)
-			f = open( logfile, 'at' )
+			f = open( MakeWayFor( logfile ), 'at' )
 			f.write( 'Patient Code: %s\nSession Code: %s\n\n' % ( self.params.SubjectName, self.params.SessionStamp ) )
 			f.close()
 		return logfile
@@ -348,8 +352,9 @@ class Operator( object ):
 		else:
 			self.bci2000( 'set parameter Connector list OutputExpressions= 0' )
 		
-		if not work_around_bci2000_bug: self.bci2000( 'setconfig' )
-		self.needSetConfig = False
+		if not work_around_bci2000_bug:
+			self.bci2000( 'setconfig' )
+			self.needSetConfig = False
 		self.WriteSettings()
 		
 		
