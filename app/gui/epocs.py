@@ -708,13 +708,15 @@ class StickySpanSelector( object ): # definition copied and tweaked from matplot
 	def keypress( self, event ):
 		if self.ax is not self.ax.figure.gca(): return True
 		if self is not self.sibs()[ -1 ]: return True
+		if event.key == None: return True
 		coords = list( self.get() )
 		gran = self.granularity
+		arrow = str( event.key ).split( '+' )[ -1 ]
 		if gran == None: minv, maxv = self.get(); gran = max( abs( maxv ), abs( minv ) ) / 100.0
-		if   event.key in [ 'left'  ] and self.direction == 'horizontal': coords[ self.last_moved ] -= gran
-		elif event.key in [ 'right' ] and self.direction == 'horizontal': coords[ self.last_moved ] += gran
-		elif event.key in [ 'down'  ] and self.direction == 'vertical':   coords[ self.last_moved ] -= gran
-		elif event.key in [ 'up'    ] and self.direction == 'vertical':   coords[ self.last_moved ] += gran
+		if   arrow in [ 'left'  ] and self.direction == 'horizontal': coords[ self.last_moved ] -= gran
+		elif arrow in [ 'right' ] and self.direction == 'horizontal': coords[ self.last_moved ] += gran
+		elif arrow in [ 'down'  ] and self.direction == 'vertical':   coords[ self.last_moved ] -= gran
+		elif arrow in [ 'up'    ] and self.direction == 'vertical':   coords[ self.last_moved ] += gran
 		elif event.key in [ 'enter' ]:
 			attr = self.direction + 'StickySpanSelectorKeyPressHandled'
 			previouslyHandled = getattr( event, attr, False )
@@ -1641,12 +1643,12 @@ class ResponseOverlay( object ):
 		axes.grid( True )
 		self.yController = AxisController( axes, 'y', units='V', start=( -0.100, +0.100 ), narrowest=( -0.0001, +0.0001 ), widest=( -20.000, +20.000 ) )
 		self.xController = AxisController( axes, 'x', units='s', start=( -0.020, +0.100 ), narrowest=( -0.002,  +0.010  ), widest=( -0.100, +0.500 ) )
-		if responseInterval == None:   self.responseSelector   = None
-		else:                          self.responseSelector   = StickySpanSelector( axes, onselect=updateCommand, initial=responseInterval,   fmt='%g', units='s', granularity=0.0001, color='#008800', text_verticalalignment='top',    text_y=0.98 )
 		if comparisonInterval == None: self.comparisonSelector = None
 		else:                          self.comparisonSelector = StickySpanSelector( axes, onselect=updateCommand, initial=comparisonInterval, fmt='%g', units='s', granularity=0.0001, color='#AA5500', text_verticalalignment='bottom', text_y=1.00 )
 		if backgroundInterval == None: self.backgroundSelector = None
 		else:                          self.backgroundSelector = StickySpanSelector( axes, onselect=updateCommand, initial=backgroundInterval, fmt='%g', units='s', granularity=0.0001, color='#777777', text_verticalalignment='top',    text_y=0.98 )
+		if responseInterval == None:   self.responseSelector   = None
+		else:                          self.responseSelector   = StickySpanSelector( axes, onselect=updateCommand, initial=responseInterval,   fmt='%g', units='s', granularity=0.0001, color='#008800', text_verticalalignment='top',    text_y=0.98 )
 		self.data = data
 		self.channel = channel
 		self.fs = fs
@@ -1944,7 +1946,7 @@ class AnalysisWindow( Dialog, TkMPL ):
 			
 		header.grid( row=1, column=1, sticky='ns' )
 		container.grid( row=2, column=1, sticky='nsew' )
-		footer.grid( row=3, column=1, sticky='ns' )
+		footer.grid( row=3, column=1, sticky='ns', pady=20 )
 		frame.grid_rowconfigure( 2, weight=1 )
 		frame.grid_columnconfigure( 1, weight=1 )
 			
