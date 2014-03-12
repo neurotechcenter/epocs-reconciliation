@@ -2382,9 +2382,8 @@ class SubjectChooser( tkinter.Frame ):
 	
 	def InformalTime(self, then, now ):
 		seconds = float( now ) - float( then )
-		day  = int( then / ( 60.0 * 60.0 * 24.0 ) ) 
-		today = int( now / ( 60.0 * 60.0 * 24.0 ) )
-		days = today - day
+		def SetToNoon( t ): t = list( time.localtime( t ) ); t[ 3:6 ] = 12, 0, 0; return time.mktime( t ) # so fking tedious
+		days = round( ( SetToNoon( now ) - SetToNoon( then ) ) / ( 60.0 * 60.0 * 24.0 ) )
 		weeks = days / 7.0
 		years = days / 365.25
 		months = years * 12.0
