@@ -38,3 +38,9 @@ quit
 #  (the warning message correctly contains Bar, not Foo) the update is not
 #  recognized for the purpose of determining the file name: the data file
 #  is still recorded with "Foo", not "Bar" in the filename.
+#
+#  NB the same trouble happens if DataFile itself is not changed from one
+#  setconfig to the next, but contains a reference to a Parameter ${Whatever},
+#  which does change:  the change recognized by the system at some level (i.e.
+#  is correct when queried by get parameter), but not implemented in determining
+#  the filename.

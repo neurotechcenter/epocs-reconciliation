@@ -499,7 +499,8 @@ class AxisController( object ):
 		self.axes.figure.canvas.draw()
 		
 	def FormatTicks( self, value, index ):
-		locs = [ x for x in self.axis.get_majorticklocs() if min( self.lims ) <= x <= max( self.lims ) or matplotlib.__version__ >= '1.3' ]   # if-conditional is necessary for matplotlib 0.99 but not 1.3.0 (tends to create two unitted ticks in the latter case)
+		fudge = 0.001 * ( max( self.lims ) - min( self.lims ) )
+		locs = [ x for x in self.axis.get_majorticklocs() if min( self.lims ) - fudge <= x <= max( self.lims ) + fudge ]
 		appendUnits = value >= max( locs ) * ( 1 - 1e-8 ) # allow a small tolerance, again to account for precision errors
 		return FormatWithUnits( value=value, context=locs, units=self.units, fmt=self.fmt, appendUnits=appendUnits )
 	

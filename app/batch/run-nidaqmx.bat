@@ -34,11 +34,12 @@ add parameter Application:Operant%20Conditioning     float    BaselineResponseLe
 
 wait for connected
 
-if [ $DEVEL ] ;  set environment fs ${get parameter SamplingRate} ; set environment sbs ${get parameter SampleBlockSize} ; end
-
-load parameterfile ../parms/base-nidaqmx.prm
-
-if [ $DEVEL ] ; set parameter SamplingRate $fs ; set parameter SampleBlockSize $sbs ; end  # re-establish parameters from playback file even if overwritten by .prm file
+if [ $DEVEL ]
+	# do nothing - just use the parameters from the file (vital for SamplingRate and SourceCh*, and desirable for SampleBlockSize - but note that epocs.py may overrule many parameters)
+else
+	load parameterfile ../parms/base-nidaqmx.prm
+	if ${is file ../parms/custom.prm} ; load parameterfile ../parms/custom.prm ; end
+end
 
 if [ $MODE == master ]
 	set parameter VisualizeTiming 1
