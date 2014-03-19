@@ -2,8 +2,9 @@
 TODO
 	when baseline is set, make the default limit of the response scale equal to twice the baseline
 	
-	resume-after-crash loading of trials from a temporary pickle file
-	track down source of "pythonw has stopped working" crash
+	offline analysis
+		use BCPy2000 tools to read .dat file: either BCI2000.FileReader, or (preferably) fix BCI2000 filtertools and use them
+		allow access to multi-file offline analysis via "advanced" mode (possibly hidden?) in EPOCS GUI
 	
 	'use marked timings' button starts off red sometimes (e.g. in Recruitment curve)
 		
@@ -277,15 +278,7 @@ class Operator( object ):
 	
 	def SendConditioningParameters( self ):
 		
-		channelNames = [ x.replace( ' ', '%20' ) for x in self.params._EMGChannelNames ]
-		triggerName = 'TRIG'
-		# we'll assume that SourceCh, SourceChOffset and SourceChGain are all set correctly in the .prm file
-		# according the number of EMG channels (+1 trigger) used in this type of experiment, but that the GUI
-		# user might want to change the *names* of the EMG channels
-		self.bci2000( 'set parameter Source  list ChannelNames=   %d %s' % ( len( channelNames ) + 1, ' '.join( channelNames + [ triggerName ] ) ) )
-		self.bci2000( 'set parameter Trigger list ChannelsToTrap= %d %s' % ( len( channelNames ) + 1, ' '.join( channelNames + [ triggerName ] ) ) )
-		self.SendParameter( 'TriggerChannel', triggerName )
-		
+		channelNames = [ x.replace( ' ', '%20' ) for x in self.params._EMGChannelNames ] # TODO: for now, we'll have to assume that these names are correctly configured in the parameter file
 		units = self.params._VoltageUnits
 		
 		def stringify( listOfNumbers ):
