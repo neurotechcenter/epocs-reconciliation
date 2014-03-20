@@ -1,0 +1,22 @@
+On 64-bit Windows 8 using 32-bit Release builds of command-line tools from BCI2000 source r4700:
+
+> cd c:\BCI2000
+> tools\cmdline\bci_dat2stream.exe -ptools\matlab\ExampleParameters.prm --duration=0:10 < data\samplefiles\eeg3_2.dat >   dat2stream-eeg3_2-bin32win64.bin
+> tools\cmdline\TransmissionFilter.exe < dat2stream-eeg3_2-bin32win64.bin > out
+
+Logic Error: Error reading message of type 0x321 (unknown), nominal length: 31045, read: 0
+Function: bci::MessageChannel::HandleMessage()
+File: ..\..\..\..\src\shared\modules\MessageChannel.cpp
+Line: 165
+Aborting TransmissionFilter.
+
+NB: It is possible to show that it is the *output* mechanism of bci_dat2stream, TransmissionFilter and
+friends, and probably not their input, that is corrupted, Using a version of the tools that is known to work
+(i.e. my 64-bit native OSX binaries from whichever svn release of BCI2000 last compiled on the Mac - possibly circa early 2013?
+I created dat2stream-eeg3_2-bin64osx64.bin and transferred this over to the Windows machine.  The Windows TransmissionFilter.exe
+successfully processed this, but the problem was only pushed one step down the chain: subsequent filters in the chain
+(e.g. SpatialFilter.exe) produce exactly the same error (Logic Error, MessageChannel.cpp line 165 while reading "unknown"
+type message) when they attempt to process the output of TransmissionFilter.exe
+
+The error still occurs when bci_dat2stream.exe is run without command-line options (but --duration=0:10 helps to make the
+binary files more manageable in size)
