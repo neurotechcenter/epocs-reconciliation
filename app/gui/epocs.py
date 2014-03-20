@@ -1,12 +1,14 @@
 """
 TODO
-	when baseline is set, make the default limit of the response scale equal to twice the baseline
+	auto-set response scale limit when baseline first entered
 	separate ISI durations from ST and the rest
+	
 	offline analysis
 		use BCPy2000 tools to read .dat file: either BCI2000.FileReader, or (preferably) fix BCI2000 filtertools and use them
 		allow access to multi-file offline analysis via "advanced" mode (possibly hidden?) in EPOCS GUI
 	
-	'use marked timings' button starts off red sometimes (e.g. in Recruitment curve)
+	"are you sure you want to quit?"
+	
 		
 	NIDAQmxADC: acquisition of floating-point raw data instead of integers
 """
@@ -711,7 +713,7 @@ class StickySpanSelector( object ): # definition copied and tweaked from matplot
 		elif arrow in [ 'right' ] and self.direction == 'horizontal': coords[ self.last_moved ] += gran
 		elif arrow in [ 'down'  ] and self.direction == 'vertical':   coords[ self.last_moved ] -= gran
 		elif arrow in [ 'up'    ] and self.direction == 'vertical':   coords[ self.last_moved ] += gran
-		elif event.key in [ 'enter' ]:
+		elif arrow in [ 'enter' ]:
 			attr = self.direction + 'StickySpanSelectorKeyPressHandled'
 			previouslyHandled = getattr( event, attr, False )
 			setattr( event, attr, True )
@@ -935,6 +937,9 @@ class GUI( tksuperclass, TkMPL ):
 		except: tkinter.ALLWINDOWS = []
 		tkinter.ALLWINDOWS.append( self )
 		
+		self.option_add( '*Font', 'TkDefaultFont 13' )
+		self.option_add( '*Label*Font', 'TkDefaultFont 13' )
+		
 		self.ready = False
 		self.iconbitmap( os.path.join( GUIDIR, 'epocs.ico' ) )
 		title = 'Evoked Potential Operant Conditioning System'
@@ -1089,6 +1094,7 @@ class GUI( tksuperclass, TkMPL ):
 		self.DrawFigures()
 		#self.resizable( True, False ) # STEP 13 from http://sebsauvage.net/python/gui/
 		self.update(); self.geometry( self.geometry().split( '+', 1 )[ 0 ] + '+25+25' ) # prevents Tkinter from resizing the GUI when component parts try to change size (STEP 18 from http://sebsauvage.net/python/gui/ )
+		self.wm_state( 'zoomed' )
 		self.ready = True
 
 	def AddTab( self, key, title, makeframe=True ):
@@ -1828,15 +1834,16 @@ class AnalysisWindow( Dialog, TkMPL ):
 	def TimingsSaved( self ):
 		result = True
 		params = self.parent.operator.params
+		def equal( a, b ): return float( '%g' % a ) == float( '%g' % b )
 		if self.overlay.responseSelector:
 			start, end = [ sec * 1000.0 for sec in self.overlay.responseSelector.get() ]
-			if params._ResponseStartMsec[ 0 ] != start or params._ResponseEndMsec[ 0 ] != end: result = False
+			if not equal( params._ResponseStartMsec[ 0 ], start ) or not equal( params._ResponseEndMsec[ 0 ], end ): result = False
 		if self.overlay.comparisonSelector:
 			start, end = [ sec * 1000.0 for sec in self.overlay.comparisonSelector.get() ]
-			if params._ComparisonStartMsec[ 0 ] != start or params._ComparisonEndMsec[ 0 ] != end: result = False
+			if not equal( params._ComparisonStartMsec[ 0 ], start ) or not equal( params._ComparisonEndMsec[ 0 ], end ): result = False
 		if self.overlay.backgroundSelector:
 			start, end = [ sec * 1000.0 for sec in self.overlay.backgroundSelector.get() ]
-			if params._PrestimulusStartMsec[ 0 ] != start or params._PrestimulusEndMsec[ 0 ] != end: result = False
+			if not equal( params._PrestimulusStartMsec[ 0 ], start ) or not equal( params._PrestimulusEndMsec[ 0 ], end ): result = False
 		return result
 	
 	def PersistTimings( self ):
@@ -1868,7 +1875,8 @@ class AnalysisWindow( Dialog, TkMPL ):
 			critical = float( info.fmt % critical )
 			lims = ( 0, critical )
 		if self.acceptMode != None:
-			self.parent.operator.Set( _ResponseBarLimit=critical * 2 )
+			if self.parent.operator.params._ResponseBarLimit < critical or self.parent.operator.params._BaselineResponse == None:
+				self.parent.operator.Set( _ResponseBarLimit=critical * 2 )
 			self.parent.operator.Set( _ResponseMin=[ lims[ 0 ], params._ResponseMin[ 1 ] ] )
 			self.parent.operator.Set( _ResponseMax=[ lims[ 1 ], params._ResponseMax[ 1 ] ] )
 			self.parent.SetBarLimits( 'tt' )
@@ -2187,7 +2195,8 @@ class SettingsWindow( Dialog, TkMPL ):
 		state = { True : 'normal', False : 'disabled' }[ self.mode in [ 'vc', 'rc', 'ct', 'tt' ] ]
 		self.widgets.entry_refresh = LabelledEntry( section, 'Bar refresh\ncycle (msec)' ).connect( params, '_BarUpdatePeriodMsec' ).enable( state ).grid( row=2, column=1, sticky='e', padx=8, pady=8 )
 		state = { True : 'normal', False : 'disabled' }[ self.mode in [ 'tt' ] ]
-		self.widgets.entry_responsebar = LabelledEntry( section, 'Response bar\naxes limit (%s)' % units ).connect( params, '_ResponseBarLimit' ).enable( state ).grid( row=1, column=2, sticky='e', padx=8, pady=8 )
+		w = self.widgets.entry_responsebar = LabelledEntry( section, 'Response bar\naxes limit (%s)' % units ).connect( params, '_ResponseBarLimit' ).enable( state ).grid( row=1, column=2, sticky='e', padx=8, pady=8 )
+		w.entry.configure( validatecommand=warningCommand, validate='key' )
 		w = self.widgets.entry_baselineresponse = LabelledEntry( section, 'Baseline\nresponse (%s)' % units ).connect( params, '_BaselineResponse' ).enable( state ).grid( row=2, column=2, sticky='e', padx=8, pady=8 )
 		w.entry.configure( validatecommand=warningCommand, validate='key' )
 		section.pack( side='top', pady=10, padx=10, fill='both' )
@@ -2251,6 +2260,11 @@ class SettingsWindow( Dialog, TkMPL ):
 			oldValue = self.parent.operator.params._BaselineResponse
 			if oldValue != None and newValue != oldValue:
 				msg = "The baseline marker was previously set at %g%s. Usually, it\nshould stay fixed for the whole of a patient's course of treatment." % ( oldValue, self.parent.operator.params._VoltageUnits )
+				self.error( msg, widget, color='#884400', highlight='#FF8800' )
+		if widget is self.widgets.entry_responsebar.entry:
+			baseline = self.parent.operator.params._BaselineResponse
+			if baseline and newValue and float( '%g' % newValue ) != float( '%g' % ( 2 * baseline ) ):
+				msg = 'Unless the patient is producing unusually large responses,\nthe response bar axes limit should be twice the baseline\nvalue (2 x %g = %g%s)' % ( baseline, baseline * 2, self.parent.operator.params._VoltageUnits )
 				self.error( msg, widget, color='#884400', highlight='#FF8800' )
 		return True
 	
