@@ -44,16 +44,11 @@ end
 if [ $MODE == master ]
 	set parameter VisualizeTiming 1
 	set parameter VisualizeSource 1
-	set parameter VisualizeTrapFilter 1
 	set parameter VisualizeBackgroundAverages 1
+	set parameter VisualizeTrapFilter 1
+	set parameter VisualizeRangeIntegrator 1
 	setconfig
 	set state Running 1
 else
 	set parameter OutputMode 0
-	set parameter VisualizeRangeIntegrator 0
-
-	set parameter VisualizeTiming 0
-	set parameter VisualizeSource 0
-	set parameter VisualizeTrapFilter 0
-	set parameter VisualizeBackgroundAverages 0
 end

@@ -40,12 +40,12 @@ Responses     matrix     ResponseAssessment=   1 { Response%20Name Min%20Amplitu
 Responses     int        OutputMode=                       1                        // which signal to pass on, 0: pass through input unchanged, 1: output responses (enumeration)
 
 
-Visualize     int        VisualizeBackgroundAverages=      1                        // Visualize segment averages from BackgroundTriggerFilter (boolean)
 Visualize     float      BackgroundVisualizationUnit=      1mV                      // Unit for numerical representation of BackgroundTriggerFilter
-Visualize     int        VisualizeTrapFilter=              1                        // Visualize TrapFilter output (boolean)
-Visualize     int        VisualizeRangeIntegrator=         1                        // Visualize RangeIntegrator output (boolean)
-Visualize     int        VisualizeTiming=                  1
-Visualize     int        VisualizeSource=                  1
+Visualize     int        VisualizeBackgroundAverages=      0                        // Visualize segment averages from BackgroundTriggerFilter (boolean)
+Visualize     int        VisualizeTrapFilter=              0                        // Visualize TrapFilter output (boolean)
+Visualize     int        VisualizeRangeIntegrator=         0                        // Visualize RangeIntegrator output (boolean)
+Visualize     int        VisualizeTiming=                  0
+Visualize     int        VisualizeSource=                  0
 
 Visualize     int        VisualizeSourceTime=              2s
 Visualize     int        VisualizeSourceDecimation=        1

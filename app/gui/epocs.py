@@ -1,7 +1,7 @@
 """
 TODO
 	when baseline is set, make the default limit of the response scale equal to twice the baseline
-	
+	separate ISI durations from ST and the rest
 	offline analysis
 		use BCPy2000 tools to read .dat file: either BCI2000.FileReader, or (preferably) fix BCI2000 filtertools and use them
 		allow access to multi-file offline analysis via "advanced" mode (possibly hidden?) in EPOCS GUI
