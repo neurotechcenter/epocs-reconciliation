@@ -3,13 +3,14 @@ TODO
 	auto-set response scale limit when baseline first entered
 	separate ISI durations from ST and the rest
 	
+	make separate settings entry to govern maximum random extra hold duration?  (if so: enforce its rounding to whole number of segments)
+	
+	"are you sure you want to quit?"
+	
 	offline analysis
 		use BCPy2000 tools to read .dat file: either BCI2000.FileReader, or (preferably) fix BCI2000 filtertools and use them
 		allow access to multi-file offline analysis via "advanced" mode (possibly hidden?) in EPOCS GUI
 	
-	"are you sure you want to quit?"
-	
-		
 	NIDAQmxADC: acquisition of floating-point raw data instead of integers
 """
 
@@ -144,6 +145,7 @@ class Operator( object ):
 			_SecondsBetweenTriggers = 5,
 			_BarUpdatePeriodMsec = 200,
 			_BackgroundHoldSec = 2,       # should be an integer multiple of BackgroundSegmentDuration
+			_BackgroundHoldExtraSec = 0,  # should be an integer multiple of BackgroundSegmentDuration
 				
 		)
 		
@@ -312,8 +314,12 @@ class Operator( object ):
 		self.bci2000( 'set parameter Responses  matrix ResponseAssessment= ' + str( len( rows ) ) + ' { ' + cols + ' } ' + ' '.join( rows ) )
 
 		secondsPerSegment = float( self.params.BackgroundSegmentDuration.strip( 'ms' ) ) / 1000.0
-		if self.params.ApplicationMode.lower() in [ 'st' ]: self.SendParameter( 'BackgroundHoldDuration', 0 )
-		else:                                               self.SendParameter( 'BackgroundHoldDuration', '%gs' % self.params._BackgroundHoldSec )
+		if self.params.ApplicationMode.lower() in [ 'st' ]:
+			self.SendParameter( 'BackgroundHoldDuration', 0 )
+			self.SendParameter( 'MaxRandomExtraHoldDuration', 0 )
+		else:
+			self.SendParameter( 'BackgroundHoldDuration', '%gs' % self.params._BackgroundHoldSec )
+			self.SendParameter( 'MaxRandomExtraHoldDuration', '%gs' % self.params._BackgroundHoldExtraSec )
 		if self.params.ApplicationMode.lower() in [ 'vc' ]: self.SendParameter( 'TriggerExpression', 0 )
 		else:                                               self.SendParameter( 'TriggerExpression' )
 		self.SendParameter( 'MinTimeBetweenTriggers', '%gs' % self.params._SecondsBetweenTriggers )

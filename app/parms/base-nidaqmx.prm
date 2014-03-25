@@ -22,7 +22,8 @@ Filtering     int        Downsample=                       0                    
 
 Background    matrix     BackgroundChannels=         2 { Input%20Channel Subtract%20Mean? Norm Min%20Amplitude Max%20Amplitude Feedback%20Weight }                                                               EMG1              yes         1        5mV           18mV               1.0             EMG2              yes         1        0mV           15mV               0.0          // specification of signal channels used to monitor baseline compliance
 Background    float      FeedbackTimeConstant=           200ms                      // length of time over which to average the feedback signal (will be rounded up to a whole number of segment lengths)
-Background    int        NumberOfBackgroundSegments=      10                        // the number of consecutive time segments to monitor for compliance with the desired baseline activity level
+Background    float      BackgroundHoldDuration=           2s                       // the duration for which consecutive time segments must comply with the target baseline activity ranges
+Background    float      MaxRandomExtraHoldDuration=       1s                       // a random extra duration may be added to BackgroundHoldDuration on each trial, up to this amount
 Background    float      BackgroundSegmentDuration=      200ms                      // the duration of one background segment (in sampleblocks, or in milliseconds if "ms" is appended)
 Trigger       string     TriggerExpression=                %                        // optional BCI2000 Expression that must be satisfied for trigger to fire
 Trigger       float      TriggerStateDuration=             2                        // duration (whole number of sampleblocks) for which the EnableTrigger output state is kept high
