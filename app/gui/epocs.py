@@ -1,17 +1,16 @@
 """
-TODO
-	auto-set response scale limit when baseline first entered
-	separate ISI durations from ST and the rest
-	
-	make separate settings entry to govern maximum random extra hold duration?  (if so: enforce its rounding to whole number of segments)
-	
-	"are you sure you want to quit?"
-	
+TODO	
 	offline analysis
 		use BCPy2000 tools to read .dat file: either BCI2000.FileReader, or (preferably) fix BCI2000 filtertools and use them
 		allow access to multi-file offline analysis via "advanced" mode (possibly hidden?) in EPOCS GUI
 	
+	"are you sure you want to quit?"
+	
+	make separate settings entry to govern maximum random extra hold duration?  (if so: remember to enforce its rounding to whole number of segments)
+	
 	NIDAQmxADC: acquisition of floating-point raw data instead of integers
+	
+	NB: assuming background is in range, time between triggers is actually MinTimeBetweenTriggers + 1 sample block
 """
 
 import os, sys, time, math, re, threading
@@ -143,6 +142,7 @@ class Operator( object ):
 			_VoltageUnits = 'mV',
 			
 			_SecondsBetweenTriggers = 5,
+			_SecondsBetweenStimulusTests = 3,
 			_BarUpdatePeriodMsec = 200,
 			_BackgroundHoldSec = 2,       # should be an integer multiple of BackgroundSegmentDuration
 			_BackgroundHoldExtraSec = 0,  # should be an integer multiple of BackgroundSegmentDuration
@@ -315,14 +315,15 @@ class Operator( object ):
 
 		secondsPerSegment = float( self.params.BackgroundSegmentDuration.strip( 'ms' ) ) / 1000.0
 		if self.params.ApplicationMode.lower() in [ 'st' ]:
+			self.SendParameter( 'MinTimeBetweenTriggers', '%gs' % self.params._SecondsBetweenStimulusTests )
 			self.SendParameter( 'BackgroundHoldDuration', 0 )
 			self.SendParameter( 'MaxRandomExtraHoldDuration', 0 )
 		else:
+			self.SendParameter( 'MinTimeBetweenTriggers', '%gs' % self.params._SecondsBetweenTriggers )
 			self.SendParameter( 'BackgroundHoldDuration', '%gs' % self.params._BackgroundHoldSec )
 			self.SendParameter( 'MaxRandomExtraHoldDuration', '%gs' % self.params._BackgroundHoldExtraSec )
 		if self.params.ApplicationMode.lower() in [ 'vc' ]: self.SendParameter( 'TriggerExpression', 0 )
 		else:                                               self.SendParameter( 'TriggerExpression' )
-		self.SendParameter( 'MinTimeBetweenTriggers', '%gs' % self.params._SecondsBetweenTriggers )
 		self.SendParameter( 'FeedbackTimeConstant', '%gms' % self.params._BarUpdatePeriodMsec )
 		
 		bgLimit, rLimit, rBaseline = stringify( [ self.GetBackgroundBarLimit( self.params.ApplicationMode ), self.params._ResponseBarLimit, self.params._BaselineResponse ] )
@@ -875,18 +876,22 @@ class TkMPL( object ):
 		self.artists = Bunch()
 		self.widgets = Bunch()
 		self.colors = Bunch(
-			   figure = '#CCCCCC',
-			       bg = '#CCCCCC',
-			       fg = '#000000',
-			   button = '#DDDDDD',
-			 disabled = '#777777',
-			 backpage = '#888888',
-			   header = '#CCCCCC',
-			   footer = '#DDDDDD',
-			     emg1 = '#0000FF',
-			     emg2 = '#FF0000',
-			     good = '#008800',
-			      bad = '#FF0000',
+			           figure = '#CCCCCC',
+			               bg = '#CCCCCC',
+			               fg = '#000000',
+			           button = '#DDDDDD',
+			         disabled = '#777777',
+			         backpage = '#888888',
+			           header = '#CCCCCC',
+			           footer = '#DDDDDD',
+			             emg1 = '#0000FF',
+			             emg2 = '#FF0000',
+			             good = '#008800',
+			              bad = '#FF0000',
+			         error_bg = '#AA0000',
+			  error_highlight = '#FF6666',
+			       warning_bg = '#886600',
+			warning_highlight = '#AA8800',
 		)
 
 	def Match( self, things, *terms ):
@@ -2190,9 +2195,11 @@ class SettingsWindow( Dialog, TkMPL ):
 		units = params._VoltageUnits
 		warningCommand = ( self.register( self.ValueWarnings ), '%W', '%P' )
 		
-		state = { True : 'normal', False : 'disabled' }[ self.mode in [ 'st', 'rc', 'ct', 'tt' ] ]
 		section = tkinter.LabelFrame( frame, text='Stimulus Scheduling', bg=bg )
-		self.widgets.entry_isi = LabelledEntry( section, 'Min. stimulation\ninterval (sec)').connect( params, '_SecondsBetweenTriggers' ).enable( state ).pack( padx=10, pady=10 )
+		state = { True : 'normal', False : 'disabled' }[ self.mode in [ 'st' ] ]
+		self.widgets.entry_isi_st = LabelledEntry( section, 'Min. stimulus test\ninterval (sec)').connect( params, '_SecondsBetweenStimulusTests' ).enable( state ).grid( row=1, column=1, sticky='e', padx=8, pady=8 )
+		state = { True : 'normal', False : 'disabled' }[ self.mode in [ 'rc', 'ct', 'tt' ] ]
+		self.widgets.entry_isi = LabelledEntry( section, 'Min. training\ninterval (sec)').connect( params, '_SecondsBetweenTriggers' ).enable( state ).grid( row=1, column=2, sticky='e', padx=8, pady=8 )
 		section.pack( side='top', pady=10, padx=10, fill='both' )
 		
 		state = { True : 'normal', False : 'disabled' }[ self.mode in [ 'vc' ] ]
@@ -2254,7 +2261,7 @@ class SettingsWindow( Dialog, TkMPL ):
 		if len( widgets ): widgets[ -1 ].focus()
 		if msg != None: self.error( msg )
 		return good
-	
+		
 	def ValueWarnings( self, widgetName, newString ):
 		widget = self.nametowidget( widgetName )
 		if len( newString.strip() ) == 0: newValue = None
@@ -2266,17 +2273,22 @@ class SettingsWindow( Dialog, TkMPL ):
 			oldValue = self.parent.operator.params._BaselineResponse
 			if oldValue != None and newValue != oldValue:
 				msg = "The baseline marker was previously set at %g%s. Usually, it\nshould stay fixed for the whole of a patient's course of treatment." % ( oldValue, self.parent.operator.params._VoltageUnits )
-				self.error( msg, widget, color='#884400', highlight='#FF8800' )
+				self.error( msg, widget, color=self.colors.warning_bg, highlight=self.colors.warning_highlight )
+			else: self.mark( widget, good=True )
 		if widget is self.widgets.entry_responsebar.entry:
-			baseline = self.parent.operator.params._BaselineResponse
+			baseline = self.widgets.entry_baselineresponse.get().strip()
+			try: baseline = float( baseline )
+			except: baseline = None
+			#baseline = self.parent.operator.params._BaselineResponse
 			if baseline and newValue and float( '%g' % newValue ) != float( '%g' % ( 2 * baseline ) ):
 				msg = 'Unless the patient is producing unusually large responses,\nthe response bar axes limit should be twice the baseline\nvalue (2 x %g = %g%s)' % ( baseline, baseline * 2, self.parent.operator.params._VoltageUnits )
-				self.error( msg, widget, color='#884400', highlight='#FF8800' )
+				self.error( msg, widget, color=self.colors.warning_bg, highlight=self.colors.warning_highlight )
+			else: self.mark( widget, good=True )
 		return True
 	
 	def error( self, msg, *widgets, **kwargs ):
-		color = kwargs.pop( 'color', '#AA0000' )
-		highlight = kwargs.pop( 'highlight', '#FF6666' )
+		color = kwargs.pop( 'color', self.colors.error_bg )
+		highlight = kwargs.pop( 'highlight', self.colors.error_highlight )
 		if len( kwargs ): raise TypeError( 'unexpected kwargs in error()' )
 		if msg == None: msg = ''
 		msgLabel = self.widgets.label_message
@@ -2290,6 +2302,10 @@ class SettingsWindow( Dialog, TkMPL ):
 		entry = Bunch()
 		for key, widget in self.widgets.items():
 			if not key.startswith( 'entry_' ): continue
+			self.mark( widget, good=True )
+			
+		for key, widget in self.widgets.items():
+			if not key.startswith( 'entry_' ): continue
 			key = key[ 6: ]
 			x = widget.get().strip()
 			if x == '':
@@ -2298,14 +2314,14 @@ class SettingsWindow( Dialog, TkMPL ):
 			else:
 				try: x = float( x )
 				except: return self.error( 'cannot interpret this as a number', widget )
-				else: self.mark( widget, good=True )
 				if x < 0.0: return self.error( 'this cannot be negative', widget )
 				#'isi   backgroundbar refresh  responsebar baselineresponse    bgmin1 bgmax1 bgmin2 bgmax2   hold   rstart rend  rmin1 rmin2 rmax1 rmax2'
-				if x == 0.0 and key in 'isi backgroundbar refresh  responsebar bgmax1 bgmax2  rmax1 rmax2'.split(): return self.error( 'this cannot be zero', widget )
+				if x == 0.0 and key in 'isi isi_st backgroundbar refresh  responsebar bgmax1 bgmax2  rmax1 rmax2'.split(): return self.error( 'this cannot be zero', widget )
 			value[ key ] = x
 			entry[ key ] = widget
-		
-		if value.isi < 2.0: return self.error( 'this should not be less than 2 seconds', entry.isi )
+			
+		if value.isi    < 2.0: return self.error( 'this should not be less than 2 seconds', entry.isi )
+		if value.isi_st < 2.0: return self.error( 'this should not be less than 2 seconds', entry.isi_st )
 		if value.bgmin1 != None and value.bgmax1 != None and value.bgmin1 >= value.bgmax1: return self.error( 'minimum must be less than maximum', entry.bgmin1, entry.bgmax1 )
 		if value.bgmin2 != None and value.bgmax2 != None and value.bgmin2 >= value.bgmax2: return self.error( 'minimum must be less than maximum', entry.bgmin2, entry.bgmax2 )
 		if value.rmin1  != None and value.rmax1  != None and value.rmin1  >= value.rmax1:  return self.error( 'minimum must be less than maximum', entry.rmin1,  entry.rmax1 )
@@ -2319,6 +2335,17 @@ class SettingsWindow( Dialog, TkMPL ):
 		if value.refresh < 50: return self.error( 'this cannot be less than 50ms', entry.refresh )
 		if value.rstart >= value.rend: return self.error( 'start must be earlier than end', entry.rstart, entry.rend )
 		if value.rstart > value.rend - 1: return self.error( 'start must be earlier than end by at least 1ms', entry.rstart, entry.rend )
+		
+		if value.baselineresponse != None and value.baselineresponse != self.parent.operator.params._BaselineResponse:
+			if float( str( value.responsebar ) ) != float( str( value.baselineresponse * 2 ) ):
+				if getattr( self, 'response_scale_warning_delivered', None ) != ( value.baselineresponse, value.responsebar ):
+					self.response_scale_warning_delivered = ( value.baselineresponse, value.responsebar )
+					if self.parent.operator.params._BaselineResponse == None:
+						msg = 'Since you are setting the baseline level for the first\ntime, it is recommended that you set the response bar\naxes limit to twice the baseline, i.e. to %g. (Press\n"OK" again if you really want to proceed with %g.)' % ( value.baselineresponse * 2, value.responsebar )
+					else:
+						msg = 'Since you are changing the baseline level, it is\nrecommended that you set the response bar axes limit \nto twice the baseline, i.e. to %g. (Press "OK" again\nif you really want to proceed with %g.)' % ( value.baselineresponse * 2, value.responsebar )
+					return self.error( msg, self.widgets.entry_responsebar, color=self.colors.warning_bg, highlight=self.colors.warning_highlight )
+		
 		return True
 	
 	def apply( self ):
