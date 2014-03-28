@@ -1,5 +1,7 @@
 """
 TODO	
+	optional RC-like view in the bottom panel of CT and TT analysis
+	
 	offline analysis
 		use BCPy2000 tools to read .dat file: either BCI2000.FileReader, or (preferably) fix BCI2000 filtertools and use them
 		allow access to multi-file offline analysis via "advanced" mode (possibly hidden?) in EPOCS GUI
@@ -936,6 +938,39 @@ class TkMPL( object ):
 		self.widgets[ name ] = widget
 		fig.subplots_adjust( bottom=0.06, top=0.94, right=0.92 )
 		return fig, widget, container
+		
+	def MakeNotebook( self, parent=None ):
+		if parent == None: parent = self
+		if 'ttk' in sys.modules:
+			notebook = self.widgets.notebook = ttk.Notebook( parent )
+		else:
+			notebook = self.widgets.notebook = Tix.NoteBook( parent, name='notebook', ipadx=6, ipady=6 )
+			notebook[ 'bg' ] = notebook.nbframe[ 'bg' ] = self.colors.bg
+			notebook.nbframe[ 'backpagecolor' ] = self.colors.backpage
+		return notebook
+		
+	def AddTab( self, key, title, makeframe=True ):
+		if 'ttk' in sys.modules:
+			tab = self.widgets[ key + '_tab' ] = tkinter.Frame( self, bg=self.colors.bg )
+			tab.pack()
+			self.widgets.notebook.add( tab, text=' ' + title + ' ', underline=1, padding=10 )
+			if not makeframe: return tab
+			frame = self.widgets[ key + '_frame_main'] = tkinter.Frame( tab, bg=self.colors.bg )
+			return frame
+		else:
+			tab   = self.widgets[ key + '_tab' ] = self.widgets.notebook.add( name=key + '_tab', label=title, underline=0 )
+			tab[ 'bg' ] = self.colors.bg
+			if not makeframe: return tab
+			frame = self.widgets[ key + '_frame_main' ] = tkinter.Frame( tab, bg=self.colors.bg )
+			return frame
+		
+	def TabFocus( self, whichTab='all' ):
+		tabNames = [ k for k in self.widgets.keys() if 'tab' in k.lower().split( '_' ) ]
+		for tabName in tabNames:
+			if whichTab == 'all' or whichTab.lower() in tabName.lower().split( '_' ): state = 'normal'
+			else: state = 'disabled'
+			if 'ttk' in sys.modules: self.widgets.notebook.tab( self.widgets[ tabName ], state=state )
+			else: self.widgets.notebook.tk.call( self.widgets.notebook._w, 'pageconfigure', tabName, '-state', state )
 
 class GUI( tksuperclass, TkMPL ):
 	
@@ -1008,15 +1043,8 @@ class GUI( tksuperclass, TkMPL ):
 		self.operator.Launch()
 		self.operator.SetConfig( work_around_bci2000_bug=True )
 		self.GetSignalParameters()
-		
-		if 'ttk' in sys.modules:
-			notebook = self.widgets.notebook = ttk.Notebook( self )
-		else:
-			notebook = self.widgets.notebook = Tix.NoteBook( self, name='notebook', ipadx=6, ipady=6 )
-			notebook[ 'bg' ] = notebook.nbframe[ 'bg' ] = self.colors.bg
-			notebook.nbframe[ 'backpagecolor' ] = self.colors.backpage
-		
-		notebook.pack( expand=1, fill='both', padx=5, pady=5 ,side='top' )
+				
+		self.MakeNotebook().pack( expand=1, fill='both', padx=5, pady=5 ,side='top' )
 		
 		self.modenames = Bunch( st='Stimulus Test', vc='Voluntary Contraction', rc='Recruitment Curve', ct='Control Trials', tt='Training Trials' )
 		
@@ -1107,29 +1135,6 @@ class GUI( tksuperclass, TkMPL ):
 		self.update(); self.geometry( self.geometry().split( '+', 1 )[ 0 ] + '+25+25' ) # prevents Tkinter from resizing the GUI when component parts try to change size (STEP 18 from http://sebsauvage.net/python/gui/ )
 		self.wm_state( 'zoomed' )
 		self.ready = True
-
-	def AddTab( self, key, title, makeframe=True ):
-		if 'ttk' in sys.modules:
-			tab = self.widgets[ key + '_tab' ] = tkinter.Frame( self, bg=self.colors.bg )
-			tab.pack()
-			self.widgets.notebook.add( tab, text=' ' + title + ' ', underline=1, padding=10 )
-			if not makeframe: return tab
-			frame = self.widgets[ key + '_frame_main'] = tkinter.Frame( tab, bg=self.colors.bg )
-			return frame
-		else:
-			tab   = self.widgets[ key + '_tab' ] = self.widgets.notebook.add( name=key + '_tab', label=title, underline=0 )
-			tab[ 'bg' ] = self.colors.bg
-			if not makeframe: return tab
-			frame = self.widgets[ key + '_frame_main' ] = tkinter.Frame( tab, bg=self.colors.bg )
-			return frame
-		
-	def TabFocus( self, whichTab='all' ):
-		tabNames = [ k for k in self.widgets.keys() if 'tab' in k.lower().split( '_' ) ]
-		for tabName in tabNames:
-			if whichTab == 'all' or whichTab.lower() in tabName.lower().split( '_' ): state = 'normal'
-			else: state = 'disabled'
-			if 'ttk' in sys.modules: self.widgets.notebook.tab( self.widgets[ tabName ], state=state )
-			else: self.widgets.notebook.tk.call( self.widgets.notebook._w, 'pageconfigure', tabName, '-state', state )
 	
 	def GetSignalParameters( self ):
 		self.fs = float( self.operator.remote.GetParameter( 'SamplingRate' ).lower().strip( 'hz' ) )
@@ -1362,7 +1367,7 @@ class GUI( tksuperclass, TkMPL ):
 	def ScheduleTask( self, key, func ):
 		self.pendingTasks[ key ] = func
 		
-	def DrawPendingFigures( self ):
+	def HandlePendingTasks( self ):
 		
 		for v in self.pendingTasks.values(): v()
 		self.pendingTasks.clear()
@@ -1371,12 +1376,12 @@ class GUI( tksuperclass, TkMPL ):
 			fig = self.pendingFigures.pop( 0 )
 			while fig in self.pendingFigures: self.pendingFigures.remove( fig )
 			fig.canvas.draw()
-		self.After( 10, 'DrawPendingFigures', self.DrawPendingFigures )
+		self.After( 10, 'HandlePendingTasks', self.HandlePendingTasks )
 
-	def StopThreads( self ):
-		self.keepgoing = False
-	
 	def WatchMM( self ):
+		# NB: this is run in a thread. tkinter is not thread-safe.
+		# So do not touch any tk widgets from this code.
+		# Use ScheduleTask instead - HandlePendingTasks mops these up every 10ms.
 		counter = prev = 0
 		while self.keepgoing:
 			while self.keepgoing and ( counter == prev or counter == 0 ):
@@ -1385,8 +1390,11 @@ class GUI( tksuperclass, TkMPL ):
 			if self.keepgoing:
 				prev = counter
 				signal, states = self.operator.ReadMM()
-				if self.Incoming( states, 'States' ):
-					self.Incoming( signal, 'Signal' )
+				self.ScheduleTask( 'update_states_and_signal', Curry( self.ProcessStatesAndSignal, states=states, signal=signal ) )
+				
+	def ProcessStatesAndSignal( self, states, signal ):
+		if self.Incoming( states, 'States' ):
+			self.Incoming( signal, 'Signal' )
 		
 	def Incoming( self, block, queue ):
 		
@@ -1415,13 +1423,13 @@ class GUI( tksuperclass, TkMPL ):
 		if changed.BackgroundFeedbackValue or changed.BackgroundGreen:
 			height = states.BackgroundFeedbackValue / 1000000.0
 			good = ( states.BackgroundGreen != 0.0 )
-			self.ScheduleTask( 'update_background', Curry( self.UpdateBar, height, good, code, 'background' ) )
-				
+			self.UpdateBar( height, good, code, 'background' )
+		
 		if changed.ResponseFeedbackValue or changed.ResponseGreen:
 			height = states.ResponseFeedbackValue / 1000000.0
 			good = ( states.ResponseGreen != 0.0 )
 			#print 'received.append(%g)' % height # TODO
-			self.ScheduleTask( 'update_response',   Curry( self.UpdateBar, height, good, code, 'response' ) )
+			self.UpdateBar( height, good, code, 'response' )
 		
 		if changed.TrialsCompleted:
 			trialCounter = self.widgets.get( code + '_label_value_trial', None )
@@ -1458,13 +1466,18 @@ class GUI( tksuperclass, TkMPL ):
 			self.NeedsUpdate( line.figure )
 				
 	def StartThread( self, name, func, *pargs, **kwargs ):
+		# NB: tkinter is not thread-safe. So do not touch any tk widgets from inside func.
+		# Use ScheduleTask instead - HandlePendingTasks mops these up every 10ms.
 		t = self.threads[ name ] = threading.Thread( target=func, args=pargs, kwargs=kwargs )
 		t.start()
 
+	def StopThreads( self ):
+		self.keepgoing = False
+	
 	def Loop( self ):
 		self.keepgoing = True
 		self.StartThread( 'watch_mm', self.WatchMM )
-		self.After( 50, 'DrawPendingFigures', self.DrawPendingFigures )
+		self.After( 50, 'HandlePendingTasks', self.HandlePendingTasks )
 		try: self.mainloop()
 		except KeyboardInterrupt: pass
 		self.StopThreads()
@@ -1944,6 +1957,14 @@ class AnalysisWindow( Dialog, TkMPL ):
 
 			ax2 = self.artists.an_axes_results = matplotlib.pyplot.subplot( 2, 1, 2 )
 			
+			if 'ttk' in sys.modules:
+				notebook = self.widgets.notebook = ttk.Notebook( self )
+			else:
+				notebook = self.widgets.notebook = Tix.NoteBook( self, name='notebook', ipadx=6, ipady=6 )
+				notebook[ 'bg' ] = notebook.nbframe[ 'bg' ] = self.colors.bg
+				notebook.nbframe[ 'backpagecolor' ] = self.colors.backpage
+			
+			
 			if self.mode == 'rc':
 				tkinter.Label( footer, text='Trials to pool: ', bg=footer[ 'bg' ] ).pack( side='left', padx=3, pady=3 )
 				vcmd = ( self.register( self.PoolingEntry ), '%s', '%P' )
@@ -2197,9 +2218,9 @@ class SettingsWindow( Dialog, TkMPL ):
 		
 		section = tkinter.LabelFrame( frame, text='Stimulus Scheduling', bg=bg )
 		state = { True : 'normal', False : 'disabled' }[ self.mode in [ 'st' ] ]
-		self.widgets.entry_isi_st = LabelledEntry( section, 'Min. stimulus test\ninterval (sec)').connect( params, '_SecondsBetweenStimulusTests' ).enable( state ).grid( row=1, column=1, sticky='e', padx=8, pady=8 )
+		self.widgets.entry_isi_st = LabelledEntry( section, 'Min. interval for\nStimulus Test (sec)').connect( params, '_SecondsBetweenStimulusTests' ).enable( state ).grid( row=1, column=1, sticky='e', padx=8, pady=8 )
 		state = { True : 'normal', False : 'disabled' }[ self.mode in [ 'rc', 'ct', 'tt' ] ]
-		self.widgets.entry_isi = LabelledEntry( section, 'Min. training\ninterval (sec)').connect( params, '_SecondsBetweenTriggers' ).enable( state ).grid( row=1, column=2, sticky='e', padx=8, pady=8 )
+		self.widgets.entry_isi = LabelledEntry( section, 'Min. interval for\nnormal usage(sec)').connect( params, '_SecondsBetweenTriggers' ).enable( state ).grid( row=1, column=2, sticky='e', padx=8, pady=8 )
 		section.pack( side='top', pady=10, padx=10, fill='both' )
 		
 		state = { True : 'normal', False : 'disabled' }[ self.mode in [ 'vc' ] ]
