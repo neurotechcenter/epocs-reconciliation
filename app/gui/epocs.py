@@ -2124,8 +2124,8 @@ class AnalysisWindow( Dialog, TkMPL ):
 		elif type == 'distribution':
 			start, end = [ sec * 1000.0 for sec in self.overlay.responseSelector.get() ]
 			self.parent.Log( 'From %s trials using target response interval from %g to %gmsec and aiming at percentile %s: ' % ( self.hist.panel.n.str(), start, end, self.hist.entry.str() ) )
-			self.parent.Log( '   pre-stimulus activity (mean, median) = %s' % self.hist.panel.background.str() )
-			self.parent.Log( '   reference response    (mean, median) = %s' % self.hist.panel.comparison.str() )
+			self.parent.Log( '   pre-stimulus activity (median, mean) = %s' % self.hist.panel.background.str() )
+			self.parent.Log( '   reference response    (median, mean) = %s' % self.hist.panel.comparison.str() )
 			self.parent.Log( '   target response       (median, mean) = %s' % self.hist.panel.response.str() )
 			self.parent.Log( '   upward target = %s' % self.hist.panel.uptarget.str() )
 			self.parent.Log( '   downward target = %s\n' % self.hist.panel.downtarget.str() )
