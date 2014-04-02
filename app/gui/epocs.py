@@ -1,18 +1,16 @@
 """
-TODO	
-	optional RC-like view in the bottom panel of CT and TT analysis
+TODO
+	info pane on ST screen
 	
 	offline analysis
 		use BCPy2000 tools to read .dat file: either BCI2000.FileReader, or (preferably) fix BCI2000 filtertools and use them
 		allow access to multi-file offline analysis via "advanced" mode (possibly hidden?) in EPOCS GUI
 	
-	"are you sure you want to quit?"
-	
 	make separate settings entry to govern maximum random extra hold duration?  (if so: remember to enforce its rounding to whole number of segments)
 	
 	NIDAQmxADC: acquisition of floating-point raw data instead of integers
 	
-	NB: assuming background is in range, time between triggers is actually MinTimeBetweenTriggers + 1 sample block
+	NB: assuming background is in range, time between triggers actually seems to come out to MinTimeBetweenTriggers + 1 sample block
 """
 
 import os, sys, time, math, re, threading
@@ -924,7 +922,7 @@ class TkMPL( object ):
 		if fig: matplotlib.pyplot.figure( fig.number )
 		else: fig = matplotlib.pyplot.figure()
 		container = tkinter.Frame( parent, bg=parent[ 'bg' ] )
-		matplotlib.backends.backend_tkagg.FigureCanvasTkAgg( fig, master=container) # replaces fig.canvas
+		matplotlib.backends.backend_tkagg.FigureCanvasTkAgg( fig, master=container ) # replaces fig.canvas
 		widget = fig.canvas.get_tk_widget()
 		if color == None: color = self.colors.figure
 		if color == None: color = widget.master[ 'bg' ]
@@ -933,45 +931,50 @@ class TkMPL( object ):
 		widget.configure( bg=color, borderwidth=0, insertborderwidth=0, selectborderwidth=0, highlightthickness=0, insertwidth=0 )
 		container.configure( width=800, height=600 )
 		if len( kwargs ): container.configure( **kwargs )
-		FixAspectRatio( widget ) #, relx=0.0, anchor='w' )
+		FixAspectRatio( widget, float( container[ 'height' ] ) / float( container[ 'width' ] ) ) #, relx=0.0, anchor='w' )
 		self.artists[ name ] = fig
 		self.widgets[ name ] = widget
 		fig.subplots_adjust( bottom=0.06, top=0.94, right=0.92 )
 		return fig, widget, container
 		
-	def MakeNotebook( self, parent=None ):
+	def MakeNotebook( self, parent=None, name='notebook' ):
 		if parent == None: parent = self
 		if 'ttk' in sys.modules:
-			notebook = self.widgets.notebook = ttk.Notebook( parent )
+			notebook = self.widgets[ name ] = ttk.Notebook( parent )
 		else:
-			notebook = self.widgets.notebook = Tix.NoteBook( parent, name='notebook', ipadx=6, ipady=6 )
+			notebook = self.widgets[ name ] = Tix.NoteBook( parent, name=name, ipadx=6, ipady=6 )
 			notebook[ 'bg' ] = notebook.nbframe[ 'bg' ] = self.colors.bg
 			notebook.nbframe[ 'backpagecolor' ] = self.colors.backpage
 		return notebook
 		
-	def AddTab( self, key, title, makeframe=True ):
+	def AddTab( self, key, title, makeframe=True, nbname='notebook' ):
 		if 'ttk' in sys.modules:
 			tab = self.widgets[ key + '_tab' ] = tkinter.Frame( self, bg=self.colors.bg )
 			tab.pack()
-			self.widgets.notebook.add( tab, text=' ' + title + ' ', underline=1, padding=10 )
+			self.widgets[ nbname ].add( tab, text=' ' + title + ' ', padding=10 )
 			if not makeframe: return tab
 			frame = self.widgets[ key + '_frame_main'] = tkinter.Frame( tab, bg=self.colors.bg )
 			return frame
 		else:
-			tab   = self.widgets[ key + '_tab' ] = self.widgets.notebook.add( name=key + '_tab', label=title, underline=0 )
+			tab   = self.widgets[ key + '_tab' ] = self.widgets[ nbname ].add( name=key + '_tab', label=title, underline=0 )
 			tab[ 'bg' ] = self.colors.bg
 			if not makeframe: return tab
 			frame = self.widgets[ key + '_frame_main' ] = tkinter.Frame( tab, bg=self.colors.bg )
 			return frame
 		
-	def TabFocus( self, whichTab='all' ):
+	def EnableTab( self, whichTab='all', nbname='notebook' ):
 		tabNames = [ k for k in self.widgets.keys() if 'tab' in k.lower().split( '_' ) ]
 		for tabName in tabNames:
 			if whichTab == 'all' or whichTab.lower() in tabName.lower().split( '_' ): state = 'normal'
 			else: state = 'disabled'
-			if 'ttk' in sys.modules: self.widgets.notebook.tab( self.widgets[ tabName ], state=state )
-			else: self.widgets.notebook.tk.call( self.widgets.notebook._w, 'pageconfigure', tabName, '-state', state )
-
+			if 'ttk' in sys.modules: self.widgets[ nbname ].tab( self.widgets[ tabName ], state=state )
+			else: self.widgets[ nbname ].tk.call( self.widgets[ nbname ]._w, 'pageconfigure', tabName, '-state', state )
+	
+	def SelectTab( self, whichTab, nbname='notebook' ):
+		tabName = whichTab + '_tab'
+		if 'ttk' in sys.modules: self.widgets[ nbname ].select( self.widgets[ tabName ] )
+		else: self.widgets[ nbname ].raise_page( tabName )
+		
 class GUI( tksuperclass, TkMPL ):
 	
 	def __init__( self, operator=None ):
@@ -1144,7 +1147,7 @@ class GUI( tksuperclass, TkMPL ):
 	def Start( self, mode ):
 		self.run = 'R%02d' % self.operator.NextRunNumber() # must query this before starting the run
 		self.operator.Start( mode.upper() )
-		self.TabFocus( mode )
+		self.EnableTab( mode )
 		EnableWidget( self.MatchWidgets( mode, 'button' ), False )
 		EnableWidget( self.MatchWidgets( mode, 'button', 'stop' ), True )
 		self.mode = mode
@@ -1167,7 +1170,7 @@ class GUI( tksuperclass, TkMPL ):
 	
 	def Stop( self ):
 		self.operator.Stop()
-		self.TabFocus( 'all' )
+		self.EnableTab( 'all' )
 		EnableWidget( self.MatchWidgets( self.mode, 'button' ), True )
 		EnableWidget( self.MatchWidgets( self.mode, 'button', 'stop' ), False )
 		EnableWidget( self.MatchWidgets( self.mode, 'button', 'analysis' ), len( self.data[ self.mode ] ) > 0 )
@@ -1198,7 +1201,7 @@ class GUI( tksuperclass, TkMPL ):
 				min, max = self.operator.GetVolts( ( self.operator.params._BackgroundMin[ 0 ], self.operator.params._BackgroundMax[ 0 ] ) )
 				self.UpdateTarget( min, max, mode, 'target', 'background' )
 				min, max = self.operator.GetVolts( ( self.operator.params._ResponseMin[ 0 ], self.operator.params._ResponseMax[ 0 ] ) )
-				self.UpdateTarget( min, max, mode, 'target', 'response' ) # TODO: UpdateTarget will need to deal with Nones
+				self.UpdateTarget( min, max, mode, 'target', 'response' )
 
 	def SettingsFrame( self, code, settings=True, analysis=True ):
 		if settings: settings_tag = '_button_settings'
@@ -1338,7 +1341,19 @@ class GUI( tksuperclass, TkMPL ):
 		self.afterIDs[ key ] = self.after( msec, func )
 	
 	def CloseWindow( self ):
-		if self.mode == None: self.destroy()
+		if self.mode != None: return
+		if getattr( self, 'areyousure', False ): return
+		class AreYouSure( Dialog ):
+			def body( self, frame ): tkinter.Label( frame, text='Are you sure you want to\nquit EPOCS?' ).pack( fill='both', expand=1, padx=10, pady=5 )
+			def apply( self ): self.result = True; print self.result
+		w, h, propx, propy = 400, 150, 0.5, 0.5
+		pw, ph, px, py = [ float( x ) for x in self.geometry().replace( '+', 'x' ).split( 'x' ) ]
+		#pw, ph, px, py = self.winfo_screenwidth(), self.winfo_screenheight(), 0, 0
+		geometry = geometry='%dx%d+%d+%d' % ( w, h, ( pw - w ) * propx + px, ( ph - h ) * propy + py )
+		self.areyousure = True
+		sure = AreYouSure( self, geometry=geometry ).result
+		self.areyousure = False
+		if sure: self.destroy()
 		
 	def destroy( self, arg=None ):
 		self.StopThreads()
@@ -1428,7 +1443,6 @@ class GUI( tksuperclass, TkMPL ):
 		if changed.ResponseFeedbackValue or changed.ResponseGreen:
 			height = states.ResponseFeedbackValue / 1000000.0
 			good = ( states.ResponseGreen != 0.0 )
-			#print 'received.append(%g)' % height # TODO
 			self.UpdateBar( height, good, code, 'response' )
 		
 		if changed.TrialsCompleted:
@@ -1485,12 +1499,14 @@ class GUI( tksuperclass, TkMPL ):
 
 class Dialog( tkinter.Toplevel ):
 	""" Modal dialog box courtesy of Fredrik Lundh: http://effbot.org/tkinterbook/tkinter-dialog-windows.htm """
-	def __init__( self, parent, title=None, icon=None, geometry=None ):
+	def __init__( self, parent, title=None, icon=None, geometry=None, blocking=True ):
 
 		tkinter.Toplevel.__init__( self, parent )
 		self.transient( parent )
 		if title: self.title( title )
 		if icon: self.iconbitmap( icon )
+		if geometry == None: geometry = "+%d+%d" % ( parent.winfo_rootx() + 10, parent.winfo_rooty() + 30 )
+		self.desired_geometry = geometry
 		self.parent = parent
 		self.result = None
 		body = tkinter.Frame( self )
@@ -1498,13 +1514,12 @@ class Dialog( tkinter.Toplevel ):
 		body.pack( side='top', fill='both', expand=True, padx=5, pady=5 )
 		self[ 'bg' ] = body[ 'bg' ]
 		self.buttonbox()
+		self.geometry( geometry )
 		self.grab_set()
 		if not self.initial_focus: self.initial_focus = self
 		self.protocol( "WM_DELETE_WINDOW", self.cancel )
-		if geometry == None: geometry = "+%d+%d" % ( parent.winfo_rootx() + 10, parent.winfo_rooty() + 30 )
-		self.geometry( geometry )
 		self.initial_focus.focus_set()
-		self.wait_window( self )
+		if blocking: self.wait_window( self )
 
 	# construction hooks
 
@@ -1718,18 +1733,20 @@ class RecruitmentCurve( object ):
 		responseColor = self.overlay.responseSelector.rectprops[ 'facecolor' ]
 		if tk:
 			widget = self.axes.figure.canvas.get_tk_widget()
-			self.frame = tkinter.Frame( widget, bg=widget[ 'bg' ] )
+			if isinstance( tk, tkinter.Widget ): self.frame = tk
+			else: self.frame = tkinter.Frame( widget, bg=widget[ 'bg' ] )
 		self.panel = Bunch(
 			  bg=InfoItem( 'Mean\npre-stimulus',      0, fmt='%.1f', units='V', color=prestimColor    ).tk( self.frame, row=1 ),
 			mmax=InfoItem( 'Max reference\nresponse', 0, fmt='%.1f', units='V', color=comparisonColor ).tk( self.frame, row=2 ),
 			hmax=InfoItem( 'Max target\nresponse',    0, fmt='%.1f', units='V', color=responseColor   ).tk( self.frame, row=3 ),
 		)
-		AxesPosition( self.axes, right=0.75 )
 		if self.frame:
 			for row in range( 3 ): self.frame.grid_rowconfigure( row + 1, weight = 1 )
 			self.frame.grid_columnconfigure( 2, weight = 1 )
-			p = AxesPosition( self.axes ); rgap = 1.0 - p.right
-			self.frame.place( in_=widget, relx=1.0 - rgap / 2.0, rely=1.0 - p.bottom - p.height/2, relheight=p.height*1.1, anchor='center' )
+			if not isinstance( tk, tkinter.Widget ):
+				AxesPosition( self.axes, right=0.75 )
+				p = AxesPosition( self.axes ); rgap = 1.0 - p.right
+				self.frame.place( in_=widget, relx=1.0 - rgap / 2.0, rely=1.0 - p.bottom - p.height/2, relheight=p.height*1.1, anchor='center' )
 		self.Update()
 					
 	def Update( self, pooling=None, p2p=None ):
@@ -1776,7 +1793,8 @@ class ResponseHistogram( object ):
 		responseColor = self.overlay.responseSelector.rectprops[ 'facecolor' ]
 		if tk:
 			widget = self.axes.figure.canvas.get_tk_widget()
-			self.frame = tkinter.Frame( widget.master, bg=widget[ 'bg' ] )
+			if isinstance( tk, tkinter.Widget ): self.frame = tk
+			else: self.frame = tkinter.Frame( widget, bg=widget[ 'bg' ] )
 		self.panel = Bunch(
 			         n=InfoItem( 'Number\nof Trials',                  0, fmt='%g'                                     ).tk( self.frame, row=1 ),
 			background=InfoItem( 'Pre-stimulus\n(Median, Mean)',       0, fmt='%.1f', units='V', color=prestimColor    ).tk( self.frame, row=2 ),
@@ -1785,13 +1803,14 @@ class ResponseHistogram( object ):
 			  uptarget=InfoItem( 'Upward\nTarget',                     0, fmt='%.1f', units='V'                        ).tk( self.frame, row=6 ),
 			downtarget=InfoItem( 'Downward\nTarget',                   0, fmt='%.1f', units='V'                        ).tk( self.frame, row=7 ),
 		)
-		AxesPosition( self.axes, right=0.65 )
 		if self.frame:
 			self.entry = InfoItem( 'Target\nPercentile', self.targetpc, fmt='%g' ).tk( self.frame, row=5, entry=True )
 			for row in range( 6 ): self.frame.grid_rowconfigure( row + 1, weight = 1 )
 			self.frame.grid_columnconfigure( 2, weight = 1 )
-			p = AxesPosition( self.axes ); rgap = 1.0 - p.right
-			self.frame.place( in_=widget, relx=1.0 - rgap * 0.4, rely=1.0 - p.bottom - p.height/2, relheight=p.height*1.1, anchor='center' )
+			if not isinstance( tk, tkinter.Widget ):
+				AxesPosition( self.axes, right=0.65 )
+				p = AxesPosition( self.axes ); rgap = 1.0 - p.right
+				self.frame.place( in_=widget, relx=1.0 - rgap * 0.4, rely=1.0 - p.bottom - p.height/2, relheight=p.height*1.1, anchor='center' )
 		self.Update()
 					
 	def Update( self, nbins=None, targetpc=None, p2p=None ):
@@ -1837,9 +1856,11 @@ class AnalysisWindow( Dialog, TkMPL ):
 		self.mode = mode
 		self.channel = 0 # first EMG channel
 		self.data = parent.data[ mode ]
+		self.runs = [ parent.MatchWidgets( mode, 'label', 'value', 'run' )[ 0 ][ 'text' ] ]
 		self.acceptMode = None
 		TkMPL.__init__( self )
-		Dialog.__init__( self, parent=parent, title='%s Analysis' % parent.modenames[ mode ], icon=os.path.join( GUIDIR, 'epocs.ico' ), geometry=parent.geometry() )
+		Dialog.__init__( self, parent=parent, title='%s Analysis' % parent.modenames[ mode ], icon=os.path.join( GUIDIR, 'epocs.ico' ), geometry=parent.geometry(), blocking=not DEVEL )
+		if DEVEL: self.parent.child = self
 		# NB: Dialog.__init__ will not return until the dialog is destroyed
 		
 	def buttonbox( self ): # override default OK + cancel buttons (and <Return> key binding)
@@ -1914,31 +1935,40 @@ class AnalysisWindow( Dialog, TkMPL ):
 		
 	def body( self, frame ):
 		frame[ 'bg' ] = self.colors.bg
-					
-		figure, widget, container = self.NewFigure( parent=frame, prefix='an', suffix='main', width=800, height=800 )
-		
-		header = self.widgets.an_frame_header = tkinter.Frame( frame, bg=self.colors.header )
-		footer = self.widgets.an_frame_footer = tkinter.Frame( frame, bg=self.colors.footer )
-		w = self.widgets.an_button_log = tkinter.Button( footer, text='Log Results', command=self.Log ); w.pack( side='right' )
+
+		figwidth, figheight = 0.75 * self.winfo_screenwidth(), 0.75 * self.winfo_screenheight()
+		figreducedwidth = figwidth * 0.8
+		fighalfheight = figheight * 0.5 - 50
 		
 		if self.mode in [ 'vc' ]:
+			header = self.widgets.overlay_frame_header = tkinter.Frame( frame, bg=self.colors.header )
+			w = self.widgets.mvc_button_log = tkinter.Button( header, text='Log Results', command=Curry( self.Log, type='mvc' ) ); w.pack( side='right' )
+			
+			figure, widget, container = self.NewFigure( parent=frame, prefix='an', suffix='main', width=figwidth, height=figheight )
 			self.mvc = MVC( self.data, fs=self.parent.fs / self.parent.sbs, callback=self.Changed )
 			self.widgets.an_xadjust_mvc = PlusMinusTk( frame, controllers=self.mvc.xcon ).place( in_=widget, relx=0.92, rely=0.06, width=40, height=20, anchor='se' )
-			container.pack( fill='both', expand=1 )
+			
+			header.grid( row=1, column=1, sticky='nsew', padx=5, pady=2 )
+			container.grid( row=2, column=1, sticky='nsew', padx=5, pady=2 )
+			frame.grid_rowconfigure( 2, weight=1 )
+			frame.grid_columnconfigure( 1, weight=1 )
 			
 		elif self.mode in [ 'rc', 'ct', 'tt' ]:
+			
+			uppernb = self.MakeNotebook( parent=self, name='notebook_upper' )
+			uppernb.pack( side='top', fill='both', expand=1 )
+			tabframe = self.AddTab( 'overlay', 'Timings', nbname='notebook_upper' )
+			tabframe.grid( row=1, column=1, sticky='nsew' ); tabframe.master.grid_rowconfigure( 1, weight=1 ); tabframe.master.grid_columnconfigure( 1, weight=1 ); 
+			
+			header = self.widgets.overlay_frame_header = tkinter.Frame( tabframe, bg=self.colors.header )
 			switch = Switch( header, title='Rectification: ', offLabel='off', onLabel='on', initialValue=0, command=self.UpdateLines )
 			switch.pack( side='left', pady=3 )
 			tkinter.Frame( header, bg=header[ 'bg' ] ).pack( side='left', padx=25 )
-			button = self.widgets.an_button_savetimings = tkinter.Button( header, text='Use marked timings', command=self.PersistTimings )
-			button.pack( side='left', pady=3 )
-			if self.mode in [ 'ct', 'tt' ]:
-				conditioning = tkinter.Frame( header, bg=header[ 'bg' ] )
-				w = self.widgets.an_button_upcondition = tkinter.Button( conditioning, text="Up-Condition", width=10, command=self.ok_up ); w.pack( side='top', padx=5, pady=2, ipadx=16, fill='both', expand=1 )
-				w = self.widgets.an_button_downcondition = tkinter.Button( conditioning, text="Down-Condition", width=10, command=self.ok_down ); w.pack( side='bottom', padx=5, pady=2, ipadx=16, fill='both', expand=1 )
-				conditioning.pack( side='right' )
-				
-			ax1 = self.artists.an_axes_overlay = matplotlib.pyplot.subplot( 2, 1, 1 )
+			button = self.widgets.overlay_button_savetimings = tkinter.Button( header, text='Use marked timings', command=self.PersistTimings )
+			button.pack( side='right', pady=3 )
+			
+			figure, widget, container = self.NewFigure( parent=tabframe, prefix='overlay', suffix='main', width=figwidth, height=fighalfheight )
+			axes = self.overlay_axes_main = figure.gca()
 			responseInterval   = self.parent.operator.params._ResponseStartMsec[ self.channel ] / 1000.0, self.parent.operator.params._ResponseEndMsec[ self.channel ] / 1000.0
 			comparisonInterval = self.parent.operator.params._ComparisonStartMsec[ self.channel ] / 1000.0, self.parent.operator.params._ComparisonEndMsec[ self.channel ] / 1000.0
 			backgroundInterval = self.parent.operator.params._PrestimulusStartMsec[ self.channel ] / 1000.0, self.parent.operator.params._PrestimulusEndMsec[ self.channel ] / 1000.0
@@ -1946,44 +1976,84 @@ class AnalysisWindow( Dialog, TkMPL ):
 			self.overlay = ResponseOverlay(
 				data=self.data, channel=self.channel, 
 				fs=self.parent.fs, lookback=self.parent.lookback,
-				axes=ax1, color=self.colors[ 'emg%d' % ( self.channel + 1 ) ],
+				axes=axes, color=self.colors[ 'emg%d' % ( self.channel + 1 ) ],
 				responseInterval=responseInterval, comparisonInterval=comparisonInterval, backgroundInterval=backgroundInterval,
 				updateCommand=self.Changed,
 			)
 			self.overlay.yController.set( self.parent.axiscontrollers_emg1[ -1 ].get() )
 			self.parent.axiscontrollers_emg1.append( self.overlay.yController )
-			self.widgets.an_yadjust_overlay = PlusMinusTk( parent=frame, controllers=self.parent.axiscontrollers_emg1 ).place( in_=widget, width=20, height=40, relx=0.93, rely=0.25, anchor='w' )
-			self.widgets.an_xadjust_overlay = PlusMinusTk( parent=frame, controllers=self.overlay.xController         ).place( in_=widget, width=40, height=20, relx=0.92, rely=0.05, anchor='se' )
-
-			ax2 = self.artists.an_axes_results = matplotlib.pyplot.subplot( 2, 1, 2 )
+			self.widgets.overlay_yadjust = PlusMinusTk( parent=tabframe, controllers=self.parent.axiscontrollers_emg1 ).place( in_=widget, width=20, height=40, relx=0.93, rely=0.25, anchor='w' )
+			self.widgets.overlay_xadjust = PlusMinusTk( parent=tabframe, controllers=self.overlay.xController         ).place( in_=widget, width=40, height=20, relx=0.92, rely=0.05, anchor='se' )
 			
-			if 'ttk' in sys.modules:
-				notebook = self.widgets.notebook = ttk.Notebook( self )
-			else:
-				notebook = self.widgets.notebook = Tix.NoteBook( self, name='notebook', ipadx=6, ipady=6 )
-				notebook[ 'bg' ] = notebook.nbframe[ 'bg' ] = self.colors.bg
-				notebook.nbframe[ 'backpagecolor' ] = self.colors.backpage
+			#header.pack( side='top', fill='both', expand=1 )
+			#container.pack( fill='both', expand=1 )
+			header.grid( row=1, column=1, sticky='nsew', padx=5, pady=2 )
+			container.grid( row=2, column=1, sticky='nsew', padx=5, pady=2 )
+			tabframe.grid_rowconfigure( 2, weight=1 )
+			tabframe.grid_columnconfigure( 1, weight=1 )
 			
 			
-			if self.mode == 'rc':
-				tkinter.Label( footer, text='Trials to pool: ', bg=footer[ 'bg' ] ).pack( side='left', padx=3, pady=3 )
+			lowernb = self.MakeNotebook( parent=self, name='notebook_lower' )
+			lowernb.pack( side='top', fill='both', expand=1 )
+			
+			if self.mode in [ 'rc', 'ct', 'tt' ]:
+				tabframe = self.AddTab( 'sequence', 'Sequence', nbname='notebook_lower' )
+				
+				header = self.widgets.sequence_frame_header = tkinter.Frame( tabframe, bg=self.colors.header )			
+				tkinter.Label( header, text='Trials to pool: ', bg=header[ 'bg' ] ).pack( side='left', padx=3, pady=3 )
 				vcmd = ( self.register( self.PoolingEntry ), '%s', '%P' )
-				entry = self.widgets.an_entry_pooling = tkinter.Entry( footer, width=2, validate='key', validatecommand=vcmd, textvariable=tkinter.Variable( footer, value='1' ), bg='#FFFFFF' )
+				entry = self.widgets.sequence_entry_pooling = tkinter.Entry( header, width=2, validate='key', validatecommand=vcmd, textvariable=tkinter.Variable( header, value='1' ), bg='#FFFFFF' )
 				entry.pack( side='left', padx=3, pady=3 )
-				switch = self.widgets.an_switch_responsemode = Switch( footer, offLabel='mean rect.', onLabel='peak-to-peak', command=self.UpdateResults )
+				switch = self.widgets.sequence_switch_responsemode = Switch( header, offLabel='mean rect.', onLabel='peak-to-peak', command=self.UpdateResults )
 				switch.pack( side='left', pady=3, padx=10 )
-				self.recruitment = RecruitmentCurve( self.overlay, axes=ax2, pooling=1, tk=True, p2p=False )
-			else:
-				self.hist = ResponseHistogram( self.overlay, axes=ax2, targetpc=self.parent.operator.params._TargetPercentile, nbins=10, tk=True )
+				w = self.widgets.sequence_button_log = tkinter.Button( header, text='Log Results', command=Curry( self.Log, type='sequence' ) ); w.pack( side='right' )
+				
+				figure, widget, container = self.NewFigure( parent=tabframe, prefix='sequence', suffix='main', width=figreducedwidth, height=fighalfheight )
+				panel = tkinter.Frame( tabframe, bg=tabframe[ 'bg' ] )
+				self.recruitment = RecruitmentCurve( self.overlay, pooling=1, tk=panel, p2p=False )
+				
+				#header.pack( side='top', fill='both', expand=1 )
+				#container.pack( fill='both', expand=1 )
+				header.grid( row=1, column=1, columnspan=2, sticky='nsew', padx=5, pady=2 )
+				container.grid( row=2, column=1, sticky='nsew', padx=5, pady=2 )
+				panel.grid( row=2, column=2, sticky='ns', padx=5, pady=2 )
+				tabframe.grid_rowconfigure( 2, weight=1 )
+				tabframe.grid_columnconfigure( 1, weight=1 )
+				
+				tabframe.pack( fill='both', expand=1 )
+				
+				
+			if self.mode in [ 'ct', 'tt' ]:
+				tabframe = self.AddTab( 'distribution', 'Distribution', nbname='notebook_lower' )
+					
+				header = self.widgets.distribution_frame_header = tkinter.Frame( tabframe, bg=self.colors.header )
+				w = self.widgets.distribution_button_log = tkinter.Button( header, text='Log Results', command=Curry( self.Log, type='distribution' ) ); w.pack( side='right' )
+				#conditioning = tkinter.Frame( self, bg=header[ 'bg' ] )
+				#w = self.widgets.distribution_button_upcondition = tkinter.Button( conditioning, text="Up-Condition", width=10, command=self.ok_up ); w.pack( side='top', pady=2, ipadx=16, fill='both', expand=1 )
+				#w = self.widgets.distribution_button_downcondition = tkinter.Button( conditioning, text="Down-Condition", width=10, command=self.ok_down ); w.pack( side='bottom', pady=2, ipadx=16, fill='both', expand=1 )
+				##conditioning.place( in_=self.widgets.overlay_button_savetimings, anchor='ne', relx=1.0, rely=1.1 )
+				#conditioning.place( in_=tabframe, anchor='se', relx=1.0, rely=1.0 )
+				
+				figure, widget, container = self.NewFigure( parent=tabframe, prefix='distribution', suffix='main', width=figreducedwidth, height=fighalfheight )
+				panel = tkinter.Frame( tabframe, bg=tabframe[ 'bg' ] )
+				self.hist = ResponseHistogram( self.overlay, targetpc=self.parent.operator.params._TargetPercentile, nbins=10, tk=panel )
 				vcmd = ( self.register( self.TargetPCEntry ), '%s', '%P' )
 				self.hist.entry.widgets.value.configure( width=3, validatecommand=vcmd, validate='key' )
-			
-		header.grid( row=1, column=1, sticky='ns' )
-		container.grid( row=2, column=1, sticky='nsew' )
-		footer.grid( row=3, column=1, sticky='ns', pady=20 )
-		frame.grid_rowconfigure( 2, weight=1 )
-		frame.grid_columnconfigure( 1, weight=1 )
-			
+
+				w = self.widgets.distribution_button_upcondition   = tkinter.Button( self.hist.frame, text="Up-Condition",   width=10, command=self.ok_up   ); w.grid( row=6, column=3, sticky='nsew', padx=1, pady=1, ipadx=16 )
+				w = self.widgets.distribution_button_downcondition = tkinter.Button( self.hist.frame, text="Down-Condition", width=10, command=self.ok_down ); w.grid( row=7, column=3, sticky='nsew', padx=1, pady=1, ipadx=16 )
+
+				#header.pack( side='top', fill='both', expand=1 )
+				#container.pack( fill='both', expand=1 )
+				header.grid( row=1, column=1, columnspan=2, sticky='nsew', padx=5, pady=2 )
+				container.grid( row=2, column=1, sticky='nsew', padx=5, pady=2 )
+				panel.grid( row=2, column=2, sticky='ns', padx=5, pady=2 )
+				tabframe.grid_rowconfigure( 2, weight=1 )
+				tabframe.grid_columnconfigure( 1, weight=1 )
+
+				tabframe.pack( fill='both', expand=1 )
+				self.SelectTab( 'distribution', 'notebook_lower' )
+				
 			
 		self.UpdateResults()
 		self.DrawFigures()
@@ -2011,46 +2081,47 @@ class AnalysisWindow( Dialog, TkMPL ):
 		return True
 		
 	def UpdateResults( self, *unused_args ):
-		if self.mode in [ 'vc' ]:
+		if hasattr( self, 'mvc' ):
 			self.mvc.Update()
-		elif self.mode in [ 'rc' ]:
-			pooling = self.widgets.an_entry_pooling.get()
+		if hasattr( self, 'recruitment' ):
+			pooling = self.widgets.sequence_entry_pooling.get()
 			try: pooling = int( pooling )
 			except: pooling = None # no change
-			p2p = self.widgets.an_switch_responsemode.scale.get()
+			p2p = self.widgets.sequence_switch_responsemode.scale.get()
 			self.recruitment.Update( pooling=pooling, p2p=p2p )
-		elif self.mode in [ 'ct', 'tt' ]:
+		if hasattr( self, 'hist' ):
 			targetpc = self.hist.entry.widgets.value.get()
 			try: targetpc = float( targetpc )
 			except: targetpc = None
 			self.hist.Update( targetpc=targetpc )
-			EnableWidget( [ self.widgets.an_button_upcondition, self.widgets.an_button_downcondition ], self.TimingsSaved() )
-		if self.mode in [ 'rc', 'ct', 'tt' ]:
-			if self.TimingsSaved(): self.widgets.an_button_savetimings.configure( state='disabled', bg=self.colors.button )
-			else:                   self.widgets.an_button_savetimings.configure( state='normal',   bg='#FF4444' )
-		ax = self.artists.get( 'an_axes_overlay', None )
+			EnableWidget( [ self.widgets.distribution_button_upcondition, self.widgets.distribution_button_downcondition ], self.TimingsSaved() )
+		if hasattr( self, 'overlay' ):
+			if self.TimingsSaved(): self.widgets.overlay_button_savetimings.configure( state='disabled', bg=self.colors.button )
+			else:                   self.widgets.overlay_button_savetimings.configure( state='normal',   bg='#FF4444' )
+		ax = self.artists.get( 'overlay_axes_main', None )
 		if ax: matplotlib.pyplot.figure( ax.figure.number ).sca( ax )
 		self.DrawFigures()
-		if 'an_button_log' in self.widgets: self.widgets.an_button_log[ 'state' ] = 'normal'
+		for button in self.MatchWidgets( 'button', 'log' ): button[ 'state' ] = 'normal'
 	
-	def Log( self ):
-		if self.mode in [ 'vc' ]:
+	def Log( self, type ):
+		self.parent.Log( '===== %s Analysis (%s) =====' % ( self.parent.modenames[ self.mode ], ' + '.join( self.runs ) ) )
+		if type == 'mvc':
 			start, end = [ sec * 1000.0 for sec in self.mvc.selector.get() ]
 			if self.mvc.estimate != None: self.parent.Log( 'MVC estimated at %s over a %g-msec window' % ( self.mvc.estimate, end - start ) )
-		elif self.mode in [ 'rc' ]:
-			if self.recruitment.p2p: type = 'peak-to-peak'
-			else: type = 'average rectified signal'
+		elif type == 'sequence':
+			if self.recruitment.p2p: metric = 'peak-to-peak'
+			else: metric = 'average rectified signal'
 			self.parent.Log( 'From %d measurements, pooled in groups of %d:' % ( self.recruitment.n, self.recruitment.pooling ) )
 			start, end = [ sec * 1000.0 for sec in self.overlay.backgroundSelector.get() ]
 			meanPrestim = self.recruitment.panel.bg.str()
-			self.parent.Log( '   Mean pre-stimulus activity (%g to %g msec) = %s (%s)' % ( start, end, meanPrestim, type ) )
+			self.parent.Log( '   Mean pre-stimulus activity (%g to %g msec) = %s (%s)' % ( start, end, meanPrestim, metric ) )
 			start, end = [ sec * 1000.0 for sec in self.overlay.comparisonSelector.get() ]
 			maxComparison = self.recruitment.panel.mmax.str()
-			self.parent.Log( '   Maximum reference response (%g to %g msec) = %s (%s)' % ( start, end, maxComparison, type ) )
+			self.parent.Log( '   Maximum reference response (%g to %g msec) = %s (%s)' % ( start, end, maxComparison, metric ) )
 			start, end = [ sec * 1000.0 for sec in self.overlay.responseSelector.get() ]
 			maxResponse = self.recruitment.panel.hmax.str()
-			self.parent.Log( '   Maximum target response (%g to %g msec) = %s (%s)\n' % ( start, end, maxResponse, type ) )
-		elif self.mode in [ 'ct', 'tt' ]:
+			self.parent.Log( '   Maximum target response (%g to %g msec) = %s (%s)\n' % ( start, end, maxResponse, metric ) )
+		elif type == 'distribution':
 			start, end = [ sec * 1000.0 for sec in self.overlay.responseSelector.get() ]
 			self.parent.Log( 'From %s trials using target response interval from %g to %gmsec and aiming at percentile %s: ' % ( self.hist.panel.n.str(), start, end, self.hist.entry.str() ) )
 			self.parent.Log( '   pre-stimulus activity (mean, median) = %s' % self.hist.panel.background.str() )
@@ -2064,7 +2135,8 @@ class AnalysisWindow( Dialog, TkMPL ):
 				baselines[ self.parent.operator.LastRunNumber( mode=self.mode ) ] = info.value[ 0 ]
 				meanOfMedians = sum( baselines.values() ) / float( len( baselines ) )
 				self.parent.Log( 'Estimated baseline so far = %s    *****\n' % info.str( meanOfMedians ) )
-		self.widgets.an_button_log[ 'state' ] = 'disabled'
+		else: self.parent.Log( '??? - unexpected logging error (type "%s")' % type )
+		for button in self.MatchWidgets( type, 'button', 'log' ): button[ 'state' ] = 'disabled'
 		
 	def TargetPCEntry( self, oldValue, newValue ):
 		if len( newValue ) == 0: return True
@@ -2133,7 +2205,7 @@ def AxesPosition( axes, left=None, right=None, top=None, bottom=None, width=None
 	return Bunch( left=p[ 0 ], bottom=p[ 1 ], width=p[ 2 ], height=p[ 3 ], right=p[ 0 ] + p[ 2 ], top=p[ 1 ] + p[ 3 ] )
 
 class LabelledEntry( tkinter.Frame ):
-	def __init__( self, parent, label, value='', width=4, bg=None ):
+	def __init__( self, parent, label, value='', width=5, bg=None ):
 		if bg == None: bg = parent[ 'bg' ]
 		tkinter.Frame.__init__( self, parent, bg=bg )
 		self.label = tkinter.Label( self, text=label, bg=bg, justify='right' )
