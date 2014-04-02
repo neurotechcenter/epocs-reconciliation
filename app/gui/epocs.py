@@ -1,7 +1,5 @@
 """
 TODO
-	info pane on ST screen
-	
 	offline analysis
 		use BCPy2000 tools to read .dat file: either BCI2000.FileReader, or (preferably) fix BCI2000 filtertools and use them
 		allow access to multi-file offline analysis via "advanced" mode (possibly hidden?) in EPOCS GUI
@@ -22,7 +20,7 @@ import matplotlib, matplotlib.pyplot
 tksuperclass = tkinter.Tk
 try: import ttk
 except ImportError: import Tix; tksuperclass = Tix.Tk  # ...because Python 2.5 does not have ttk
-	
+
 import ctypes
 try: ctypes.windll.nicaiu
 except: DEVEL = True
@@ -49,7 +47,7 @@ class Bunch( dict ):
 		if key in self.__dict__: self.__dict__[ key ] = value
 		else: self[ key ] = value
 	def _getAttributeNames( self ): return self.keys()
-	
+
 def Curry( func, *creation_time_pargs, **creation_time_kwargs ):
 	def curried( *call_time_pargs, **call_time_kwargs ):
 		pargs = creation_time_pargs + call_time_pargs
@@ -1074,7 +1072,8 @@ class GUI( tksuperclass, TkMPL ):
 		self.widgets.st_xadjust_emg  = PlusMinusTk( parent=frame, controllers=[ AxisController( ax, 'x', units='s', start=( -0.020,  +0.100  ), narrowest=( -0.002,  +0.010  ), widest=(  -0.100, + 0.500 ) ) for ax in self.MatchArtists( 'st', 'axes' ) ] ).place( in_=widget, width=40, height=20, relx=0.92, rely=0.05, anchor='se' )
 		container.pack( side='top', fill='both', expand=True, padx=20, pady=5 )
 		frame.pack( side='left', padx=2, pady=2, fill='both', expand=1 )
-		
+		chn = ', '.join( self.operator.remote.GetListParameter( 'ChannelNames' ) )
+		tkinter.Label( frame.master, text='Configured for %s at %gHz' % ( chn, self.fs ), bg=self.colors.footer ).place( in_=frame.master, relx=1.0, rely=1.0, anchor='se' )
 		
 		frame = self.AddTab( 'vc', title=self.modenames.vc )
 		fig, widget, container = self.NewFigure( parent=frame, prefix='vc', suffix='emg' )
@@ -1345,7 +1344,7 @@ class GUI( tksuperclass, TkMPL ):
 		if getattr( self, 'areyousure', False ): return
 		class AreYouSure( Dialog ):
 			def body( self, frame ): tkinter.Label( frame, text='Are you sure you want to\nquit EPOCS?' ).pack( fill='both', expand=1, padx=10, pady=5 )
-			def apply( self ): self.result = True; print self.result
+			def apply( self ): self.result = True
 		w, h, propx, propy = 400, 150, 0.5, 0.5
 		pw, ph, px, py = [ float( x ) for x in self.geometry().replace( '+', 'x' ).split( 'x' ) ]
 		#pw, ph, px, py = self.winfo_screenwidth(), self.winfo_screenheight(), 0, 0
@@ -1372,6 +1371,7 @@ class GUI( tksuperclass, TkMPL ):
 				self.after_cancel( self.afterIDs.pop( k ) )
 		try: tksuperclass.destroy( self )
 		except: pass
+		time.sleep( 0.25 )
 		self.quit()
 	
 	def Log( self, text, datestamp=True ):

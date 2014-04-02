@@ -211,6 +211,37 @@ class BCI2000Remote(object):
     def GetParameter(self, name):
         return self._get_string_result( self._lib.BCI2000Remote_GetParameter, ctypes.c_char_p( name ) )
 
+    def GetListParameter(self, name):
+        if not self.Execute( 'list parameter ' + name ):
+            raise self._object_error
+        content = self.Result.split()
+        if not content[ 1 ].lower().endswith( 'list' ):
+            raise TypeError( '%s is not a list parameter' % name )
+        length = int( content[ 3 ] )
+        return content[ 4 : 4 + length ]
+
+    def GetMatrixParameter(self, name):
+        if not self.Execute( 'list parameter ' + name ):
+            raise self._object_error
+        content = self.Result.split()
+        if not content[ 1 ].lower().endswith( 'matrix' ):
+            raise TypeError( '%s is not a matrix parameter' % name )
+        content = content[ 3 : ]
+        if content[ 0 ] == '{':
+            rows = content.index( '}' ) - 1
+            content = content[ rows + 2 : ]
+        else:
+            rows = int( content[ 0 ] )
+            content = content[ 1 : ]
+        if content[ 0 ] == '{':
+            columns = content.index( '}' ) - 1
+            content = content[ columns + 2 : ]
+        else:
+            columns = int( content[ 0 ] )
+            content = content[ 1 : ]
+        content = content[ : rows * columns ]
+        return [ [ content.pop( 0 ) for column in range( columns ) ] for row in range( rows ) ]
+
     def AddStateVariable(self, name, bit_width, initial_value):
         return self._lib.BCI2000Remote_AddStateVariable( self._instance, ctypes.c_char_p( name ), ctypes.c_int( bit_width ), ctypes.c_double( initial_value ) )
 
