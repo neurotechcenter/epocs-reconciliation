@@ -1,0 +1,74 @@
+The following 3 problems were observed with the cmake system on OSX, using
+up-to-date sources from the svn HEAD on 2013-12-05 (following one exchange
+of emails with Juergen that fixed other osx-cmake problems):
+
+
+(1) PyffApplication's CMakeLists.txt requires PythonLibs version 2.7
+or later.  If this version is not present on the system, the result is
+a fatal error which prevents CMake from completing, for all the other
+targets. Obviously the failure of one target shouldn't affect the
+others but I was unable to figure out how to prevent this except by
+brutally commenting out ADD_SUBDIRECTORY( PyffApplication )
+
+It's probably not a good solution to simply demand the user install
+Python 2.7. Unfortunately installing and upgrading Python (and in
+particular, any third-party Python packages you might rely on for your
+project) is an absolute nightmare on the mac (it's much easier on windows
+and linux).  It took a couple of days' solid work to get my 2.6 tree
+installed on my mac, which I'm not keen to repeat until I absolutely have
+to.
+
+
+
+(2) The code itself doesn't compile.  There are hundreds of lines of errors -
+this is the first error I got running `make Operator` with up-to-date sources on
+2013-12-05:
+
+[  4%] Building CXX object
+CMakeFiles/frameworks/LibTiny/CMakeFiles/LibTiny.dir/Users/njh07/bci/bci2000/3.x/src/shared/utils/Lib/Semaphore.cpp.o
+In file included from
+/Users/njh07/bci/bci2000/3.x/src/shared/utils/Lib/Semaphore.cpp:26:
+/Users/njh07/bci/bci2000/3.x/src/shared/utils/Lib/Semaphore.h:53:
+error: 'sem_t' does not name a type
+
+
+
+
+(3) There is also a Qt error (log below) demanding version >= 4.7.0.
+I have long forgotten which version of the Qt I have, or even how to
+*query* which version I have.     I seem to be able to work around
+this by going into CMakeCache and setting USE_EXTERNAL_QT=ON  (which I
+discovered by chance on
+http://www.bci2000.org/wiki/index.php/Programming_Reference:Building_Qt_for_BCI2000
+and tried at random). But I presume we're not demanding that most
+users do that.  What would be the standard procedure for normal users?
+ Can we give more precise instructions than "install Qt >=4.7.0 on
+your machine"?  I dimly remember that one has to install not
+just the "Qt Libraries" that are easy to find on qt-project.org but
+also the "QT SomethingElse" where SomethingElse possibly == "SDK" or
+possibly "Framework' (qt-project.org isn't helpful on this issue)
+
+
+-- Looking for Q_WS_X11
+-- Looking for Q_WS_X11 - not found
+-- Looking for Q_WS_WIN
+-- Looking for Q_WS_WIN - not found
+-- Looking for Q_WS_QWS
+-- Looking for Q_WS_QWS - not found
+-- Looking for Q_WS_MAC
+-- Looking for Q_WS_MAC - found
+-- Looking for QT_MAC_USE_COCOA
+-- Looking for QT_MAC_USE_COCOA - found
+There is no precompiled version of Qt available for your platform/compiler.
+You will need to install Qt >=4.7.0 on your machine in order to build BCI2000.
+
+CMake Error at cmake/Utils.cmake:81 (MESSAGE):
+  There is no precompiled version of Qt available for your platform/compiler.
+
+  You will need to install Qt >=4.7.0 on your machine in order to build
+  BCI2000.
+
+Call Stack (most recent call first):
+  cmake/FindQt.cmake:219 (UTILS_FATAL_ERROR)
+  cmake/Utils.cmake:100 (INCLUDE)
+  CMakeLists.txt:22 (UTILS_INCLUDE)

@@ -1,0 +1,23 @@
+This a bug that I can work around but not fix, involving IIRBandpass /
+IIRFilterBase.   Whenever I enabled
+the high-pass filter I would get either a stoppage (operator clock
+keeps ticking in the title-bar, but the source window and all other
+visualizers stop) or a crash (unhandled windows exception, access
+violation, terminating thread of type IIRFilter).   This would appear
+to happen non-deterministically---it happens at different points in
+the run even if I play back the same file each time as source. Also, I
+never noticed it during development on my laptop (8-core 2.5GHz i7
+running 64-bit Windows 8), but it happens nearly always within the
+first 2 minutes of a run on the lab machine (4-core 3.3GHz i3 running
+32-bit Windows 7). In both cases the binary is the same (32-bit
+Release build).
+
+I varied the parameters a bit but it always seemed to be dangerous,
+The particular parameters I'm running with are SourceCh=4,
+SampleBlockSize=64, SamplingRate=1600, HighPassCorner=0.5Hz and
+HighPassOrder=2 (notch and lowpass disabled)
+
+After some very crude debugging I think the problem can be prevented
+by launching with --NumberOfThreads=1, so that's the workaround I've
+been using.
+
