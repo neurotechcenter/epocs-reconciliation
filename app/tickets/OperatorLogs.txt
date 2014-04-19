@@ -1,6 +1,0 @@
-This is a feature request (or query about a possibly already existing feature
-that I can't find).  It would be *extremely* useful when supporting users if
-the operator could be configured to dump automatically to a datestamped file
-whatever also appears in the operator Log window. Users cannot be relied on
-to take a screenshot or copy-paste the operator log-window text when an error
-occurs.
