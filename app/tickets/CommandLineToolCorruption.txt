@@ -1,4 +1,13 @@
-TLDR (interim conclusion 2014-04-15): to compile working versions of BCI2000's command-line filter tools, you
+Fundamental bugs remain in the way that BCI2000 components send data to each other. They were
+probably introduced around r4529.
+
+They are most clearly manifested in two ways: in the command-line tools used by BCI2000CHAIN
+(this ticket) and in sporadic crashes of the online system. It is unknown whether the two are
+linked, although I suspect so (and hope so, because otherwise the sporadic errors will be hard
+to catch).
+
+Full story below. Interim conclusion 2014-04-15: to compile working versions of BCI2000's
+command-line filter tools, you
 must roll back to r4528 (August 2013): r4529 does not seem to compile at all and r4530 introduced a bug which
 corrupts command-line tool output, causing the next tool in the pipeline to crash.
 
@@ -12,12 +21,13 @@ and conveniences that were only introduced into the BCI2000 framework in later v
 StringUtils::ToLower, Inf<double>) so they no longer compile in the rolled-back framework.  I introduced
 a header called Workaround4530.h which adds these back in. This is obviously not a sustainable way forward
 but for me to hack through the framework jungle actually fix the underlying bug would likely take weeks of
-solid effort.
+full-time effort.
 
 As an added "bonus", Workaround4530.h might also allow the tools to be compiled on the Mac (rolling back
 to whatever framework version last compiled there).
 
-However there are other preflight and run-time errors that are introduced by rolling back..
+However there are other preflight and run-time errors that are introduced by rolling back....
+
 
 
 
