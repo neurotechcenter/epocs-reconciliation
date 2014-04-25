@@ -1,5 +1,8 @@
 """
 TODO
+	investigate "python is not responding" error
+	NIDAQmx error -88709 on StopRun happened once....
+
 	offline analysis
 		use BCPy2000 tools to read .dat file: either BCI2000.FileReader, or (preferably) fix BCI2000 filtertools and use them
 		allow access to multi-file offline analysis via "advanced" mode (possibly hidden?) in EPOCS GUI
@@ -353,6 +356,7 @@ class Operator( object ):
 			self.bci2000( 'set parameter Connector list OutputExpressions= 0' )
 		
 		if not work_around_bci2000_bug:
+			self.bci2000( 'wait for Connected|ParamsModified 5' )
 			self.bci2000( 'setconfig' )
 			self.needSetConfig = False
 		self.WriteSettings()
@@ -1371,6 +1375,7 @@ class GUI( tksuperclass, TkMPL ):
 				self.after_cancel( self.afterIDs.pop( k ) )
 		try: tksuperclass.destroy( self )
 		except: pass
+		for x in self.MatchArtists( 'figure' ): matplotlib.pyplot.close( x )
 		time.sleep( 0.25 )
 		self.quit()
 	
@@ -1874,6 +1879,7 @@ class AnalysisWindow( Dialog, TkMPL ):
 		except: pass
 		controllers = self.parent.axiscontrollers_emg1
 		if hasattr( self, 'overlay' ) and self.overlay.yController in controllers: controllers.remove( self.overlay.yController )
+		for x in self.MatchArtists( 'figure' ): matplotlib.pyplot.close( x )
 		Dialog.cancel( self )
 	
 	def TimingsSaved( self ):
