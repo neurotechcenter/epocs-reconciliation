@@ -149,11 +149,11 @@ class Operator( object ):
 			_BackgroundHoldExtraSec = 0,  # should be an integer multiple of BackgroundSegmentDuration
 				
 		)
-		
-		self.remote = BCI2000Remote.BCI2000Remote()
-		self.remote.Connect()
+		self.remote = None
 	
 	def Launch( self ):
+		self.remote = BCI2000Remote.BCI2000Remote()
+		self.remote.Connect()
 		if DEVEL: self.bci2000( 'execute script ../batch/run-nidaqmx.bat slave devel' )
 		else:     self.bci2000( 'execute script ../batch/run-nidaqmx.bat slave' )
 	
@@ -440,7 +440,7 @@ def FormatWithUnits( value, context=None, units='', fmt='%+g', stripZeroSign=Tru
 	return s
 
 def TimeBase( values, fs, lookback ):
-	return [ sample / fs - lookback for sample, value in enumerate( values ) ]
+	return [ float( sample ) / fs - lookback for sample, value in enumerate( values ) ]
 
 def GetVolts( value, units ):
 	if isinstance( value, ( tuple, list ) ): return value.__class__( GetVolts( x, units ) for x in value )
@@ -1213,7 +1213,7 @@ class GUI( tksuperclass, TkMPL ):
 		else: analysis_tag = '_fakebutton_analysis'
 		parent = self.widgets[ code + '_frame_footer' ]
 		frame = self.widgets[ code + '_frame_settings' ] = tkinter.Frame( parent, bg=parent[ 'bg' ] )
-		button = self.widgets[ code + analysis_tag ] = tkinter.Button( frame, text='Analysis', command = Curry( AnalysisWindow, parent=self, mode=code ) )
+		button = self.widgets[ code + analysis_tag ] = tkinter.Button( frame, text='Analysis', command = Curry( AnalysisWindow, parent=self, mode=code, geometry='parent' ) )
 		EnableWidget( button, False )
 		button.pack( side='top', ipadx=20, padx=2, pady=2, fill='both' )
 		button = self.widgets[ code + settings_tag ]    = tkinter.Button( frame, text='Settings',    command = Curry( SettingsWindow, parent=self, mode=code ) )
@@ -1343,6 +1343,9 @@ class GUI( tksuperclass, TkMPL ):
 		if old != None: self.after_cancel( old )
 		self.afterIDs[ key ] = self.after( msec, func )
 	
+	def GetRuns( self, mode ):
+		return [ self.MatchWidgets( mode, 'label', 'value', 'run' )[ 0 ][ 'text' ] ]
+	
 	def CloseWindow( self ):
 		if self.mode != None: return
 		if getattr( self, 'areyousure', False ): return
@@ -1368,7 +1371,7 @@ class GUI( tksuperclass, TkMPL ):
 			if self.operator.sessionStamp:
 				try: self.operator.WriteSettings()
 				except: pass
-			self.operator.bci2000( 'quit' )
+			if self.operator.remote: self.operator.bci2000( 'quit' )
 			
 		if getattr( self, 'afterIDs', None ):
 			for k in self.afterIDs.keys():
@@ -1504,13 +1507,14 @@ class GUI( tksuperclass, TkMPL ):
 
 class Dialog( tkinter.Toplevel ):
 	""" Modal dialog box courtesy of Fredrik Lundh: http://effbot.org/tkinterbook/tkinter-dialog-windows.htm """
-	def __init__( self, parent, title=None, icon=None, geometry=None, blocking=True ):
+	def __init__( self, parent, title=None, icon=None, geometry=None, blocking=True, modal=True ):
 
 		tkinter.Toplevel.__init__( self, parent )
-		self.transient( parent )
+		if parent and modal: self.transient( parent )
 		if title: self.title( title )
 		if icon: self.iconbitmap( icon )
-		if geometry == None: geometry = "+%d+%d" % ( parent.winfo_rootx() + 10, parent.winfo_rooty() + 30 )
+		if geometry == None and hasattr( parent, 'winfo_rootx' ):
+			geometry = "+%d+%d" % ( parent.winfo_rootx() + 10, parent.winfo_rooty() + 30 )
 		self.desired_geometry = geometry
 		self.parent = parent
 		self.result = None
@@ -1519,12 +1523,12 @@ class Dialog( tkinter.Toplevel ):
 		body.pack( side='top', fill='both', expand=True, padx=5, pady=5 )
 		self[ 'bg' ] = body[ 'bg' ]
 		self.buttonbox()
-		self.geometry( geometry )
-		self.grab_set()
+		if geometry != None: self.geometry( geometry )
+		if modal: self.grab_set()
 		if not self.initial_focus: self.initial_focus = self
 		self.protocol( "WM_DELETE_WINDOW", self.cancel )
 		self.initial_focus.focus_set()
-		if blocking: self.wait_window( self )
+		if modal and blocking: self.wait_window( self )
 
 	# construction hooks
 
@@ -1551,7 +1555,7 @@ class Dialog( tkinter.Toplevel ):
 		self.cancel()
 	def cancel(self, event=None):
 		# put focus back to the parent window
-		self.parent.focus_set()
+		if self.parent and hasattr( self.parent, 'focus_set' ): self.parent.focus_set()
 		#print self.geometry()
 		self.destroy()
 
@@ -1679,7 +1683,7 @@ class MVC( object ):
 			self.axes.set_title( '' )
 
 class ResponseOverlay( object ):
-	def __init__( self, data, fs, lookback, channel=0, axes=None, responseInterval=( .028, .035 ), comparisonInterval=None, backgroundInterval=None, color='#0000FF', updateCommand=None, rectified=False ): 
+	def __init__( self, data, fs, lookback, channel=0, axes=None, responseInterval=( .028, .035 ), comparisonInterval=None, prestimulusInterval=None, color='#0000FF', updateCommand=None, rectified=False ): 
 		# return lines, span selectors, ycon, xcon
 		if axes == None: axes = matplotlib.pyplot.gca()
 		else: matplotlib.pyplot.figure( axes.figure.number ).sca( axes )
@@ -1687,12 +1691,12 @@ class ResponseOverlay( object ):
 		axes.grid( True )
 		self.yController = AxisController( axes, 'y', units='V', start=( -0.100, +0.100 ), narrowest=( -0.0001, +0.0001 ), widest=( -20.000, +20.000 ) )
 		self.xController = AxisController( axes, 'x', units='s', start=( -0.020, +0.100 ), narrowest=( -0.002,  +0.010  ), widest=( -0.100, +0.500 ) )
-		if comparisonInterval == None: self.comparisonSelector = None
-		else:                          self.comparisonSelector = StickySpanSelector( axes, onselect=updateCommand, initial=comparisonInterval, fmt='%g', units='s', granularity=0.0001, color='#AA5500', text_verticalalignment='bottom', text_y=1.00 )
-		if backgroundInterval == None: self.backgroundSelector = None
-		else:                          self.backgroundSelector = StickySpanSelector( axes, onselect=updateCommand, initial=backgroundInterval, fmt='%g', units='s', granularity=0.0001, color='#777777', text_verticalalignment='top',    text_y=0.98 )
-		if responseInterval == None:   self.responseSelector   = None
-		else:                          self.responseSelector   = StickySpanSelector( axes, onselect=updateCommand, initial=responseInterval,   fmt='%g', units='s', granularity=0.0001, color='#008800', text_verticalalignment='top',    text_y=0.98 )
+		if comparisonInterval == None:  self.comparisonSelector  = None
+		else:                           self.comparisonSelector  = StickySpanSelector( axes, onselect=updateCommand, initial=comparisonInterval,  fmt='%g', units='s', granularity=0.0001, color='#AA5500', text_verticalalignment='bottom', text_y=1.00 )
+		if prestimulusInterval == None: self.prestimulusSelector = None
+		else:                           self.prestimulusSelector = StickySpanSelector( axes, onselect=updateCommand, initial=prestimulusInterval, fmt='%g', units='s', granularity=0.0001, color='#777777', text_verticalalignment='top',    text_y=0.98 )
+		if responseInterval == None:    self.responseSelector    = None
+		else:                           self.responseSelector    = StickySpanSelector( axes, onselect=updateCommand, initial=responseInterval,    fmt='%g', units='s', granularity=0.0001, color='#008800', text_verticalalignment='top',    text_y=0.98 )
 		self.data = data
 		self.channel = channel
 		self.fs = fs
@@ -1719,9 +1723,9 @@ class ResponseOverlay( object ):
 		else: self.axes.set_ylim( [ -ylim[ 1 ], ylim[ 1 ] ] )
 			
 	def ResponseMagnitudes( self, type='response', p2p=False ):
-		if   type == 'response':   interval = self.responseSelector.get()
-		elif type == 'comparison': interval = self.comparisonSelector.get()
-		elif type == 'background': interval = self.backgroundSelector.get()
+		if   type == 'response':    interval = self.responseSelector.get()
+		elif type == 'comparison':  interval = self.comparisonSelector.get()
+		elif type == 'prestimulus': interval = self.prestimulusSelector.get()
 		return ResponseMagnitudes( data=self.data, channel=self.channel, interval=interval, fs=self.fs, lookback=self.lookback, p2p=p2p )
 
 class RecruitmentCurve( object ):
@@ -1733,7 +1737,7 @@ class RecruitmentCurve( object ):
 		self.pooling = pooling
 		self.p2p = p2p
 		self.frame = None
-		prestimColor = self.overlay.backgroundSelector.rectprops[ 'facecolor' ]
+		prestimColor = self.overlay.prestimulusSelector.rectprops[ 'facecolor' ]
 		comparisonColor = self.overlay.comparisonSelector.rectprops[ 'facecolor' ]
 		responseColor = self.overlay.responseSelector.rectprops[ 'facecolor' ]
 		if tk:
@@ -1765,7 +1769,7 @@ class RecruitmentCurve( object ):
 			return n, pooled
 		xh, h = pool( self.overlay.ResponseMagnitudes( p2p=self.p2p, type='response'   ), self.pooling )
 		xm, m = pool( self.overlay.ResponseMagnitudes( p2p=self.p2p, type='comparison' ), self.pooling )
-		b = self.overlay.ResponseMagnitudes( p2p=self.p2p, type='background' )
+		b = self.overlay.ResponseMagnitudes( p2p=self.p2p, type='prestimulus' )
 		self.n = len( b )
 		
 		matplotlib.pyplot.figure( self.axes.figure.number ).sca( self.axes )
@@ -1793,7 +1797,7 @@ class ResponseHistogram( object ):
 		self.nbins = nbins
 		self.p2p = p2p
 		self.frame = None
-		prestimColor = self.overlay.backgroundSelector.rectprops[ 'facecolor' ]
+		prestimColor = self.overlay.prestimulusSelector.rectprops[ 'facecolor' ]
 		comparisonColor = self.overlay.comparisonSelector.rectprops[ 'facecolor' ]
 		responseColor = self.overlay.responseSelector.rectprops[ 'facecolor' ]
 		if tk:
@@ -1801,12 +1805,12 @@ class ResponseHistogram( object ):
 			if isinstance( tk, tkinter.Widget ): self.frame = tk
 			else: self.frame = tkinter.Frame( widget, bg=widget[ 'bg' ] )
 		self.panel = Bunch(
-			         n=InfoItem( 'Number\nof Trials',                  0, fmt='%g'                                     ).tk( self.frame, row=1 ),
-			background=InfoItem( 'Pre-stimulus\n(Median, Mean)',       0, fmt='%.1f', units='V', color=prestimColor    ).tk( self.frame, row=2 ),
-			comparison=InfoItem( 'Reference Response\n(Median, Mean)', 0, fmt='%.1f', units='V', color=comparisonColor ).tk( self.frame, row=3 ),
-			  response=InfoItem( 'Target Response\n(Median, Mean)',    0, fmt='%.1f', units='V', color=responseColor   ).tk( self.frame, row=4 ),
-			  uptarget=InfoItem( 'Upward\nTarget',                     0, fmt='%.1f', units='V'                        ).tk( self.frame, row=6 ),
-			downtarget=InfoItem( 'Downward\nTarget',                   0, fmt='%.1f', units='V'                        ).tk( self.frame, row=7 ),
+			          n=InfoItem( 'Number\nof Trials',                  0, fmt='%g'                                     ).tk( self.frame, row=1 ),
+			prestimulus=InfoItem( 'Pre-stimulus\n(Median, Mean)',       0, fmt='%.1f', units='V', color=prestimColor    ).tk( self.frame, row=2 ),
+			 comparison=InfoItem( 'Reference Response\n(Median, Mean)', 0, fmt='%.1f', units='V', color=comparisonColor ).tk( self.frame, row=3 ),
+			   response=InfoItem( 'Target Response\n(Median, Mean)',    0, fmt='%.1f', units='V', color=responseColor   ).tk( self.frame, row=4 ),
+			   uptarget=InfoItem( 'Upward\nTarget',                     0, fmt='%.1f', units='V'                        ).tk( self.frame, row=6 ),
+			 downtarget=InfoItem( 'Downward\nTarget',                   0, fmt='%.1f', units='V'                        ).tk( self.frame, row=7 ),
 		)
 		if self.frame:
 			self.entry = InfoItem( 'Target\nPercentile', self.targetpc, fmt='%g' ).tk( self.frame, row=5, entry=True )
@@ -1834,7 +1838,7 @@ class ResponseHistogram( object ):
 		
 		r, rSorted, rMean, rMedian = ResponseStats( 'response' )
 		c, cSorted, cMean, cMedian = ResponseStats( 'comparison' )
-		b, bSorted, bMean, bMedian = ResponseStats( 'background' )
+		b, bSorted, bMean, bMedian = ResponseStats( 'prestimulus' )
 		n = len( r )
 		targets = Quantile( rSorted, ( self.targetpc / 100.0, 1.0 - self.targetpc / 100.0 ), alreadySorted=True )
 		downtarget, uptarget = max( targets ), min( targets )
@@ -1848,25 +1852,27 @@ class ResponseHistogram( object ):
 		vals = [ downtarget, uptarget, rMean ]
 		self.downline, self.upline, self.meanline = matplotlib.pyplot.plot( [ vals, vals ], [ [ 0 for v in vals ], [ 1 for v in vals ] ], color='#FF0000', linewidth=4, alpha=0.5, transform=self.axes.get_xaxis_transform() )
 		self.panel.n.set( n )
-		self.panel.background.set( [ bMedian, bMean ] )
-		self.panel.comparison.set( [ cMedian, cMean ] )
-		self.panel.response.set(   [ rMedian, rMean ] )
+		self.panel.prestimulus.set( [ bMedian, bMean ] )
+		self.panel.comparison.set(  [ cMedian, cMean ] )
+		self.panel.response.set(    [ rMedian, rMean ] )
 		self.panel.uptarget.set( uptarget )
 		self.panel.downtarget.set( downtarget )
 		
 
 class AnalysisWindow( Dialog, TkMPL ):
 	
-	def __init__( self, parent, mode ):
+	def __init__( self, parent, mode, geometry=None, modal=True, online=True ):
 		self.mode = mode
 		self.channel = 0 # first EMG channel
 		self.data = parent.data[ mode ]
-		self.runs = [ parent.MatchWidgets( mode, 'label', 'value', 'run' )[ 0 ][ 'text' ] ]
+		self.runs = parent.GetRuns( mode )
 		self.acceptMode = None
+		self.online = online
 		TkMPL.__init__( self )
-		Dialog.__init__( self, parent=parent, title='%s Analysis' % parent.modenames[ mode ], icon=os.path.join( GUIDIR, 'epocs.ico' ), geometry=parent.geometry(), blocking=not DEVEL )
-		if DEVEL: self.parent.child = self
-		# NB: Dialog.__init__ will not return until the dialog is destroyed
+		if geometry == 'parent': geometry = parent.geometry()
+		Dialog.__init__( self, parent=parent, title='%s Analysis' % parent.modenames[ mode ], icon=os.path.join( GUIDIR, 'epocs.ico' ), geometry=geometry, blocking=not DEVEL, modal=modal )
+		# NB: if blocking=True, Dialog.__init__ will not return until the dialog is destroyed
+		if DEVEL: self.parent.child = self  # only do this during DEVEL because it creates a mutual reference loop and hence a memory leak
 		
 	def buttonbox( self ): # override default OK + cancel buttons (and <Return> key binding)
 		pass
@@ -1892,14 +1898,14 @@ class AnalysisWindow( Dialog, TkMPL ):
 		if self.overlay.comparisonSelector:
 			start, end = [ sec * 1000.0 for sec in self.overlay.comparisonSelector.get() ]
 			if not equal( params._ComparisonStartMsec[ 0 ], start ) or not equal( params._ComparisonEndMsec[ 0 ], end ): result = False
-		if self.overlay.backgroundSelector:
-			start, end = [ sec * 1000.0 for sec in self.overlay.backgroundSelector.get() ]
+		if self.overlay.prestimulusSelector:
+			start, end = [ sec * 1000.0 for sec in self.overlay.prestimulusSelector.get() ]
 			if not equal( params._PrestimulusStartMsec[ 0 ], start ) or not equal( params._PrestimulusEndMsec[ 0 ], end ): result = False
 		return result
 	
 	def PersistTimings( self ):
-		if self.overlay.backgroundSelector:
-			start, end = [ sec * 1000.0 for sec in self.overlay.backgroundSelector.get() ]
+		if self.overlay.prestimulusSelector:
+			start, end = [ sec * 1000.0 for sec in self.overlay.prestimulusSelector.get() ]
 			self.parent.operator.Set( _PrestimulusStartMsec=[ start, start ], _PrestimulusEndMsec=[ end, end ] )
 			self.parent.Log( 'Updated pre-stimulus interval: %g to %g msec' % ( start, end ) )
 		if self.overlay.comparisonSelector:
@@ -1951,7 +1957,7 @@ class AnalysisWindow( Dialog, TkMPL ):
 			w = self.widgets.mvc_button_log = tkinter.Button( header, text='Log Results', command=Curry( self.Log, type='mvc' ) ); w.pack( side='right' )
 			
 			figure, widget, container = self.NewFigure( parent=frame, prefix='an', suffix='main', width=figwidth, height=figheight )
-			self.mvc = MVC( self.data, fs=self.parent.fs / self.parent.sbs, callback=self.Changed )
+			self.mvc = MVC( self.data, fs=float( self.parent.fs ) / self.parent.sbs, callback=self.Changed )
 			self.widgets.an_xadjust_mvc = PlusMinusTk( frame, controllers=self.mvc.xcon ).place( in_=widget, relx=0.92, rely=0.06, width=40, height=20, anchor='se' )
 			
 			header.grid( row=1, column=1, sticky='nsew', padx=5, pady=2 )
@@ -1975,18 +1981,18 @@ class AnalysisWindow( Dialog, TkMPL ):
 			
 			figure, widget, container = self.NewFigure( parent=tabframe, prefix='overlay', suffix='main', width=figwidth, height=fighalfheight )
 			axes = self.overlay_axes_main = figure.gca()
-			responseInterval   = self.parent.operator.params._ResponseStartMsec[ self.channel ] / 1000.0, self.parent.operator.params._ResponseEndMsec[ self.channel ] / 1000.0
-			comparisonInterval = self.parent.operator.params._ComparisonStartMsec[ self.channel ] / 1000.0, self.parent.operator.params._ComparisonEndMsec[ self.channel ] / 1000.0
-			backgroundInterval = self.parent.operator.params._PrestimulusStartMsec[ self.channel ] / 1000.0, self.parent.operator.params._PrestimulusEndMsec[ self.channel ] / 1000.0
-			#if self.mode not in [ 'rc' ]: comparisonInterval = backgroundInterval = None
+			responseInterval    = self.parent.operator.params._ResponseStartMsec[ self.channel ] / 1000.0, self.parent.operator.params._ResponseEndMsec[ self.channel ] / 1000.0
+			comparisonInterval  = self.parent.operator.params._ComparisonStartMsec[ self.channel ] / 1000.0, self.parent.operator.params._ComparisonEndMsec[ self.channel ] / 1000.0
+			prestimulusInterval = self.parent.operator.params._PrestimulusStartMsec[ self.channel ] / 1000.0, self.parent.operator.params._PrestimulusEndMsec[ self.channel ] / 1000.0
+			#if self.mode not in [ 'rc' ]: comparisonInterval = prestimulusInterval = None
 			self.overlay = ResponseOverlay(
 				data=self.data, channel=self.channel, 
 				fs=self.parent.fs, lookback=self.parent.lookback,
 				axes=axes, color=self.colors[ 'emg%d' % ( self.channel + 1 ) ],
-				responseInterval=responseInterval, comparisonInterval=comparisonInterval, backgroundInterval=backgroundInterval,
+				responseInterval=responseInterval, comparisonInterval=comparisonInterval, prestimulusInterval=prestimulusInterval,
 				updateCommand=self.Changed,
 			)
-			self.overlay.yController.set( self.parent.axiscontrollers_emg1[ -1 ].get() )
+			if len( self.parent.axiscontrollers_emg1 ): self.overlay.yController.set( self.parent.axiscontrollers_emg1[ -1 ].get() )
 			self.parent.axiscontrollers_emg1.append( self.overlay.yController )
 			self.widgets.overlay_yadjust = PlusMinusTk( parent=tabframe, controllers=self.parent.axiscontrollers_emg1 ).place( in_=widget, width=20, height=40, relx=0.93, rely=0.25, anchor='w' )
 			self.widgets.overlay_xadjust = PlusMinusTk( parent=tabframe, controllers=self.overlay.xController         ).place( in_=widget, width=40, height=20, relx=0.92, rely=0.05, anchor='se' )
@@ -2046,8 +2052,10 @@ class AnalysisWindow( Dialog, TkMPL ):
 				vcmd = ( self.register( self.TargetPCEntry ), '%s', '%P' )
 				self.hist.entry.widgets.value.configure( width=3, validatecommand=vcmd, validate='key' )
 
-				w = self.widgets.distribution_button_upcondition   = tkinter.Button( self.hist.frame, text="Up-Condition",   width=10, command=self.ok_up   ); w.grid( row=6, column=3, sticky='nsew', padx=1, pady=1, ipadx=16 )
-				w = self.widgets.distribution_button_downcondition = tkinter.Button( self.hist.frame, text="Down-Condition", width=10, command=self.ok_down ); w.grid( row=7, column=3, sticky='nsew', padx=1, pady=1, ipadx=16 )
+				w = self.widgets.distribution_button_upcondition   = tkinter.Button( self.hist.frame, text="Up-Condition",   width=10, command=self.ok_up   )
+				if self.online: w.grid( row=6, column=3, sticky='nsew', padx=1, pady=1, ipadx=16 )
+				w = self.widgets.distribution_button_downcondition = tkinter.Button( self.hist.frame, text="Down-Condition", width=10, command=self.ok_down )
+				if self.online: w.grid( row=7, column=3, sticky='nsew', padx=1, pady=1, ipadx=16 )
 
 				#header.pack( side='top', fill='both', expand=1 )
 				#container.pack( fill='both', expand=1 )
@@ -2118,7 +2126,7 @@ class AnalysisWindow( Dialog, TkMPL ):
 			if self.recruitment.p2p: metric = 'peak-to-peak'
 			else: metric = 'average rectified signal'
 			self.parent.Log( 'From %d measurements, pooled in groups of %d:' % ( self.recruitment.n, self.recruitment.pooling ) )
-			start, end = [ sec * 1000.0 for sec in self.overlay.backgroundSelector.get() ]
+			start, end = [ sec * 1000.0 for sec in self.overlay.prestimulusSelector.get() ]
 			meanPrestim = self.recruitment.panel.bg.str()
 			self.parent.Log( '   Mean pre-stimulus activity (%g to %g msec) = %s (%s)' % ( start, end, meanPrestim, metric ) )
 			start, end = [ sec * 1000.0 for sec in self.overlay.comparisonSelector.get() ]
@@ -2130,7 +2138,7 @@ class AnalysisWindow( Dialog, TkMPL ):
 		elif type == 'distribution':
 			start, end = [ sec * 1000.0 for sec in self.overlay.responseSelector.get() ]
 			self.parent.Log( 'From %s trials using target response interval from %g to %gmsec and aiming at percentile %s: ' % ( self.hist.panel.n.str(), start, end, self.hist.entry.str() ) )
-			self.parent.Log( '   pre-stimulus activity (median, mean) = %s' % self.hist.panel.background.str() )
+			self.parent.Log( '   pre-stimulus activity (median, mean) = %s' % self.hist.panel.prestimulus.str() )
 			self.parent.Log( '   reference response    (median, mean) = %s' % self.hist.panel.comparison.str() )
 			self.parent.Log( '   target response       (median, mean) = %s' % self.hist.panel.response.str() )
 			self.parent.Log( '   upward target = %s' % self.hist.panel.uptarget.str() )
@@ -2163,7 +2171,12 @@ class InfoItem( TkMPL ):
 		self.units = units
 		self.color = color
 	def str( self, value=None, appendUnits=True ): # do not call this  __str__ : in Python 2.5, that gives a unicode conversion error when there's a microVolt symbol in the string
-		if value == None: value = self.value
+		if value == None:
+			if self.widgets.get( 'variable', None ):
+				self.value = self.widgets.variable.get()
+				try: self.value = float( self.value )
+				except: pass
+			value = self.value
 		if isinstance( value, ( tuple, list ) ): return ', '.join( self.str( value=v, appendUnits=appendUnits ) for v in value )
 		return FormatWithUnits( value, units=self.units, fmt=self.fmt, appendUnits=appendUnits )
 	def tk( self, parent, row, entry=False ):
@@ -2542,11 +2555,88 @@ class SubjectChooser( tkinter.Frame ):
 		else: return  'about %d years ago' % round( years )
 
 ################
+
+OFFLINE_ROOT = None		
+class OfflineAnalysis( object ):
+	"""
+	TODO:
+		read self.data, self.mode, self.runs, self.fs, self.sbs, and self.lookback from chosen .dat file(s)
+		no up-condition and down-condition buttons
+		load subject-specific config from file last used by online system
+		load & save subject-specific config to/from separate offline file
+	"""
+	def __init__( self, data='ExampleData.pk', mode='tt' ):
+
+		if isinstance( data, basestring ) and data.lower().endswith( '.pk' ):
+			import pickle; self.data = Bunch( pickle.load( open( data, 'rb' ) ) )
+		else: self.data = { mode : data }
+		self.mode = mode
+		self.operator = Operator()
+		self.inifile = os.path.join( GUIDIR, 'epocs.ini' )
+		if os.path.isfile( self.inifile ):
+			self.operator.Set( **eval( open( self.inifile, 'rt' ).read() ) )
+		self.modenames = Bunch( st='Stimulus Test', vc='Voluntary Contraction', rc='Recruitment Curve', ct='Control Trials', tt='Training Trials' )
+		self.axiscontrollers_emg1 = []
+		self.fs = 1600.0 # TODO
+		self.sbs = 64.0 # TODO
+		self.lookback = 0.1 # TODO
+		self.runs = [ '???' ] # TODO
+		
+		self.logtext = ''
+		self.logfile = sys.stdout
+		
+		global OFFLINE_ROOT
+		if OFFLINE_ROOT == None:
+			try: tkinter.ALLWINDOWS
+			except: tkinter.ALLWINDOWS = []
+			while len( tkinter.ALLWINDOWS ):
+				try: tkinter.ALLWINDOWS.pop( 0 ).destroy()
+				except: pass
+			OFFLINE_ROOT = tksuperclass()
+			OFFLINE_ROOT.option_add( '*Font', 'TkDefaultFont 13' )
+			OFFLINE_ROOT.option_add( '*Label*Font', 'TkDefaultFont 13' )
+			OFFLINE_ROOT.withdraw()
+			tkinter.ALLWINDOWS.append( OFFLINE_ROOT )
+		self.tkparent = OFFLINE_ROOT
+		
+		# There now follows some furious duck-typing to deal with the fact that the AnalysisWindow
+		# refers to its "parent" for two distinct types of information: Tk GUI info (used during
+		# tkinter-specific __init__ and methods of the Dialog base-class) and info about the analysis
+		# to be carried out.   The Tk GUI parent is a jealous god: there can be only one (hence the
+		# use of a single global OFFLINE_ROOT above). But we want to allow for the possibility of
+		# multiple analysis cases in memory at the same time (i.e. multiple instances of the
+		# OfflineAnalysis class, each spawning a window).  A better but more invasive solution would
+		# have be to re-write the AnalysisWindow class so that it explicitly acknowledges the two
+		# different types of "parent" and does not confuse them. 
+		
+		# These are things that are required because they seem to be used in tkinter code:
+		for field in 'tk _w children master iconname title'.split(): setattr( self, field, getattr( self.tkparent, field ) )
+		# And these are things that are knowingly used in the AnalysisWindow code:
+		for field in 'after after_cancel'.split(): setattr( self, field, getattr( self.tkparent, field ) )
+	
+		a = AnalysisWindow( parent=self, mode=self.mode, modal=False, online=False, geometry='+0+0' )
+		if DEVEL: self.child = a # only do this during DEVEL because it creates a mutual reference loop and hence a memory leak
+		
+	def GetRuns( self, mode ): return self.runs
+				
+	def Log( self, text, datestamp=True ):
+		if datestamp: stamp = self.operator.FriendlyDate( time.time() ) + '       '
+		else: stamp = ''
+		text = stamp + text + '\n'
+		if len( self.logtext ) and not self.logtext.endswith( '\n' ): self.logtext += '\n'
+		self.logtext += text
+		if self.logfile: self.logfile.write( text ) # TODO	
+	
+	# vestigial duck traits (actually these should never even be called, if the up-conditioning and down-conditioning buttons are not made visible)
+	def SetBarLimits( self, *pargs, **kwargs ): pass
+	def SetTarget( self, *pargs, **kwargs ): pass
+	
+
 if __name__ == '__main__':
 	
 	args = getattr( sys, 'argv', [] )[ 1: ]
 	import getopt
-	opts, args = getopt.getopt( args, '', [ 'log=', 'devel' ] )
+	opts, args = getopt.getopt( args, '', [ 'log=', 'devel', 'debug' ] )
 	opts = dict( opts )
 	log = opts.get( '--log', None )
 	if log:
@@ -2554,7 +2644,8 @@ if __name__ == '__main__':
 		logDir = os.path.split( log )[ 0 ]
 		if not os.path.isdir( logDir ): os.mkdir( logDir )
 		sys.stdout = sys.stderr = open( log, 'wt', 0 )
-	if '--devel' in opts: DEVEL = True
+	if '--devel' in opts: DEVEL = True  # use FilePlayback as signal source, and load example data at launch for easy test of analysis window
+	if '--debug' in opts: DEBUG = True  # print debug messages to the system log (independent of whether we're in FilePlayback mode)
 	
 	try: tkinter.ALLWINDOWS
 	except: tkinter.ALLWINDOWS = []
@@ -2567,6 +2658,7 @@ if __name__ == '__main__':
 		flush( 'matplotlib ' + str( matplotlib.__version__ ) )
 		flush( tkinter.__name__ + ' ' + str( tkinter.__version__ ) )
 		if 'ttk' in sys.modules: flush( 'ttk ' + str( ttk.__version__ ) )
+		else: flush( 'no ttk (must be using Tix)' )
 	
 	self = GUI()
 	#self.operator.remote.WindowVisible = 1
