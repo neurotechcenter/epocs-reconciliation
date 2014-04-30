@@ -1598,7 +1598,8 @@ class ScrolledText( tkinter.Frame ):
 		if self.filename == None: return
 		text = self.gettext()
 		if text == self.saved: return
-		open( self.filename, 'wt' ).write( text )
+		encoded = text.encode( 'utf-8' )
+		open( self.filename, 'wt' ).write( encoded )
 		self.text.edit_separator()
 		self.saved = text
 	def destroy( self ):
@@ -1607,7 +1608,7 @@ class ScrolledText( tkinter.Frame ):
 		tkinter.Frame.destroy( self )
 	def load( self, filename ):
 		self.autosave()
-		text = open( filename, 'rt' ).read()
+		text = open( filename, 'rt' ).read().decode( 'utf-8' )
 		self.saved = text
 		self.filename = filename
 		self.settext( text )
