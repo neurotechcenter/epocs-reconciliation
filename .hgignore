@@ -6,5 +6,6 @@ app/prog/Operator.ini
 *.pyc
 system-logs
 *.psftp
+scraps/make-icon/epocs_icon.*
 syntax: regexp
 data/(?!sample)

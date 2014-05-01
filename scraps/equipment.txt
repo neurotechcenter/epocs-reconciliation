@@ -1,3 +1,4 @@
+
 Natus:
 	Grass P511 high-performance EMG/EEG amplifiers    2    $2090    $4180
 	RPS312RM Medical grade power supply               1     $670     $670 
@@ -35,3 +36,6 @@ Shipping                                                            ~$300
 
 
                                                                   ~$18000
+
+
+# VS2010 reg key 6VPJ7-H3CXH-HBTPT-X4T74-3YVY7
