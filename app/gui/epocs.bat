@@ -2,4 +2,4 @@
 @set PYTHONHOME=%PYTHONHOME_EPOCS%
 @set PATH=%PYTHONHOME%;%PATH%
 :skipconfig
-@start pythonw epocs.py --log=../../system-logs/epocs-log-###.txt
+@start pythonw epocs.py --log=../../system-logs/###-python.txt

@@ -2640,8 +2640,9 @@ if __name__ == '__main__':
 	opts, args = getopt.getopt( args, '', [ 'log=', 'devel', 'debug' ] )
 	opts = dict( opts )
 	log = opts.get( '--log', None )
+	os.environ[ 'EPOCSTIMESTAMP' ] = time.strftime( '%Y%m%d-%H%M%S' )
 	if log:
-		log = log.replace( '###', time.strftime( '%Y%m%d-%H%M%S' ) )
+		log = log.replace( '###', os.environ[ 'EPOCSTIMESTAMP' ] )
 		logDir = os.path.split( log )[ 0 ]
 		if not os.path.isdir( logDir ): os.mkdir( logDir )
 		sys.stdout = sys.stderr = open( log, 'wt', 0 )
@@ -2668,4 +2669,13 @@ if __name__ == '__main__':
 		except: pass
 		else: [ EnableWidget( self.MatchWidgets( mode, 'button', 'analysis' ), len( self.data[ mode ] ) ) for mode in self.data ]
 	if self.ready: self.Loop()
-	if log and sys.stdout.tell() == 0: sys.stdout.close(); os.remove( log )
+	if log:
+		# remove the python log if it is empty
+		if sys.stdout.tell() == 0: sys.stdout.close(); os.remove( log )
+		# remove the operator log if it's there and if it doesn't contain the words "warning", "error" or "exception"
+		logDir, logName = os.path.split( log )
+		operatorLog = os.path.join( logDir, os.environ[ 'EPOCSTIMESTAMP' ] + '-operator.txt' )
+		if os.path.isfile( operatorLog ):
+			content = open( operatorLog, 'rt' ).read().lower()
+			if 'warning' not in content and 'error' not in content and 'exception' not in content: os.remove( operatorLog )
+

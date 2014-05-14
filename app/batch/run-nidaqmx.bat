@@ -7,12 +7,16 @@ system taskkill /F /FI "IMAGENAME eq ReflexConditioningSignalProcessing.exe"
 system taskkill /F /FI "IMAGENAME eq DummyApplication.exe"
 
 change directory $BCI2000LAUNCHDIR
+
 set environment MODE master 
 if [ $1 ]; set environment MODE $1; end
 if [ $MODE == master ]; show window; end
+
 set title ${extract file base $0}
 reset system
-startup system localhost
+
+if [ $EPOCSTIMESTAMP == "" ]; set environment EPOCSTIMESTAMP $YYYYMMDD-$HHMMSS; end
+startup system localhost --SystemLogFile=../../system-logs/$EPOCSTIMESTAMP-operator.txt
 
 set environment DEVEL $2
 
