@@ -14,7 +14,7 @@ TODO
 	NB: assuming background is in range, time between triggers actually seems to come out to MinTimeBetweenTriggers + 1 sample block
 """
 
-import os, sys, time, math, re, threading
+import os, sys, time, math, re, threading, glob
 import mmap, struct
 import inspect
 import Tkinter as tkinter
@@ -36,6 +36,7 @@ BCI2000LAUNCHDIR = os.path.abspath( os.path.join( GUIDIR, '../prog' ) )
 if not os.path.isfile( os.path.join( BCI2000LAUNCHDIR, 'BCI2000Remote.py' ) ): raise ImportError( 'could not find the prog directory containing BCI2000Remote.py' )
 if BCI2000LAUNCHDIR not in sys.path: sys.path.append( BCI2000LAUNCHDIR )
 import BCI2000Remote
+
 
 def flush( s ): sys.stdout.write( str( s ) + '\n' ); sys.stdout.flush()
 
@@ -80,6 +81,10 @@ def MakeWayFor( filepath ):
 	if len( parent ) and not os.path.isdir( parent ): os.makedirs( parent )
 	return filepath
 
+def ReadDict( filename ):
+	if not os.path.isfile( filename ): return {}
+	return eval( open( filename, 'rt' ).read() )
+
 def WriteDict( d, filename, *fields ):
 	if len( fields ): d = dict( ( k, v ) for k, v in d.items() if k in fields )
 	file = open( MakeWayFor( filename ), 'wt' )
@@ -87,6 +92,14 @@ def WriteDict( d, filename, *fields ):
 	for k, v in sorted( d.items() ): file.write( '\t%s : %s,\n' % ( repr( k ), repr( v ) ) )
 	file.write( '}\n' )
 	file.close()
+
+def TryFilePath( *alternatives ):
+	for alternative in alternatives:
+		results = sorted( glob.glob( alternative ) )
+		if len( results ) > 1: raise IOError( 'multiple matches for "%s"' % alternative )
+		if len( results ) == 1: return results[ 0 ]
+	if len( alternatives ) == 0: return None
+	raise IOError( 'could not find a match for "%s"' % alternatives[ 0 ] )
 
 class Operator( object ):
 	def __init__( self ):
@@ -160,31 +173,33 @@ class Operator( object ):
 	def DataRoot( self ):
 		return ResolveDirectory( self.params.DataDirectory, BCI2000LAUNCHDIR )
 	
-	def SettingsFile( self, subjectName=None ):
-		if subjectName == None: subjectName = self.params.SubjectName
-		if not subjectName: return ''
-		return os.path.join( self.DataRoot(), subjectName, subjectName + '-LastSettings.txt' )
-
 	def Subjects( self ):
 		dataRoot = self.DataRoot()
 		if not os.path.isdir( dataRoot ): return []
-		return [ x for x in os.listdir( dataRoot ) if os.path.isfile( self.SettingsFile( x ) ) ]
+		return [ x for x in os.listdir( dataRoot ) if os.path.isfile( self.SubjectSettingsFile( x ) ) ]
 			
-	def ReadSettings( self, subjectName=None ):
-		filename = self.SettingsFile( subjectName )
+	def SubjectSettingsFile( self, subjectName=None, suffix='' ):
+		if subjectName == None: subjectName = self.params.SubjectName
+		if not subjectName: return ''
+		return os.path.join( self.DataRoot(), subjectName, subjectName + '-LastSettings' + suffix + '.txt' )
+
+	def ReadSubjectSettings( self, subjectName=None, suffix='' ):
+		if subjectName == None: subjectName = self.params.SubjectName
+		filename = self.SubjectSettingsFile( subjectName, suffix=suffix )
 		if not os.path.isfile( filename ): return { 'SubjectName': subjectName }
-		return eval( open( filename, 'rt' ).read() )
+		return ReadDict( filename )
 	
-	def LoadSettings( self, subjectName=None, newSession=False ):
-		self.Set( **self.ReadSettings( subjectName ) )
+	def LoadSubjectSettings( self, subjectName=None, newSession=False, suffix='' ):
+		self.Set( **self.ReadSubjectSettings( subjectName, suffix=suffix ) )
 		if newSession: self.Set( SessionStamp=time.time() )
 		
-	def WriteSettings( self ):
+	def WriteSubjectSettings( self, subjectName=None, suffix='' ):
 		d = dict( ( k, v ) for k, v in self.params.items() if k in 'SubjectName SessionStamp'.split() or k.startswith( '_' ) )
-		WriteDict( d, self.SettingsFile() )
+		WriteDict( d, self.SubjectSettingsFile( subjectName=subjectName, suffix=suffix ) )
 
-	def LastSessionStamp( self, subjectName ):
-		record = self.ReadSettings( subjectName )
+	def LastSessionStamp( self, subjectName=None ):
+		if subjectName == None: subjectName = self.params.SubjectName
+		record = self.ReadSubjectSettings( subjectName )
 		try: return time.mktime( time.strptime( record[ 'SessionStamp' ], self.dateFormat ) )
 		except: return 0
 
@@ -239,7 +254,7 @@ class Operator( object ):
 		s = '${DataDirectory}/' + self.params.DataFile
 		for k, v in self.params.items():
 			match = '${%s}' % k
-			if match in s: s = s.replace( match, v )
+			if match in s: s = s.replace( match, str( v ) )
 		d = os.path.split( s )[ 0 ]
 		return ResolveDirectory( d, BCI2000LAUNCHDIR )
 	
@@ -261,7 +276,7 @@ class Operator( object ):
 				if cleaned == '': raise ValueError( 'invalid subject name "%s"' % value )
 				else: value = cleaned
 			if key == 'SessionStamp':
-				if isinstance( value, float ): value = time.strftime( self.dateFormat, time.localtime( value ) )
+				if isinstance( value, ( int, float ) ): value = time.strftime( self.dateFormat, time.localtime( value ) )
 			if value != old:
 				if self.started: raise RuntimeError( "must call Stop() method first" )
 				self.needSetConfig = True
@@ -359,7 +374,7 @@ class Operator( object ):
 			self.bci2000( 'wait for Connected|ParamsModified 5' )
 			self.bci2000( 'setconfig' )
 			self.needSetConfig = False
-		self.WriteSettings()
+		self.WriteSubjectSettings()
 		
 		
 	def Stop( self ):
@@ -976,7 +991,9 @@ class TkMPL( object ):
 		tabName = whichTab + '_tab'
 		if 'ttk' in sys.modules: self.widgets[ nbname ].select( self.widgets[ tabName ] )
 		else: self.widgets[ nbname ].raise_page( tabName )
-		
+
+MODENAMES = Bunch( st='Stimulus Test', vc='Voluntary Contraction', rc='Recruitment Curve', ct='Control Trials', tt='Training Trials', mixed='Mixed' )
+
 class GUI( tksuperclass, TkMPL ):
 	
 	def __init__( self, operator=None ):
@@ -1032,8 +1049,7 @@ class GUI( tksuperclass, TkMPL ):
 		self.operator = operator
 		
 		self.inifile = os.path.join( GUIDIR, 'epocs.ini' )
-		if os.path.isfile( self.inifile ):
-			self.operator.Set( **eval( open( self.inifile, 'rt' ).read() ) )		
+		self.operator.Set( **ReadDict( self.inifile ) )
 		
 		if DEVEL: self.bind( "<Escape>", self.destroy )
 		if not SubjectChooser( self, initialID=self.operator.params.SubjectName ).successful: self.destroy(); return		
@@ -1051,7 +1067,7 @@ class GUI( tksuperclass, TkMPL ):
 				
 		self.MakeNotebook().pack( expand=1, fill='both', padx=5, pady=5 ,side='top' )
 		
-		self.modenames = Bunch( st='Stimulus Test', vc='Voluntary Contraction', rc='Recruitment Curve', ct='Control Trials', tt='Training Trials' )
+		self.modenames = MODENAMES
 		
 		v = self.operator.params._TraceLimitVolts
 		self.axiscontrollers_emg1 = []
@@ -1369,7 +1385,7 @@ class GUI( tksuperclass, TkMPL ):
 			con2 = getattr( self, 'axiscontrollers_emg2', [ None ] )[ 0 ]
 			if con2: self.operator.params._TraceLimitVolts[ 1 ] = max( con2.get() )
 			if self.operator.sessionStamp:
-				try: self.operator.WriteSettings()
+				try: self.operator.WriteSubjectSettings()
 				except: pass
 			if self.operator.remote: self.operator.bci2000( 'quit' )
 			
@@ -2529,11 +2545,11 @@ class SubjectChooser( tkinter.Frame ):
 			self.ValidateKeyPress( '1', 'a', value )
 		
 	def NewSession( self ):
-		self.parent.operator.LoadSettings( self.subjectVar.get(), newSession=True )
+		self.parent.operator.LoadSubjectSettings( self.subjectVar.get(), newSession=True )
 		self.ok()
 		
 	def ContinueSession( self ): 
-		self.parent.operator.LoadSettings( self.subjectVar.get(), newSession=False )
+		self.parent.operator.LoadSubjectSettings( self.subjectVar.get(), newSession=False )
 		self.ok()
 	
 	def InformalTime(self, then, now ):
@@ -2562,22 +2578,23 @@ class OfflineAnalysis( object ):
 	"""
 	TODO:
 		read self.data, self.mode, self.runs, self.fs, self.sbs, and self.lookback from chosen .dat file(s)
-		no up-condition and down-condition buttons
 		load subject-specific config from file last used by online system
 		load & save subject-specific config to/from separate offline file
 	"""
-	def __init__( self, data='ExampleData.pk', mode='tt' ):
+	def __init__( self, data='ExampleData.pk', mode='tt' ):  # TODO: axe ExampleData.pk
 
 		if isinstance( data, basestring ) and data.lower().endswith( '.pk' ):
 			import pickle; self.data = Bunch( pickle.load( open( data, 'rb' ) ) )
 		else: self.data = { mode : data }
 		self.mode = mode
 		self.operator = Operator()
-		self.inifile = os.path.join( GUIDIR, 'epocs.ini' )
-		if os.path.isfile( self.inifile ):
-			self.operator.Set( **eval( open( self.inifile, 'rt' ).read() ) )
-		self.modenames = Bunch( st='Stimulus Test', vc='Voluntary Contraction', rc='Recruitment Curve', ct='Control Trials', tt='Training Trials' )
+		self.online_inifile  = os.path.join( GUIDIR, 'epocs.ini' );   self.operator.Set( **ReadDict( self.online_inifile  ) )
+		self.offline_inifile = os.path.join( GUIDIR, 'offline.ini' ); self.operator.Set( **ReadDict( self.offline_inifile ) )
+		self.SetSubject()
+		
+		self.modenames = MODENAMES
 		self.axiscontrollers_emg1 = []
+		
 		self.fs = 1600.0 # TODO
 		self.sbs = 64.0 # TODO
 		self.lookback = 0.1 # TODO
@@ -2599,7 +2616,6 @@ class OfflineAnalysis( object ):
 			OFFLINE_ROOT.withdraw()
 			tkinter.ALLWINDOWS.append( OFFLINE_ROOT )
 		self.tkparent = OFFLINE_ROOT
-		
 		# There now follows some furious duck-typing to deal with the fact that the AnalysisWindow
 		# refers to its "parent" for two distinct types of information: Tk GUI info (used during
 		# tkinter-specific __init__ and methods of the Dialog base-class) and info about the analysis
@@ -2607,19 +2623,102 @@ class OfflineAnalysis( object ):
 		# use of a single global OFFLINE_ROOT above). But we want to allow for the possibility of
 		# multiple analysis cases in memory at the same time (i.e. multiple instances of the
 		# OfflineAnalysis class, each spawning a window).  A better but more invasive solution would
-		# have be to re-write the AnalysisWindow class so that it explicitly acknowledges the two
+		# have been to re-write the AnalysisWindow class so that it explicitly acknowledges the two
 		# different types of "parent" and does not confuse them. 
 		
 		# These are things that are required because they seem to be used in tkinter code:
 		for field in 'tk _w children master iconname title'.split(): setattr( self, field, getattr( self.tkparent, field ) )
 		# And these are things that are knowingly used in the AnalysisWindow code:
 		for field in 'after after_cancel'.split(): setattr( self, field, getattr( self.tkparent, field ) )
+		# see also methods below
 	
+	def __repr__( self ):
+		s = object.__repr__( self ) + ':'
+		for k, v in sorted( self.operator.params.items() ): s += '\n%50s = %s' % ( k, repr( v ) )
+		return s
+		
+	def SetSubject( self, subjectName=None, sessionStamp=None ):
+		fmt = self.operator.dateFormat
+		def DecodeSessionStamp( subdir, parent=None ):
+			if subdir in [ 0, None, '' ]: return 0
+			if parent != None and not os.path.isdir( os.path.join( parent, subdir ) ): return 0
+			n = len( time.strftime( fmt, time.localtime( 0 ) ) )
+			try: return time.mktime( time.strptime( os.path.split( subdir )[ -1 ][ -n : ], fmt ) )
+			except: return 0
+		if subjectName == None: subjectName = self.operator.params.SubjectName
+		self.operator.Set( SubjectName=subjectName )
+		if sessionStamp != None: self.operator.Set( SessionStamp=sessionStamp )
+		if not DecodeSessionStamp( self.operator.params.SessionStamp ):
+			self.operator.Set( SessionStamp=self.operator.LastSessionStamp() )
+		if not DecodeSessionStamp( self.operator.params.SessionStamp ):
+			d = os.path.realpath( os.path.join( self.operator.DataDirectory(), '..' ) )
+			last = max( [ 0 ] + [ DecodeSessionStamp( x, d ) for x in os.listdir( d ) ] )
+			self.operator.Set( SessionStamp=time.strftime( fmt, time.localtime( last ) ) )
+		self.operator.Set( **self.operator.ReadSubjectSettings( suffix='' ) )
+		self.operator.Set( **self.operator.ReadSubjectSettings( suffix='-Offline' ) )
+		
+	def Go( self ):
 		a = AnalysisWindow( parent=self, mode=self.mode, modal=False, online=False, geometry='+0+0' )
 		if DEVEL: self.child = a # only do this during DEVEL because it creates a mutual reference loop and hence a memory leak
+		return a
 		
-	def GetRuns( self, mode ): return self.runs
-				
+	def ListDatFiles( self ):
+		return sorted( glob.glob( os.path.join( self.operator.DataDirectory(), '*.dat' ) ) )
+		
+	def ReadDatFile( self, filename, **kwargs ):
+		import BCPy2000.Paths
+		from BCI2000Tools.Chain import bci2000root, bci2000chain  # also imports BCI2000Tools.Parameters as a central component and SigTools for a few things
+		import SigTools
+		if bci2000root() == None: bci2000root( os.path.join( BCI2000LAUNCHDIR, '..' ) )
+		filename = TryFilePath( filename, os.path.join( self.operator.DataDirectory(), filename ) )
+		self.Log( 'reading ' + filename )
+		s = bci2000chain( filename, 'IIRBandpass', **kwargs )
+		try: trigIndex = s.Parms.ChannelNames.Value.index( s.Parms.TriggerChannel.Value )
+		except ValueError: trigIndex = s.Parms.TriggerChannel.NumericValue - 1
+		p = s.ImportantParameters = Bunch(
+			lookback    = s.Parms.LookBack.ScaledValue / 1000.0,
+			lookforward = s.Parms.LookForward.ScaledValue / 1000.0,
+			fs          = s.Parms.SamplingRate.ScaledValue,
+			sbs         = s.Parms.SampleBlockSize.NumericValue,
+			subject     = s.Parms.SubjectName.Value,
+			run         = 'R%02d' % s.Parms.SubjectRun.NumericValue,
+			mode        = s.Parms.ApplicationMode.Value.lower(),
+		)
+		# TODO: it would be nice to use the TrapFilter as well, instead of SigTools.edges and SigTools.epochs,
+		#       but BCI2000 framework bugs prevent it for now
+		edges = SigTools.edges( s.Signal[ :, trigIndex ] >= s.Parms.TriggerThreshold.ScaledValue )
+		s.Epochs.Data, s.Epochs.Time, s.Epochs.Indices = SigTools.epochs( s.Signal, edges, length=p.lookforward + p.lookback, offset=-p.lookback, refractory=0.5, fs=p.fs, axis=0 )
+		self.Log( 'used %d of %d triggers' % ( len( s.Epochs.Indices ), len( edges ) ) )
+		return s
+		
+	def OpenFiles( self, filenames=None, **kwargs ):
+		if filenames == None:
+			import tkFileDialog
+			d = self.operator.DataDirectory()
+			while len( d ) and not os.path.exists( d ): d = os.path.realpath( os.path.join( d, '..' ) )
+			filenames = tkFileDialog.askopenfilenames( initialdir=d, title="Select one or more data files", filetypes=[ ( "BCI2000 .dat file" , ".dat" ) , ( "All files" , ".*" ) ] )
+			if isinstance( filenames, basestring ): # you suck, tkFileDialog.askopenfilenames, for changing your output format from an easy-to-use tuple in Python 2.5 to an impossibly awkward single string in later versions
+				joined = filenames; filenames = []
+				while len( joined ):
+					m = re.match( r'\{(.+?)\}', joined )
+					if m: filenames.append( m.group().strip( '{}' ) ); joined = joined[ m.end() : ].strip(); continue
+					m = re.match( r'(\S+?)\s+', joined + ' ' )
+					if m: filenames.append( m.group().strip() ); joined = joined[ m.end() : ].strip(); continue
+					joined = joined.strip()
+			# look how many lines of annoying difficult-to-debug crap you made me write.
+			filenames = sorted( filenames )
+		objs = [ self.ReadDatFile( filename, **kwargs ) for filename in filenames ]
+		return objs
+		# TODO:  instead of returning objs:
+		#           check consistency of subject name, fs, sbs and lookback in ImportantParameters
+		#           populate these attributes of self, plus self.runs and self.mode
+		#           read settings files if any:
+		self.SetSubject( parms.subject )
+		
+	
+	# more duck-typing
+	def GetRuns( self, mode ):
+		return self.runs
 	def Log( self, text, datestamp=True ):
 		if datestamp: stamp = self.operator.FriendlyDate( time.time() ) + '       '
 		else: stamp = ''
@@ -2627,7 +2726,6 @@ class OfflineAnalysis( object ):
 		if len( self.logtext ) and not self.logtext.endswith( '\n' ): self.logtext += '\n'
 		self.logtext += text
 		if self.logfile: self.logfile.write( text ) # TODO	
-	
 	# vestigial duck traits (actually these should never even be called, if the up-conditioning and down-conditioning buttons are not made visible)
 	def SetBarLimits( self, *pargs, **kwargs ): pass
 	def SetTarget( self, *pargs, **kwargs ): pass
