@@ -4,9 +4,10 @@ TODO
 	NIDAQmx error -88709 on StopRun happened once....
 
 	offline analysis
-		use BCPy2000 tools to read .dat file: either BCI2000.FileReader, or (preferably) fix BCI2000 filtertools and use them
-		allow access to multi-file offline analysis via "advanced" mode (possibly hidden?) in EPOCS GUI
-	
+		override ResponseInterval from .dat file with ResponseInterval from -Offline config file? (but not with the one from the online one, if present)
+		interface for removing individual trials - from sequence view and/or new outlier removal tab?
+		make "log results" results go somewhere
+		
 	make separate settings entry to govern maximum random extra hold duration?  (if so: remember to enforce its rounding to whole number of segments)
 	
 	NIDAQmxADC: acquisition of floating-point raw data instead of integers
@@ -992,7 +993,7 @@ class TkMPL( object ):
 		if 'ttk' in sys.modules: self.widgets[ nbname ].select( self.widgets[ tabName ] )
 		else: self.widgets[ nbname ].raise_page( tabName )
 
-MODENAMES = Bunch( st='Stimulus Test', vc='Voluntary Contraction', rc='Recruitment Curve', ct='Control Trials', tt='Training Trials', mixed='Mixed' )
+MODENAMES = Bunch( st='Stimulus Test', vc='Voluntary Contraction', rc='Recruitment Curve', ct='Control Trials', tt='Training Trials', mixed='Mixed', offline='Offline' )
 
 class GUI( tksuperclass, TkMPL ):
 	
@@ -1359,8 +1360,8 @@ class GUI( tksuperclass, TkMPL ):
 		if old != None: self.after_cancel( old )
 		self.afterIDs[ key ] = self.after( msec, func )
 	
-	def GetRuns( self, mode ):
-		return [ self.MatchWidgets( mode, 'label', 'value', 'run' )[ 0 ][ 'text' ] ]
+	def GetDescription( self, mode ):
+		return self.MatchWidgets( mode, 'label', 'value', 'run' )[ 0 ][ 'text' ]
 	
 	def CloseWindow( self ):
 		if self.mode != None: return
@@ -1738,7 +1739,7 @@ class ResponseOverlay( object ):
 		ylim = self.axes.get_ylim()
 		if self.rectified: self.axes.set_ylim( [ 0, ylim[ 1 ] ] )
 		else: self.axes.set_ylim( [ -ylim[ 1 ], ylim[ 1 ] ] )
-			
+		
 	def ResponseMagnitudes( self, type='response', p2p=False ):
 		if   type == 'response':    interval = self.responseSelector.get()
 		elif type == 'comparison':  interval = self.comparisonSelector.get()
@@ -1882,7 +1883,7 @@ class AnalysisWindow( Dialog, TkMPL ):
 		self.mode = mode
 		self.channel = 0 # first EMG channel
 		self.data = parent.data[ mode ]
-		self.runs = parent.GetRuns( mode )
+		self.description = parent.GetDescription( mode )
 		self.acceptMode = None
 		self.online = online
 		TkMPL.__init__( self )
@@ -1982,7 +1983,7 @@ class AnalysisWindow( Dialog, TkMPL ):
 			frame.grid_rowconfigure( 2, weight=1 )
 			frame.grid_columnconfigure( 1, weight=1 )
 			
-		elif self.mode in [ 'rc', 'ct', 'tt' ]:
+		elif self.mode in [ 'rc', 'ct', 'tt', 'offline', 'mixed' ]:
 			
 			uppernb = self.MakeNotebook( parent=self, name='notebook_upper' )
 			uppernb.pack( side='top', fill='both', expand=1 )
@@ -2010,6 +2011,7 @@ class AnalysisWindow( Dialog, TkMPL ):
 				updateCommand=self.Changed,
 			)
 			if len( self.parent.axiscontrollers_emg1 ): self.overlay.yController.set( self.parent.axiscontrollers_emg1[ -1 ].get() )
+			else: x = self.parent.operator.params._TraceLimitVolts[ self.channel ]; self.overlay.yController.set( [ -x, x ] )
 			self.parent.axiscontrollers_emg1.append( self.overlay.yController )
 			self.widgets.overlay_yadjust = PlusMinusTk( parent=tabframe, controllers=self.parent.axiscontrollers_emg1 ).place( in_=widget, width=20, height=40, relx=0.93, rely=0.25, anchor='w' )
 			self.widgets.overlay_xadjust = PlusMinusTk( parent=tabframe, controllers=self.overlay.xController         ).place( in_=widget, width=40, height=20, relx=0.92, rely=0.05, anchor='se' )
@@ -2025,7 +2027,7 @@ class AnalysisWindow( Dialog, TkMPL ):
 			lowernb = self.MakeNotebook( parent=self, name='notebook_lower' )
 			lowernb.pack( side='top', fill='both', expand=1 )
 			
-			if self.mode in [ 'rc', 'ct', 'tt' ]:
+			if self.mode in [ 'rc', 'ct', 'tt', 'offline', 'mixed' ]:
 				tabframe = self.AddTab( 'sequence', 'Sequence', nbname='notebook_lower' )
 				
 				header = self.widgets.sequence_frame_header = tkinter.Frame( tabframe, bg=self.colors.header )			
@@ -2052,7 +2054,7 @@ class AnalysisWindow( Dialog, TkMPL ):
 				tabframe.pack( fill='both', expand=1 )
 				
 				
-			if self.mode in [ 'ct', 'tt' ]:
+			if self.mode in [ 'ct', 'tt', 'offline', 'mixed' ]:
 				tabframe = self.AddTab( 'distribution', 'Distribution', nbname='notebook_lower' )
 					
 				header = self.widgets.distribution_frame_header = tkinter.Frame( tabframe, bg=self.colors.header )
@@ -2135,7 +2137,7 @@ class AnalysisWindow( Dialog, TkMPL ):
 		for button in self.MatchWidgets( 'button', 'log' ): button[ 'state' ] = 'normal'
 	
 	def Log( self, type ):
-		self.parent.Log( '===== %s Analysis (%s) =====' % ( self.parent.modenames[ self.mode ], ' + '.join( self.runs ) ) )
+		self.parent.Log( '===== %s Analysis (%s) =====' % ( self.parent.modenames[ self.mode ], self.description ) )
 		if type == 'mvc':
 			start, end = [ sec * 1000.0 for sec in self.mvc.selector.get() ]
 			if self.mvc.estimate != None: self.parent.Log( 'MVC estimated at %s over a %g-msec window' % ( self.mvc.estimate, end - start ) )
@@ -2486,7 +2488,7 @@ class SettingsWindow( Dialog, TkMPL ):
 			if v: self.parent.Log( 'Changed setting %s to %s' % ( k.strip( '_' ), repr( self.parent.operator.params[ k ] ) ) )
 		if True in changed.values(): self.parent.operator.needSetConfig = True
 		self.parent.SetBarLimits( 'vc', 'rc', 'ct', 'tt' )
-		self.parent.SetTargets( 'vc', 'rc', 'ct', 'tt' )
+		self.parent.SetTargets(   'vc', 'rc', 'ct', 'tt' )
 		self.parent.DrawFigures()
 
 #class SubjectChooser( Dialog, TkMPL ):
@@ -2575,12 +2577,6 @@ class SubjectChooser( tkinter.Frame ):
 
 OFFLINE_ROOT = None		
 class OfflineAnalysis( object ):
-	"""
-	TODO:
-		read self.data, self.mode, self.runs, self.fs, self.sbs, and self.lookback from chosen .dat file(s)
-		load subject-specific config from file last used by online system
-		load & save subject-specific config to/from separate offline file
-	"""
 	def __init__( self, data='ExampleData.pk', mode='tt' ):  # TODO: axe ExampleData.pk
 
 		if isinstance( data, basestring ) and data.lower().endswith( '.pk' ):
@@ -2591,15 +2587,16 @@ class OfflineAnalysis( object ):
 		self.online_inifile  = os.path.join( GUIDIR, 'epocs.ini' );   self.operator.Set( **ReadDict( self.online_inifile  ) )
 		self.offline_inifile = os.path.join( GUIDIR, 'offline.ini' ); self.operator.Set( **ReadDict( self.offline_inifile ) )
 		self.SetSubject()
+		self.initialdir = self.operator.DataRoot()
+		#d = self.operator.DataDirectory()
+		#while len( d ) and not os.path.exists( d ): d = os.path.realpath( os.path.join( d, '..' ) )
+		#self.initialdir = d
+		self.subject = None
+		self.session = None
 		
 		self.modenames = MODENAMES
 		self.axiscontrollers_emg1 = []
-		
-		self.fs = 1600.0 # TODO
-		self.sbs = 64.0 # TODO
-		self.lookback = 0.1 # TODO
-		self.runs = [ '???' ] # TODO
-		
+				
 		self.logtext = ''
 		self.logfile = sys.stdout
 		
@@ -2656,9 +2653,20 @@ class OfflineAnalysis( object ):
 			self.operator.Set( SessionStamp=time.strftime( fmt, time.localtime( last ) ) )
 		self.operator.Set( **self.operator.ReadSubjectSettings( suffix='' ) )
 		self.operator.Set( **self.operator.ReadSubjectSettings( suffix='-Offline' ) )
-		
+	
+	
+	def CloseWindow( self, window=None ):
+		if self.subject and self.session:
+			if hasattr( window, 'overlay' ) and window.channel < 2:
+				self.operator.params._TraceLimitVolts[ window.channel ] = max( window.overlay.yController.get() )
+			try: self.operator.WriteSubjectSettings( subjectName=self.subject, suffix='-Offline' )
+			except: self.Log( 'failed to save offline analysis settings' )
+		if window != None: window.cancel()
+			
 	def Go( self ):
 		a = AnalysisWindow( parent=self, mode=self.mode, modal=False, online=False, geometry='+0+0' )
+		a.title( 'EPOCS Offline Analysis: ' + self.GetDescription() )
+		a.protocol( "WM_DELETE_WINDOW", Curry( self.CloseWindow, window=a ) )
 		if DEVEL: self.child = a # only do this during DEVEL because it creates a mutual reference loop and hence a memory leak
 		return a
 		
@@ -2676,27 +2684,28 @@ class OfflineAnalysis( object ):
 		try: trigIndex = s.Parms.ChannelNames.Value.index( s.Parms.TriggerChannel.Value )
 		except ValueError: trigIndex = s.Parms.TriggerChannel.NumericValue - 1
 		p = s.ImportantParameters = Bunch(
-			lookback    = s.Parms.LookBack.ScaledValue / 1000.0,
-			lookforward = s.Parms.LookForward.ScaledValue / 1000.0,
-			fs          = s.Parms.SamplingRate.ScaledValue,
-			sbs         = s.Parms.SampleBlockSize.NumericValue,
-			subject     = s.Parms.SubjectName.Value,
-			run         = 'R%02d' % s.Parms.SubjectRun.NumericValue,
-			mode        = s.Parms.ApplicationMode.Value.lower(),
+			LookBack         = s.Parms.LookBack.ScaledValue / 1000.0,
+			LookForward      = s.Parms.LookForward.ScaledValue / 1000.0,
+			SamplingRate     = s.Parms.SamplingRate.ScaledValue,
+			SampleBlockSize  = s.Parms.SampleBlockSize.NumericValue,
+			SubjectName      = s.Parms.SubjectName.Value,
+			SessionStamp     = s.Parms.SessionStamp.Value,
+			SubjectRun       = 'R%02d' % s.Parms.SubjectRun.NumericValue,
+			ApplicationMode  = s.Parms.ApplicationMode.Value.lower(),
+			ResponseInterval = tuple( s.Parms.ResponseDefinition.ScaledValue[ 0, [ 1, 2 ] ] ), 
 		)
 		# TODO: it would be nice to use the TrapFilter as well, instead of SigTools.edges and SigTools.epochs,
 		#       but BCI2000 framework bugs prevent it for now
 		edges = SigTools.edges( s.Signal[ :, trigIndex ] >= s.Parms.TriggerThreshold.ScaledValue )
-		s.Epochs.Data, s.Epochs.Time, s.Epochs.Indices = SigTools.epochs( s.Signal, edges, length=p.lookforward + p.lookback, offset=-p.lookback, refractory=0.5, fs=p.fs, axis=0 )
+		s.Epochs.Data, s.Epochs.Time, s.Epochs.Indices = SigTools.epochs( s.Signal / 1e6, edges, length=p.LookForward + p.LookBack, offset=-p.LookBack, refractory=0.5, fs=p.SamplingRate, axis=0, return_array=True )
 		self.Log( 'used %d of %d triggers' % ( len( s.Epochs.Indices ), len( edges ) ) )
+		if len( s.Epochs.Data ): s.Epochs.Data = list( s.Epochs.Data.transpose( 0, 2, 1 ) ) # AnalysisWindow and its subplots will expect trials by channels by time
 		return s
 		
 	def OpenFiles( self, filenames=None, **kwargs ):
 		if filenames == None:
 			import tkFileDialog
-			d = self.operator.DataDirectory()
-			while len( d ) and not os.path.exists( d ): d = os.path.realpath( os.path.join( d, '..' ) )
-			filenames = tkFileDialog.askopenfilenames( initialdir=d, title="Select one or more data files", filetypes=[ ( "BCI2000 .dat file" , ".dat" ) , ( "All files" , ".*" ) ] )
+			filenames = tkFileDialog.askopenfilenames( initialdir=self.initialdir, title="Select one or more data files", filetypes=[ ( "BCI2000 .dat file" , ".dat" ) , ( "All files" , ".*" ) ] )
 			if isinstance( filenames, basestring ): # you suck, tkFileDialog.askopenfilenames, for changing your output format from an easy-to-use tuple in Python 2.5 to an impossibly awkward single string in later versions
 				joined = filenames; filenames = []
 				while len( joined ):
@@ -2708,17 +2717,60 @@ class OfflineAnalysis( object ):
 			# look how many lines of annoying difficult-to-debug crap you made me write.
 			filenames = sorted( filenames )
 		objs = [ self.ReadDatFile( filename, **kwargs ) for filename in filenames ]
-		return objs
-		# TODO:  instead of returning objs:
-		#           check consistency of subject name, fs, sbs and lookback in ImportantParameters
-		#           populate these attributes of self, plus self.runs and self.mode
-		#           read settings files if any:
-		self.SetSubject( parms.subject )
+		objs = [ obj for obj in objs if len( obj.Epochs.Data ) ]
+		if len( objs ) == 0: return
+
+		self.initialdir = os.path.split( filenames[ 0 ] )[ 0 ]
+		first = objs[ 0 ].ImportantParameters
+		unique = Bunch( [ ( field, sorted( set( [ obj.ImportantParameters[ field ] for obj in objs ] ) ) ) for field in first ] )
+		errs = []
+		for field in 'LookBack LookForward SamplingRate SampleBlockSize'.split():
+			vals = unique[ field ]
+			if len( vals ) > 1: errs.append( "%s setting differs between runs (values %s)" % ( field, repr( vals ) ) ) 
+		if len( errs ): raise ValueError( '\n   '.join( [ "runs are incompatible unless you explicitly override the following:" ] + errs ) )
+			
+		if len( unique.ApplicationMode ) == 1:
+			self.mode = unique.ApplicationMode[ 0 ].lower()
+			if self.mode not in [ 'vc' ]: self.mode = 'offline'
+		else:
+			self.Log( 'WARNING: data are from mixed modes %s' % repr( unique.ApplicationMode ) )
+			self.mode = 'mixed'
+			
+		if len( unique.SubjectName ) == 1:
+			self.subject = unique.SubjectName[ 0 ]
+			self.SetSubject( self.subject )
+		else:
+			self.Log( 'WARNING: data are mixed across sessions %s' % repr( unique.SubjectName ) )
+			self.subject = None
+			
+		if len( unique.SessionStamp ) == 1:
+			self.session = unique.SessionStamp[ 0 ]
+			self.operator.Set( SessionStamp=self.session )
+		else:
+			self.Log( 'WARNING: data are mixed across sessions %s' % repr( unique.SessionStamp ) )
+			self.session = None
+			
+		if len( unique.ResponseInterval ) > 1:
+			self.Log( 'WARNING: data have different response intervals in ResponseDefinition parameter: %s' % repr( unique.ResponseInterval ) )
+		self.operator.Set( _ResponseStartMsec=[ objs[ -1 ].ImportantParameters.ResponseInterval[ 0 ] ] * 2 )
+		self.operator.Set( _ResponseEndMsec = [ objs[ -1 ].ImportantParameters.ResponseInterval[ 1 ] ] * 2 )
 		
+		self.runs = unique.SubjectRun
+		self.fs = float( unique.SamplingRate[ 0 ] )
+		self.sbs = float( unique.SampleBlockSize[ 0 ] )
+		self.lookback = float( unique.LookBack[ 0 ] )
+		data = reduce( list.__add__, [ obj.Epochs.Data for obj in objs ] )
+		self.data = { self.mode : data }
+		window = self.Go()
 	
 	# more duck-typing
-	def GetRuns( self, mode ):
-		return self.runs
+	def GetDescription( self, mode=None ):
+		subject = self.subject
+		if subject == None: subject = 'multiple subjects'
+		session = self.session
+		if session == None: session = 'multiple sessions'
+		return '%s - %s - %s' % ( subject, session, ','.join( self.runs ) )
+		
 	def Log( self, text, datestamp=True ):
 		if datestamp: stamp = self.operator.FriendlyDate( time.time() ) + '       '
 		else: stamp = ''
@@ -2735,7 +2787,7 @@ if __name__ == '__main__':
 	
 	args = getattr( sys, 'argv', [] )[ 1: ]
 	import getopt
-	opts, args = getopt.getopt( args, '', [ 'log=', 'devel', 'debug' ] )
+	opts, args = getopt.getopt( args, '', [ 'log=', 'devel', 'debug', 'offline' ] )
 	opts = dict( opts )
 	log = opts.get( '--log', None )
 	os.environ[ 'EPOCSTIMESTAMP' ] = time.strftime( '%Y%m%d-%H%M%S' )
@@ -2760,13 +2812,18 @@ if __name__ == '__main__':
 		if 'ttk' in sys.modules: flush( 'ttk ' + str( ttk.__version__ ) )
 		else: flush( 'no ttk (must be using Tix)' )
 	
-	self = GUI()
-	#self.operator.remote.WindowVisible = 1
-	if DEVEL:
-		try: import pickle; self.data = Bunch( pickle.load( open( 'ExampleData.pk', 'rb' ) ) ) # TODO
-		except: pass
-		else: [ EnableWidget( self.MatchWidgets( mode, 'button', 'analysis' ), len( self.data[ mode ] ) ) for mode in self.data ]
-	if self.ready: self.Loop()
+	if '--offline' in opts:
+		self = OfflineAnalysis()
+		self.OpenFiles()
+	else:
+		self = GUI()
+		#self.operator.remote.WindowVisible = 1
+		if DEVEL:
+			try: import pickle; self.data = Bunch( pickle.load( open( 'ExampleData.pk', 'rb' ) ) ) # TODO
+			except: pass
+			else: [ EnableWidget( self.MatchWidgets( mode, 'button', 'analysis' ), len( self.data[ mode ] ) ) for mode in self.data ]
+		if self.ready: self.Loop()
+		
 	if log:
 		# remove the python log if it is empty
 		if sys.stdout.tell() == 0: sys.stdout.close(); os.remove( log )
@@ -2775,5 +2832,5 @@ if __name__ == '__main__':
 		operatorLog = os.path.join( logDir, os.environ[ 'EPOCSTIMESTAMP' ] + '-operator.txt' )
 		if os.path.isfile( operatorLog ):
 			content = open( operatorLog, 'rt' ).read().lower()
-			if 'warning' not in content and 'error' not in content and 'exception' not in content: os.remove( operatorLog )
+			#if 'warning' not in content and 'error' not in content and 'exception' not in content: os.remove( operatorLog )
 
