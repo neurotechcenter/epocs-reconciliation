@@ -2674,9 +2674,8 @@ class OfflineAnalysis( object ):
 		return sorted( glob.glob( os.path.join( self.operator.DataDirectory(), '*.dat' ) ) )
 		
 	def ReadDatFile( self, filename, **kwargs ):
-		import BCPy2000.Paths
-		from BCI2000Tools.Chain import bci2000root, bci2000chain  # also imports BCI2000Tools.Parameters as a central component and SigTools for a few things
-		import SigTools
+		from BCPy2000.BCI2000Tools.Chain import bci2000root, bci2000chain  # also imports BCI2000Tools.Parameters as a central component and SigTools for a few things
+		import BCPy2000.SigTools as SigTools
 		if bci2000root() == None: bci2000root( os.path.join( BCI2000LAUNCHDIR, '..' ) )
 		filename = TryFilePath( filename, os.path.join( self.operator.DataDirectory(), filename ) )
 		self.Log( 'reading ' + filename )
