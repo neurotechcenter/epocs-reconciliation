@@ -2762,6 +2762,7 @@ class OfflineAnalysis( object ):
 		data = reduce( list.__add__, [ obj.Epochs.Data for obj in objs ] )
 		self.data = { self.mode : data }
 		window = self.Go()
+		return window
 	
 	# more duck-typing
 	def GetDescription( self, mode=None ):
@@ -2814,7 +2815,8 @@ if __name__ == '__main__':
 	
 	if '--offline' in opts:
 		self = OfflineAnalysis()
-		self.OpenFiles()
+		window = self.OpenFiles()
+		if window: window.wait_window()
 	else:
 		self = GUI()
 		#self.operator.remote.WindowVisible = 1
