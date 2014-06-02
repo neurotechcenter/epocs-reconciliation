@@ -1,18 +1,19 @@
 """
 TODO
-	investigate "python is not responding" error
-	NIDAQmx error -88709 on StopRun happened once....
 
 	offline analysis
 		override ResponseInterval from .dat file with ResponseInterval from -Offline config file? (but not with the one from the online one, if present)
 		interface for removing individual trials - from sequence view and/or new outlier removal tab?
 		make "log results" results go somewhere
 		
-	make separate settings entry to govern maximum random extra hold duration?  (if so: remember to enforce its rounding to whole number of segments)
-	
-	NIDAQmxADC: acquisition of floating-point raw data instead of integers
-	
+	intermittently broken zooming in VC analysis
 	NB: assuming background is in range, time between triggers actually seems to come out to MinTimeBetweenTriggers + 1 sample block
+
+	investigate "python is not responding" error
+	NIDAQmx error -88709 on StopRun happened once....
+	
+	make separate settings entry to govern maximum random extra hold duration?  (if so: remember to enforce its rounding to whole number of segments)
+	NIDAQmxADC: acquisition of floating-point raw data instead of integers
 """
 
 import os, sys, time, math, re, threading, glob
