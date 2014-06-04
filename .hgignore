@@ -1,6 +1,5 @@
 syntax: glob
 app/gui/epocs.ini
-app/parms/custom.prm
 app/prog/epocs.mmap
 app/prog/Operator.ini
 *.pyc

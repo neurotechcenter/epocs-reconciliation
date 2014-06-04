@@ -18,9 +18,9 @@ reset system
 if [ $EPOCSTIMESTAMP == "" ]; set environment EPOCSTIMESTAMP $YYYYMMDD-$HHMMSS; end
 startup system localhost --SystemLogFile=../../system-logs/$EPOCSTIMESTAMP-operator.txt
 
-set environment DEVEL $2
+set environment CUSTOM $2
 
-if [ $DEVEL ]
+if [ $CUSTOM == "devel" ]
 	start executable FilePlayback                       --local --EvaluateTiming=0 --PlaybackFileName=../../data/sample/akt-2014-01-30-14-25-R11-TT.dat
 	start executable ReflexConditioningSignalProcessing --local --NumberOfThreads=1
 	start executable DummyApplication                   --local
@@ -38,11 +38,12 @@ add parameter Application:Operant%20Conditioning     float    BaselineResponseLe
 
 wait for connected
 
-if [ $DEVEL ]
+
+
+if [ $CUSTOM == "devel" ]
 	# do nothing - just use the parameters from the file (vital for SamplingRate and SourceCh*, and desirable for SampleBlockSize - but note that epocs.py may overrule many parameters)
 else
 	load parameterfile ../parms/base-nidaqmx.prm
-	if ${is file ../parms/custom.prm} ; load parameterfile ../parms/custom.prm ; end
 end
 
 if [ $MODE == master ]
@@ -51,8 +52,15 @@ if [ $MODE == master ]
 	set parameter VisualizeBackgroundAverages 1
 	set parameter VisualizeTrapFilter 1
 	set parameter VisualizeRangeIntegrator 1
-	setconfig
-	set state Running 1
 else
 	set parameter OutputMode 0
+end
+
+if [ $CUSTOM ] && [ $CUSTOM != "devel" ]
+	execute script $CUSTOM
+end
+
+if [ $MODE == master ]
+	setconfig
+	set state Running 1
 end

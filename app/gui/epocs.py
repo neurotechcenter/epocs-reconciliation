@@ -32,6 +32,7 @@ except: DEVEL = True
 else:   DEVEL = False
 
 DEBUG = False
+CUSTOM = ''
 
 GUIDIR = os.path.dirname( os.path.realpath( inspect.getfile( inspect.currentframe() ) ) )
 BCI2000LAUNCHDIR = os.path.abspath( os.path.join( GUIDIR, '../prog' ) )
@@ -170,7 +171,7 @@ class Operator( object ):
 		self.remote = BCI2000Remote.BCI2000Remote()
 		self.remote.Connect()
 		if DEVEL: self.bci2000( 'execute script ../batch/run-nidaqmx.bat slave devel' )
-		else:     self.bci2000( 'execute script ../batch/run-nidaqmx.bat slave' )
+		else:     self.bci2000( 'execute script ../batch/run-nidaqmx.bat slave ' + CUSTOM )
 	
 	def DataRoot( self ):
 		return ResolveDirectory( self.params.DataDirectory, BCI2000LAUNCHDIR )
@@ -2788,7 +2789,7 @@ if __name__ == '__main__':
 	
 	args = getattr( sys, 'argv', [] )[ 1: ]
 	import getopt
-	opts, args = getopt.getopt( args, '', [ 'log=', 'devel', 'debug', 'offline' ] )
+	opts, args = getopt.getopt( args, '', [ 'log=', 'devel', 'debug', 'offline', 'custom=' ] )
 	opts = dict( opts )
 	log = opts.get( '--log', None )
 	os.environ[ 'EPOCSTIMESTAMP' ] = time.strftime( '%Y%m%d-%H%M%S' )
@@ -2799,6 +2800,7 @@ if __name__ == '__main__':
 		sys.stdout = sys.stderr = open( log, 'wt', 0 )
 	if '--devel' in opts: DEVEL = True  # use FilePlayback as signal source, and load example data at launch for easy test of analysis window
 	if '--debug' in opts: DEBUG = True  # print debug messages to the system log (independent of whether we're in FilePlayback mode)
+	CUSTOM = opts.get( '--custom', '' )
 	
 	try: tkinter.ALLWINDOWS
 	except: tkinter.ALLWINDOWS = []
