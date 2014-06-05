@@ -170,8 +170,8 @@ class Operator( object ):
 	def Launch( self ):
 		self.remote = BCI2000Remote.BCI2000Remote()
 		self.remote.Connect()
-		if DEVEL: self.bci2000( 'execute script ../batch/run-nidaqmx.bat slave devel' )
-		else:     self.bci2000( 'execute script ../batch/run-nidaqmx.bat slave ' + CUSTOM )
+		if DEVEL: self.bci2000( 'execute script ../batch/run-nidaqmx.bat slave replay ' + CUSTOM )
+		else:     self.bci2000( 'execute script ../batch/run-nidaqmx.bat slave live   ' + CUSTOM )
 	
 	def DataRoot( self ):
 		return ResolveDirectory( self.params.DataDirectory, BCI2000LAUNCHDIR )

@@ -9,8 +9,11 @@ system taskkill /F /FI "IMAGENAME eq DummyApplication.exe"
 change directory $BCI2000LAUNCHDIR
 
 set environment MODE master 
-if [ $1 ]; set environment MODE $1; end
-if [ $MODE == master ]; show window; end
+if [ $1 ]; set environment MODE $1; end    # "master" or "slave"
+set environment SOURCE $2                  # "replay" or "live"
+set environment CUSTOM $3                  # empty, or a path to a BCI2000 script file
+
+if [ $MODE == "master" ]; show window; end
 
 set title ${extract file base $0}
 reset system
@@ -18,9 +21,8 @@ reset system
 if [ $EPOCSTIMESTAMP == "" ]; set environment EPOCSTIMESTAMP $YYYYMMDD-$HHMMSS; end
 startup system localhost --SystemLogFile=../../system-logs/$EPOCSTIMESTAMP-operator.txt
 
-set environment CUSTOM $2
 
-if [ $CUSTOM == "devel" ]
+if [ $SOURCE == "replay" ]
 	start executable FilePlayback                       --local --EvaluateTiming=0 --PlaybackFileName=../../data/sample/akt-2014-01-30-14-25-R11-TT.dat
 	start executable ReflexConditioningSignalProcessing --local --NumberOfThreads=1
 	start executable DummyApplication                   --local
@@ -40,13 +42,13 @@ wait for connected
 
 
 
-if [ $CUSTOM == "devel" ]
+if [ $SOURCE == "replay" ]
 	# do nothing - just use the parameters from the file (vital for SamplingRate and SourceCh*, and desirable for SampleBlockSize - but note that epocs.py may overrule many parameters)
 else
 	load parameterfile ../parms/base-nidaqmx.prm
 end
 
-if [ $MODE == master ]
+if [ $MODE == "master" ]
 	set parameter VisualizeTiming 1
 	set parameter VisualizeSource 1
 	set parameter VisualizeBackgroundAverages 1
@@ -56,11 +58,11 @@ else
 	set parameter OutputMode 0
 end
 
-if [ $CUSTOM ] && [ $CUSTOM != "devel" ]
+if [ $CUSTOM ]
 	execute script $CUSTOM
 end
 
-if [ $MODE == master ]
+if [ $MODE == "master" ]
 	setconfig
 	set state Running 1
 end
