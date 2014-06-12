@@ -172,6 +172,7 @@ class Operator( object ):
 		self.remote.Connect()
 		if DEVEL: self.bci2000( 'execute script ../batch/run-nidaqmx.bat slave replay ' + CUSTOM )
 		else:     self.bci2000( 'execute script ../batch/run-nidaqmx.bat slave live   ' + CUSTOM )
+		self.Set( TriggerExpression=self.remote.GetParameter( 'TriggerExpression' ) )
 	
 	def DataRoot( self ):
 		return ResolveDirectory( self.params.DataDirectory, BCI2000LAUNCHDIR )
@@ -1096,7 +1097,9 @@ class GUI( tksuperclass, TkMPL ):
 		container.pack( side='top', fill='both', expand=True, padx=20, pady=5 )
 		frame.pack( side='left', padx=2, pady=2, fill='both', expand=1 )
 		chn = ', '.join( self.operator.remote.GetListParameter( 'ChannelNames' ) )
-		tkinter.Label( frame.master, text='Configured for %s at %gHz' % ( chn, self.fs ), bg=self.colors.footer ).place( in_=frame.master, relx=1.0, rely=1.0, anchor='se' )
+		reminder = 'Configured for %s at %gHz' % ( chn, self.fs )
+		if len( self.operator.params.TriggerExpression ): reminder += '\nExtra trigger condition: ' + self.operator.params.TriggerExpression
+		tkinter.Label( frame.master, text=reminder, bg=self.colors.footer ).place( in_=frame.master, relx=1.0, rely=1.0, anchor='se' )
 		
 		frame = self.AddTab( 'vc', title=self.modenames.vc )
 		fig, widget, container = self.NewFigure( parent=frame, prefix='vc', suffix='emg' )
