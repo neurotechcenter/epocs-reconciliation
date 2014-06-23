@@ -104,6 +104,21 @@ def TryFilePath( *alternatives ):
 	if len( alternatives ) == 0: return None
 	raise IOError( 'could not find a match for "%s"' % alternatives[ 0 ] )
 
+DB_ON = False
+def DB( arg=None, **kwargs ):
+	global DB_ON
+	if isinstance( arg, ( bool, basestring ) ):
+		if arg in [ True, 'ON', 'on' ]: DB_ON = True; return
+		if arg in [ False, 'OFF', 'off' ]: DB_ON = False; return
+	if not DB_ON: return
+	stamp = time.strftime( '%Y-%m-%d  %H:%M:%S', time.localtime() )
+	info = inspect.getframeinfo( inspect.stack()[ 1 ][ 0 ] )
+	if arg == None: argstr = ''
+	else: argstr = str( arg )
+	argstr = '   '.join( [ argstr ] + [ '%s = %s' % ( key, repr( value ) ) for key, value in sorted( kwargs.items() ) ] )
+	sys.stderr.write( '%s  line %4d  %s\n' % ( stamp, info.lineno, argstr ) )
+
+
 class Operator( object ):
 	def __init__( self ):
 		
@@ -1990,23 +2005,24 @@ class AnalysisWindow( Dialog, TkMPL ):
 			
 		elif self.mode in [ 'rc', 'ct', 'tt', 'offline', 'mixed' ]:
 			
-			uppernb = self.MakeNotebook( parent=self, name='notebook_upper' )
-			uppernb.pack( side='top', fill='both', expand=1 )
-			tabframe = self.AddTab( 'overlay', 'Timings', nbname='notebook_upper' )
-			tabframe.grid( row=1, column=1, sticky='nsew' ); tabframe.master.grid_rowconfigure( 1, weight=1 ); tabframe.master.grid_columnconfigure( 1, weight=1 ); 
+			DB( 'on' ); DB()
+			uppernb = self.MakeNotebook( parent=self, name='notebook_upper' ); DB()
+			uppernb.pack( side='top', fill='both', expand=1 ); DB()
+			tabframe = self.AddTab( 'overlay', 'Timings', nbname='notebook_upper' ); DB()
+			tabframe.grid( row=1, column=1, sticky='nsew' ); tabframe.master.grid_rowconfigure( 1, weight=1 ); tabframe.master.grid_columnconfigure( 1, weight=1 ); DB()
 			
-			header = self.widgets.overlay_frame_header = tkinter.Frame( tabframe, bg=self.colors.header )
-			switch = Switch( header, title='Rectification: ', offLabel='off', onLabel='on', initialValue=0, command=self.UpdateLines )
-			switch.pack( side='left', pady=3 )
-			tkinter.Frame( header, bg=header[ 'bg' ] ).pack( side='left', padx=25 )
-			button = self.widgets.overlay_button_savetimings = tkinter.Button( header, text='Use marked timings', command=self.PersistTimings )
-			button.pack( side='right', pady=3 )
+			header = self.widgets.overlay_frame_header = tkinter.Frame( tabframe, bg=self.colors.header ); DB()
+			switch = Switch( header, title='Rectification: ', offLabel='off', onLabel='on', initialValue=0, command=self.UpdateLines ); DB()
+			switch.pack( side='left', pady=3 ); DB()
+			tkinter.Frame( header, bg=header[ 'bg' ] ).pack( side='left', padx=25 ); DB()
+			button = self.widgets.overlay_button_savetimings = tkinter.Button( header, text='Use marked timings', command=self.PersistTimings ); DB()
+			button.pack( side='right', pady=3 ); DB()
 			
-			figure, widget, container = self.NewFigure( parent=tabframe, prefix='overlay', suffix='main', width=figwidth, height=fighalfheight )
-			axes = self.overlay_axes_main = figure.gca()
-			responseInterval    = self.parent.operator.params._ResponseStartMsec[ self.channel ] / 1000.0, self.parent.operator.params._ResponseEndMsec[ self.channel ] / 1000.0
-			comparisonInterval  = self.parent.operator.params._ComparisonStartMsec[ self.channel ] / 1000.0, self.parent.operator.params._ComparisonEndMsec[ self.channel ] / 1000.0
-			prestimulusInterval = self.parent.operator.params._PrestimulusStartMsec[ self.channel ] / 1000.0, self.parent.operator.params._PrestimulusEndMsec[ self.channel ] / 1000.0
+			figure, widget, container = self.NewFigure( parent=tabframe, prefix='overlay', suffix='main', width=figwidth, height=fighalfheight ); DB()
+			axes = self.overlay_axes_main = figure.gca(); DB()
+			responseInterval    = self.parent.operator.params._ResponseStartMsec[ self.channel ] / 1000.0, self.parent.operator.params._ResponseEndMsec[ self.channel ] / 1000.0; DB()
+			comparisonInterval  = self.parent.operator.params._ComparisonStartMsec[ self.channel ] / 1000.0, self.parent.operator.params._ComparisonEndMsec[ self.channel ] / 1000.0; DB()
+			prestimulusInterval = self.parent.operator.params._PrestimulusStartMsec[ self.channel ] / 1000.0, self.parent.operator.params._PrestimulusEndMsec[ self.channel ] / 1000.0; DB()
 			#if self.mode not in [ 'rc' ]: comparisonInterval = prestimulusInterval = None
 			self.overlay = ResponseOverlay(
 				data=self.data, channel=self.channel, 
@@ -2014,89 +2030,89 @@ class AnalysisWindow( Dialog, TkMPL ):
 				axes=axes, color=self.colors[ 'emg%d' % ( self.channel + 1 ) ],
 				responseInterval=responseInterval, comparisonInterval=comparisonInterval, prestimulusInterval=prestimulusInterval,
 				updateCommand=self.Changed,
-			)
-			if len( self.parent.axiscontrollers_emg1 ): self.overlay.yController.set( self.parent.axiscontrollers_emg1[ -1 ].get() )
-			else: x = self.parent.operator.params._TraceLimitVolts[ self.channel ]; self.overlay.yController.set( [ -x, x ] )
-			self.parent.axiscontrollers_emg1.append( self.overlay.yController )
-			self.widgets.overlay_yadjust = PlusMinusTk( parent=tabframe, controllers=self.parent.axiscontrollers_emg1 ).place( in_=widget, width=20, height=40, relx=0.93, rely=0.25, anchor='w' )
-			self.widgets.overlay_xadjust = PlusMinusTk( parent=tabframe, controllers=self.overlay.xController         ).place( in_=widget, width=40, height=20, relx=0.92, rely=0.05, anchor='se' )
+			); DB()
+			if len( self.parent.axiscontrollers_emg1 ): self.overlay.yController.set( self.parent.axiscontrollers_emg1[ -1 ].get() ); DB()
+			else: x = self.parent.operator.params._TraceLimitVolts[ self.channel ]; self.overlay.yController.set( [ -x, x ] ); DB()
+			self.parent.axiscontrollers_emg1.append( self.overlay.yController ); DB()
+			self.widgets.overlay_yadjust = PlusMinusTk( parent=tabframe, controllers=self.parent.axiscontrollers_emg1 ).place( in_=widget, width=20, height=40, relx=0.93, rely=0.25, anchor='w' ); DB()
+			self.widgets.overlay_xadjust = PlusMinusTk( parent=tabframe, controllers=self.overlay.xController         ).place( in_=widget, width=40, height=20, relx=0.92, rely=0.05, anchor='se' ); DB()
 			
 			#header.pack( side='top', fill='both', expand=1 )
 			#container.pack( fill='both', expand=1 )
-			header.grid( row=1, column=1, sticky='nsew', padx=5, pady=2 )
-			container.grid( row=2, column=1, sticky='nsew', padx=5, pady=2 )
-			tabframe.grid_rowconfigure( 2, weight=1 )
-			tabframe.grid_columnconfigure( 1, weight=1 )
+			header.grid( row=1, column=1, sticky='nsew', padx=5, pady=2 ); DB()
+			container.grid( row=2, column=1, sticky='nsew', padx=5, pady=2 ); DB()
+			tabframe.grid_rowconfigure( 2, weight=1 ); DB()
+			tabframe.grid_columnconfigure( 1, weight=1 ); DB()
 			
 			
-			lowernb = self.MakeNotebook( parent=self, name='notebook_lower' )
-			lowernb.pack( side='top', fill='both', expand=1 )
+			lowernb = self.MakeNotebook( parent=self, name='notebook_lower' ); DB()
+			lowernb.pack( side='top', fill='both', expand=1 ); DB()
 			
 			if self.mode in [ 'rc', 'ct', 'tt', 'offline', 'mixed' ]:
-				tabframe = self.AddTab( 'sequence', 'Sequence', nbname='notebook_lower' )
+				tabframe = self.AddTab( 'sequence', 'Sequence', nbname='notebook_lower' ); DB()
 				
-				header = self.widgets.sequence_frame_header = tkinter.Frame( tabframe, bg=self.colors.header )			
-				tkinter.Label( header, text='Trials to pool: ', bg=header[ 'bg' ] ).pack( side='left', padx=3, pady=3 )
-				vcmd = ( self.register( self.PoolingEntry ), '%s', '%P' )
-				entry = self.widgets.sequence_entry_pooling = tkinter.Entry( header, width=2, validate='key', validatecommand=vcmd, textvariable=tkinter.Variable( header, value='1' ), bg='#FFFFFF' )
-				entry.pack( side='left', padx=3, pady=3 )
-				switch = self.widgets.sequence_switch_responsemode = Switch( header, offLabel='mean rect.', onLabel='peak-to-peak', command=self.UpdateResults )
-				switch.pack( side='left', pady=3, padx=10 )
-				w = self.widgets.sequence_button_log = tkinter.Button( header, text='Log Results', command=Curry( self.Log, type='sequence' ) ); w.pack( side='right' )
+				header = self.widgets.sequence_frame_header = tkinter.Frame( tabframe, bg=self.colors.header ); DB()
+				tkinter.Label( header, text='Trials to pool: ', bg=header[ 'bg' ] ).pack( side='left', padx=3, pady=3 ); DB()
+				vcmd = ( self.register( self.PoolingEntry ), '%s', '%P' ); DB()
+				entry = self.widgets.sequence_entry_pooling = tkinter.Entry( header, width=2, validate='key', validatecommand=vcmd, textvariable=tkinter.Variable( header, value='1' ), bg='#FFFFFF' ); DB()
+				entry.pack( side='left', padx=3, pady=3 ); DB()
+				switch = self.widgets.sequence_switch_responsemode = Switch( header, offLabel='mean rect.', onLabel='peak-to-peak', command=self.UpdateResults ); DB()
+				switch.pack( side='left', pady=3, padx=10 ); DB()
+				w = self.widgets.sequence_button_log = tkinter.Button( header, text='Log Results', command=Curry( self.Log, type='sequence' ) ); w.pack( side='right' ); DB()
 				
-				figure, widget, container = self.NewFigure( parent=tabframe, prefix='sequence', suffix='main', width=figreducedwidth, height=fighalfheight )
-				panel = tkinter.Frame( tabframe, bg=tabframe[ 'bg' ] )
-				self.recruitment = RecruitmentCurve( self.overlay, pooling=1, tk=panel, p2p=False )
+				figure, widget, container = self.NewFigure( parent=tabframe, prefix='sequence', suffix='main', width=figreducedwidth, height=fighalfheight ); DB()
+				panel = tkinter.Frame( tabframe, bg=tabframe[ 'bg' ] ); DB()
+				self.recruitment = RecruitmentCurve( self.overlay, pooling=1, tk=panel, p2p=False ); DB()
 				
 				#header.pack( side='top', fill='both', expand=1 )
 				#container.pack( fill='both', expand=1 )
-				header.grid( row=1, column=1, columnspan=2, sticky='nsew', padx=5, pady=2 )
-				container.grid( row=2, column=1, sticky='nsew', padx=5, pady=2 )
-				panel.grid( row=2, column=2, sticky='ns', padx=5, pady=2 )
-				tabframe.grid_rowconfigure( 2, weight=1 )
-				tabframe.grid_columnconfigure( 1, weight=1 )
+				header.grid( row=1, column=1, columnspan=2, sticky='nsew', padx=5, pady=2 ); DB()
+				container.grid( row=2, column=1, sticky='nsew', padx=5, pady=2 ); DB()
+				panel.grid( row=2, column=2, sticky='ns', padx=5, pady=2 ); DB()
+				tabframe.grid_rowconfigure( 2, weight=1 ); DB()
+				tabframe.grid_columnconfigure( 1, weight=1 ); DB()
 				
-				tabframe.pack( fill='both', expand=1 )
+				tabframe.pack( fill='both', expand=1 ); DB()
 				
 				
 			if self.mode in [ 'ct', 'tt', 'offline', 'mixed' ]:
-				tabframe = self.AddTab( 'distribution', 'Distribution', nbname='notebook_lower' )
+				tabframe = self.AddTab( 'distribution', 'Distribution', nbname='notebook_lower' ); DB()
 					
-				header = self.widgets.distribution_frame_header = tkinter.Frame( tabframe, bg=self.colors.header )
-				w = self.widgets.distribution_button_log = tkinter.Button( header, text='Log Results', command=Curry( self.Log, type='distribution' ) ); w.pack( side='right' )
+				header = self.widgets.distribution_frame_header = tkinter.Frame( tabframe, bg=self.colors.header ); DB()
+				w = self.widgets.distribution_button_log = tkinter.Button( header, text='Log Results', command=Curry( self.Log, type='distribution' ) ); w.pack( side='right' ); DB()
 				#conditioning = tkinter.Frame( self, bg=header[ 'bg' ] )
 				#w = self.widgets.distribution_button_upcondition = tkinter.Button( conditioning, text="Up-Condition", width=10, command=self.ok_up ); w.pack( side='top', pady=2, ipadx=16, fill='both', expand=1 )
 				#w = self.widgets.distribution_button_downcondition = tkinter.Button( conditioning, text="Down-Condition", width=10, command=self.ok_down ); w.pack( side='bottom', pady=2, ipadx=16, fill='both', expand=1 )
 				##conditioning.place( in_=self.widgets.overlay_button_savetimings, anchor='ne', relx=1.0, rely=1.1 )
 				#conditioning.place( in_=tabframe, anchor='se', relx=1.0, rely=1.0 )
 				
-				figure, widget, container = self.NewFigure( parent=tabframe, prefix='distribution', suffix='main', width=figreducedwidth, height=fighalfheight )
-				panel = tkinter.Frame( tabframe, bg=tabframe[ 'bg' ] )
-				self.hist = ResponseHistogram( self.overlay, targetpc=self.parent.operator.params._TargetPercentile, nbins=10, tk=panel )
-				vcmd = ( self.register( self.TargetPCEntry ), '%s', '%P' )
-				self.hist.entry.widgets.value.configure( width=3, validatecommand=vcmd, validate='key' )
+				figure, widget, container = self.NewFigure( parent=tabframe, prefix='distribution', suffix='main', width=figreducedwidth, height=fighalfheight ); DB()
+				panel = tkinter.Frame( tabframe, bg=tabframe[ 'bg' ] ); DB()
+				self.hist = ResponseHistogram( self.overlay, targetpc=self.parent.operator.params._TargetPercentile, nbins=10, tk=panel ); DB()
+				vcmd = ( self.register( self.TargetPCEntry ), '%s', '%P' ); DB()
+				self.hist.entry.widgets.value.configure( width=3, validatecommand=vcmd, validate='key' ); DB()
 
-				w = self.widgets.distribution_button_upcondition   = tkinter.Button( self.hist.frame, text="Up-Condition",   width=10, command=self.ok_up   )
-				if self.online: w.grid( row=6, column=3, sticky='nsew', padx=1, pady=1, ipadx=16 )
-				w = self.widgets.distribution_button_downcondition = tkinter.Button( self.hist.frame, text="Down-Condition", width=10, command=self.ok_down )
-				if self.online: w.grid( row=7, column=3, sticky='nsew', padx=1, pady=1, ipadx=16 )
+				w = self.widgets.distribution_button_upcondition   = tkinter.Button( self.hist.frame, text="Up-Condition",   width=10, command=self.ok_up   ); DB()
+				if self.online: w.grid( row=6, column=3, sticky='nsew', padx=1, pady=1, ipadx=16 ); DB()
+				w = self.widgets.distribution_button_downcondition = tkinter.Button( self.hist.frame, text="Down-Condition", width=10, command=self.ok_down ); DB()
+				if self.online: w.grid( row=7, column=3, sticky='nsew', padx=1, pady=1, ipadx=16 ); DB()
 
 				#header.pack( side='top', fill='both', expand=1 )
 				#container.pack( fill='both', expand=1 )
-				header.grid( row=1, column=1, columnspan=2, sticky='nsew', padx=5, pady=2 )
-				container.grid( row=2, column=1, sticky='nsew', padx=5, pady=2 )
-				panel.grid( row=2, column=2, sticky='ns', padx=5, pady=2 )
-				tabframe.grid_rowconfigure( 2, weight=1 )
-				tabframe.grid_columnconfigure( 1, weight=1 )
+				header.grid( row=1, column=1, columnspan=2, sticky='nsew', padx=5, pady=2 ); DB()
+				container.grid( row=2, column=1, sticky='nsew', padx=5, pady=2 ); DB()
+				panel.grid( row=2, column=2, sticky='ns', padx=5, pady=2 ); DB()
+				tabframe.grid_rowconfigure( 2, weight=1 ); DB()
+				tabframe.grid_columnconfigure( 1, weight=1 ); DB()
 
-				tabframe.pack( fill='both', expand=1 )
-				self.SelectTab( 'distribution', 'notebook_lower' )
+				tabframe.pack( fill='both', expand=1 ); DB()
+				self.SelectTab( 'distribution', 'notebook_lower' ); DB()
 				
 			
-		self.UpdateResults()
-		self.DrawFigures()
+		self.UpdateResults(); DB()
+		self.DrawFigures(); DB()
 		self.latest = None
-		self.CheckUpdate()
+		self.CheckUpdate(); DB()
 			
 	def UpdateLines( self, rectified=False ):
 		self.overlay.Update( rectified=rectified )
