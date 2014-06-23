@@ -2,7 +2,8 @@
 TODO
 
 	offline analysis
-		override ResponseInterval from .dat file with ResponseInterval from -Offline config file? (but not with the one from the online one, if present)
+		maybe override ResponseInterval from .dat file with ResponseInterval from -LastSettings-Offline.txt config file?
+			(but not with the setting from the online one, if present)
 		interface for removing individual trials - from sequence view and/or new outlier removal tab?
 		make "log results" results go somewhere
 		
@@ -20,7 +21,7 @@ import os, sys, time, math, re, threading, glob
 import mmap, struct
 import inspect
 import Tkinter as tkinter
-import matplotlib, matplotlib.pyplot
+import matplotlib, matplotlib.pyplot   # this is the online GUI's only third-party dependency besides Python itself (although implicitly, matplotlib in turn also requires numpy)
 
 tksuperclass = tkinter.Tk
 try: import ttk
@@ -28,14 +29,14 @@ except ImportError: import Tix; tksuperclass = Tix.Tk  # ...because Python 2.5 d
 
 import ctypes
 try: ctypes.windll.nicaiu
-except: DEVEL = True
-else:   DEVEL = False
+except: DEVEL = True    # automatically pop into DEVEL mode (using FilePlayback instead of live signal recording) if no NIDAQmx interface found on this computer
+else:   DEVEL = False   # otherwise, DEVEL mode will only be activated if you have supplied the --devel command-line switch
 
-DEBUG = False
-CUSTOM = ''
+DEBUG = False  # if set to true with the --debug command-line switch, print debug/version info to the system log (even if we're not in FilePlayback mode)
+CUSTOM = ''    # BCI2000 script file to run (set with command-line switch --custom=foo.bat )
 
-GUIDIR = os.path.dirname( os.path.realpath( inspect.getfile( inspect.currentframe() ) ) ) # the directory where this python file lives - will also be expected to contain .ico file and .ini files
-BCI2000LAUNCHDIR = os.path.abspath( os.path.join( GUIDIR, '../prog' ) ) # the BCI2000 binaries will be expected to be in ../prog relative to this python file
+GUIDIR = os.path.dirname( os.path.realpath( inspect.getfile( inspect.currentframe() ) ) ) # GUIDIR the directory where this python file lives - will also be expected to contain .ico file and .ini files
+BCI2000LAUNCHDIR = os.path.abspath( os.path.join( GUIDIR, '../prog' ) ) # BCI2000LAUNCHDIR contains the BCI2000 binaries: it is expected to be in ../prog relative to this python file
 if not os.path.isfile( os.path.join( BCI2000LAUNCHDIR, 'BCI2000Remote.py' ) ): raise ImportError( 'could not find the prog directory containing BCI2000Remote.py' )
 if BCI2000LAUNCHDIR not in sys.path: sys.path.append( BCI2000LAUNCHDIR )
 import BCI2000Remote
@@ -168,6 +169,11 @@ def DB( *pargs, **kwargs ):
 
 
 class Operator( object ):
+	"""
+	One Operator instance coordinates communication between one GUI instance and BCI2000's binaries.  It loads, updates and saves default
+	settings, translates these two and from BCI2000 parameter format, sends them to and receives them from the BCI2000 Operator module,
+	and receives signal information from the BCI2000 ReflexConditioningSignalProcessing module via a shared-memory mechanism
+	"""
 	def __init__( self ):
 		
 		self.dateFormat = '%Y-%m-%d-%H-%M'
@@ -181,7 +187,8 @@ class Operator( object ):
 		
 		dataDir = '../../data'
 		
-		self.params = Bunch(
+		self.params = Bunch(   # keys without underscores are direct representations of BCI2000 parameters
+			                   # keys starting with an underscore may not share a name with a BCI2000 parameter exactly, and may require translation into BCI2000 parameter values
 			SubjectName = '',
 			SessionStamp = time.strftime( self.dateFormat, time.localtime( 0 ) ),
 			SubjectRun = '00',
@@ -231,6 +238,9 @@ class Operator( object ):
 		self.remote = None
 	
 	def Launch( self ):
+		"""
+		To be called once during GUI initialization: launches BCI2000 by invoking its batch file.
+		"""
 		self.remote = BCI2000Remote.BCI2000Remote()
 		self.remote.Connect()
 		if DEVEL: self.bci2000( 'execute script ../batch/run-nidaqmx.bat slave replay ' + CUSTOM )
@@ -238,39 +248,87 @@ class Operator( object ):
 		self.Set( TriggerExpression=self.remote.GetParameter( 'TriggerExpression' ) )
 	
 	def DataRoot( self ):
+		"""
+		Return the absolute path to the top-level data directory, determined by self.params.DataDirectory
+		"""
 		return ResolveDirectory( self.params.DataDirectory, BCI2000LAUNCHDIR )
 	
 	def Subjects( self ):
+		"""
+		Return a list of subject identifiers (the name of any subdirectory of the DataRoot() directory
+		is assumed to denote a subject if that subdirectory contains a subject settings file)
+		"""
 		dataRoot = self.DataRoot()
 		if not os.path.isdir( dataRoot ): return []
 		return [ x for x in os.listdir( dataRoot ) if os.path.isfile( self.SubjectSettingsFile( x ) ) ]
 			
 	def SubjectSettingsFile( self, subjectName=None, suffix='' ):
+		"""
+		Return the absolute path to a file, which may or may not yet exist, in which to store the default
+		settings for the current (or explicitly named) subject.  The file will be located at
+		   $DATAROOT/$SUBJECTID/$SUBJECTID-LastSettings.txt
+		where $DATAROOT can be obtained by the DataRoot() method and $SUBJECTID is the subject identifier
+		(either the <subjectName> argument to this method if specified, or self.params.SubjectName if not).
+		There may also be an optional <suffix> between '-LastSettings' and '.txt'
+		Subject settings files are a convenience only, to remember settings from one session to the next
+		- it is no great disaster if they are deleted, because each data file itself contains a complete
+		specification of the settings at the time of recording).
+		
+		Called by ReadSubjectSettings() and WriteSubjectSettings()
+		"""
 		if subjectName == None: subjectName = self.params.SubjectName
 		if not subjectName: return ''
 		return os.path.join( self.DataRoot(), subjectName, subjectName + '-LastSettings' + suffix + '.txt' )
 
 	def ReadSubjectSettings( self, subjectName=None, suffix='' ):
+		"""
+		Use ReadDict() to read the SubjectSettingsFile() corresponding to the specified <subjectName>
+		(or self.params.SubjectName if not specified) and <suffix>. Return the result as a dict.
+		
+		Called by LoadSubjectSettings(), LastSessionStamp(), and the OfflineAnalysis class
+		"""
 		if subjectName == None: subjectName = self.params.SubjectName
 		filename = self.SubjectSettingsFile( subjectName, suffix=suffix )
 		if not os.path.isfile( filename ): return { 'SubjectName': subjectName }
 		return ReadDict( filename )
 	
 	def LoadSubjectSettings( self, subjectName=None, newSession=False, suffix='' ):
+		"""
+		Use ReadSubjectSettings() to read the specified (or current) subject's last settings, and adopt
+		these settings by updating self.params with them.
+		
+		Called by NewSession() and ContinueSession()
+		"""
 		self.Set( **self.ReadSubjectSettings( subjectName, suffix=suffix ) )
 		if newSession: self.Set( SessionStamp=time.time() )
 		
 	def WriteSubjectSettings( self, subjectName=None, suffix='' ):
+		"""
+		Use WriteDict() to save a SubjectSettingsFile() for the specified (or current) subject.
+		Note that only the SubjectName, SessionStamp, and underscored parameters are saved.
+		
+		Called during SetConfig(), and also when either the online GUI() or the OfflineAnalysis window shuts down (note
+		that the latter uses a different suffix to keep its settings separate from the online settings).
+		"""
 		d = dict( ( k, v ) for k, v in self.params.items() if k in 'SubjectName SessionStamp'.split() or k.startswith( '_' ) )
 		WriteDict( d, self.SubjectSettingsFile( subjectName=subjectName, suffix=suffix ) )
 
 	def LastSessionStamp( self, subjectName=None ):
+		"""
+		Use ReadSubjectSettings() to find out the date and time that the specified (or current) subject's last session started.
+		
+		Called by the online GUI when presenting an interface for specifying a subject name, and also by the OfflineAnalysis object.
+		"""
 		if subjectName == None: subjectName = self.params.SubjectName
 		record = self.ReadSubjectSettings( subjectName )
 		try: return time.mktime( time.strptime( record[ 'SessionStamp' ], self.dateFormat ) )
 		except: return 0
 
 	def GetVolts( self, value ):
+		"""
+		Assuming <value> is expressed in the default voltage units stored in self.params._VoltageUnits, return the
+		corresponding value in Volts.
+		"""
 		return GetVolts( value, self.params._VoltageUnits )		
 	
 	def DataFile( self, runNumber=None, autoIncrement=False ):
