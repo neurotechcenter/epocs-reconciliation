@@ -34,16 +34,19 @@ else:   DEVEL = False
 DEBUG = False
 CUSTOM = ''
 
-GUIDIR = os.path.dirname( os.path.realpath( inspect.getfile( inspect.currentframe() ) ) )
-BCI2000LAUNCHDIR = os.path.abspath( os.path.join( GUIDIR, '../prog' ) )
+GUIDIR = os.path.dirname( os.path.realpath( inspect.getfile( inspect.currentframe() ) ) ) # the directory where this python file lives - will also be expected to contain .ico file and .ini files
+BCI2000LAUNCHDIR = os.path.abspath( os.path.join( GUIDIR, '../prog' ) ) # the BCI2000 binaries will be expected to be in ../prog relative to this python file
 if not os.path.isfile( os.path.join( BCI2000LAUNCHDIR, 'BCI2000Remote.py' ) ): raise ImportError( 'could not find the prog directory containing BCI2000Remote.py' )
 if BCI2000LAUNCHDIR not in sys.path: sys.path.append( BCI2000LAUNCHDIR )
 import BCI2000Remote
 
-
 def flush( s ): sys.stdout.write( str( s ) + '\n' ); sys.stdout.flush()
 
 class Bunch( dict ):
+	"""
+	A class like a dict but in which you can de-reference members like.this as well as like['this']
+	Used throughout.
+	"""
 	def __init__( self, d=(), **kwargs ): dict.__init__( self, d ); dict.update( self, kwargs )
 	def update( self, d=(), **kwargs ): dict.update( self, d ); dict.update( self, kwargs ); return self
 	def __getattr__( self, key ):
@@ -56,6 +59,12 @@ class Bunch( dict ):
 	def _getAttributeNames( self ): return self.keys()
 
 def Curry( func, *creation_time_pargs, **creation_time_kwargs ):
+	"""
+	Return a callable object with argument values already baked (or "curried") in. Example
+	def AddTwoNumbers( first, second ): return first + second
+	PlusFive = Curry(AddTwoNumbers, second=5.0)
+	print PlusFive( 10 )
+	"""
 	def curried( *call_time_pargs, **call_time_kwargs ):
 		pargs = creation_time_pargs + call_time_pargs
 		kwargs = dict( creation_time_kwargs )
@@ -66,11 +75,19 @@ def Curry( func, *creation_time_pargs, **creation_time_kwargs ):
 	return curried
 
 def GenericCallback( *pargs, **kwargs ):
+	"""
+	purely for development/debugging
+	"""
 	print pargs
 	print kwargs
 	return 'yeah!'
 
 def ResolveDirectory( d, startDir=None ):
+	"""
+	Return an absolute path to <d>, relative to <startDir>
+	(or, if <startDir> is not specified, relative to the
+	current working directory.
+	"""
 	oldDir = os.getcwd()
 	if startDir == None: startDir = oldDir
 	os.chdir( startDir )
@@ -79,16 +96,29 @@ def ResolveDirectory( d, startDir=None ):
 	return result
 
 def MakeWayFor( filepath ):
+	"""
+	Make all the necessary parent and grandparent directories to allow file <filepath> to be created.
+	"""
 	# we were relying on setconfig to do this for us, but a bug in BCI2000 means we cannot setconfig twice in a row without performing a run in between (if we do, the parameter values are not all updated correctly from the first to the second time)
 	parent = os.path.split( filepath )[ 0 ]
 	if len( parent ) and not os.path.isdir( parent ): os.makedirs( parent )
 	return filepath
 
 def ReadDict( filename ):
+	"""
+	Read and interpret the text representation of dict from a text file.
+	"""
 	if not os.path.isfile( filename ): return {}
 	return eval( open( filename, 'rt' ).read() )
 
 def WriteDict( d, filename, *fields ):
+	"""
+	Write a text representation of dict <d> to a text file <filename>, creating
+	any necessary parent directories.  If extra arguments are supplied, limit the
+	output to the named fields---i.e. whereas WriteDict(d, filename) would output
+	the entire dict, WriteDict(d, filename, 'spam', 'eggs') would limit itself to
+	d['spam'] and d['eggs'].
+	"""
 	if len( fields ): d = dict( ( k, v ) for k, v in d.items() if k in fields )
 	file = open( MakeWayFor( filename ), 'wt' )
 	file.write( '{\n' )
@@ -97,26 +127,44 @@ def WriteDict( d, filename, *fields ):
 	file.close()
 
 def TryFilePath( *alternatives ):
+	"""
+	Work through the *alternatives, treat each one as a glob pattern specifying a file path
+	(e.g. './*-spam.dat') and return the unique match to the first of them that has matches.
+	If it has multiple matches, throw an error.  If no match is found to any of the
+	alternatives, also throw an error.  (Specifying multiple *alternatives is a good way to
+	search a path or to try to see whether a file exists with any one of a number of possible
+	file extensions.)
+	"""
+	if len( alternatives ) == 0: return None
 	for alternative in alternatives:
 		results = sorted( glob.glob( alternative ) )
 		if len( results ) > 1: raise IOError( 'multiple matches for "%s"' % alternative )
 		if len( results ) == 1: return results[ 0 ]
-	if len( alternatives ) == 0: return None
 	raise IOError( 'could not find a match for "%s"' % alternatives[ 0 ] )
 
 DB_ON = False
-def DB( arg=None, **kwargs ):
-	global DB_ON
-	if isinstance( arg, ( bool, basestring ) ):
-		if arg in [ True, 'ON', 'on' ]: DB_ON = True; return
-		if arg in [ False, 'OFF', 'off' ]: DB_ON = False; return
+DB_LOCK = threading.Lock()
+def DB( *pargs, **kwargs ):
+	"""
+	Call DB('on') to enable debug logging, and DB('off') to disable it.
+	In between, any call to DB() will write a date-stamped and line-number-stamped line
+	to sys.stderr,  together with any optional pargs and kwargs,  e.g.:
+	DB( 'hello', spam='SPAM', eggs=2 ) # might write:
+	2014-06-23  13:23:33  line  142  hello,  eggs=2,  spam='SPAM'
+	"""
+	global DB_ON, DB_LOCK
+	if len( pargs ) and isinstance( pargs[ 0 ], ( bool, basestring ) ) and pargs[ 0 ] in [ True,  'ON',  'on'  ]: DB_ON = True
 	if not DB_ON: return
 	stamp = time.strftime( '%Y-%m-%d  %H:%M:%S', time.localtime() )
-	info = inspect.getframeinfo( inspect.stack()[ 1 ][ 0 ] )
-	if arg == None: argstr = ''
-	else: argstr = str( arg )
-	argstr = '   '.join( [ argstr ] + [ '%s = %s' % ( key, repr( value ) ) for key, value in sorted( kwargs.items() ) ] )
-	sys.stderr.write( '%s  line %4d  %s\n' % ( stamp, info.lineno, argstr ) )
+	argstr = ',  '.join( [ str( x ) for x in pargs ] + [ '%s=%s' % ( key, repr( value ) ) for key, value in sorted( kwargs.items() ) ] )
+	caller = inspect.stack()[ 1 ]
+	info = inspect.getframeinfo( caller[ 0 ] )
+	DB_LOCK.acquire()
+	file = sys.stderr
+	file.write( '%s  line %4d (%s)  %s\n' % ( stamp, info.lineno, info.function, argstr ) )
+	file.flush()
+	if len( pargs ) and isinstance( pargs[ 0 ], ( bool, basestring ) ) and pargs[ 0 ] in [ False, 'OFF', 'off' ]: DB_ON = False
+	DB_LOCK.release()
 
 
 class Operator( object ):
@@ -484,20 +532,20 @@ def GetVolts( value, units ):
 
 class Switch( tkinter.Frame ):
 	def __init__( self, parent, title='', offLabel='off', onLabel='on', initialValue=0, command=None, values=( False, True ), bg=None, **kwargs ):
-		if bg == None: bg = parent[ 'bg' ]
-		tkinter.Frame.__init__( self, parent, bg=bg )
-		self.title = tkinter.Label( self, text=title, justify='right', bg=bg )
-		self.title.pack( side='left', fill='y', expand=True )
-		self.offLabel = tkinter.Label( self, text=offLabel, justify='right', bg=bg )
-		self.offLabel.pack( side='left', fill='y', expand=True )
-		self.scale = tkinter.Scale( self, showvalue=0, orient='horizontal', from_=0, to=1, length=50, sliderlength=20, command=self.switched )
-		self.scale.configure( troughcolor=bg, borderwidth=1 )
-		self.scale.configure( **kwargs )
-		self.scale.pack( side='left' )
-		self.onLabel = tkinter.Label( self, text=onLabel, justify='left', bg=bg )
-		self.onLabel.pack( side='right', fill='y', expand=True )
-		self.command = command
-		self.values = values
+		if bg == None: bg = parent[ 'bg' ]; DB()
+		tkinter.Frame.__init__( self, parent, bg=bg ); DB()
+		self.title = tkinter.Label( self, text=title, justify='right', bg=bg ); DB()
+		self.title.pack( side='left', fill='y', expand=True ); DB()
+		self.offLabel = tkinter.Label( self, text=offLabel, justify='right', bg=bg ); DB()
+		self.offLabel.pack( side='left', fill='y', expand=True ); DB()
+		self.scale = tkinter.Scale( self, showvalue=0, orient='horizontal', from_=0, to=1, length=50, sliderlength=20, command=self.switched ); DB()
+		self.scale.configure( troughcolor=bg, borderwidth=1 ); DB()
+		self.scale.configure( **kwargs ); DB()
+		self.scale.pack( side='left' ); DB()
+		self.onLabel = tkinter.Label( self, text=onLabel, justify='left', bg=bg ); DB()
+		self.onLabel.pack( side='right', fill='y', expand=True ); DB()
+		self.command = command; DB()
+		self.values = values; DB()
 	def get( self ): return self.scale.get()
 	def set( self, value ): return self.scale.set( value )
 	def switched( self, arg=None ):
@@ -1429,6 +1477,7 @@ class GUI( tksuperclass, TkMPL ):
 		
 	def HandlePendingTasks( self ):
 		
+		DB()
 		for v in self.pendingTasks.values(): v()
 		self.pendingTasks.clear()
 			
@@ -1629,6 +1678,7 @@ class ScrolledText( tkinter.Frame ):
 		except: pass
 	def active( self, event=None ): self.latest = time.time()
 	def check_autosave( self ): # check every 500 msec: if there is new activity, and the latest activity occurred more than 2s ago, then call autosave()
+		DB()
 		if self.latest != None and time.time() - self.latest > 2.0: self.autosave(); self.latest = None
 		self.after_id = self.after( 500, self.check_autosave )
 	def autosave( self ):
@@ -2005,7 +2055,7 @@ class AnalysisWindow( Dialog, TkMPL ):
 			
 		elif self.mode in [ 'rc', 'ct', 'tt', 'offline', 'mixed' ]:
 			
-			DB( 'on' ); DB()
+			DB( 'on' )
 			uppernb = self.MakeNotebook( parent=self, name='notebook_upper' ); DB()
 			uppernb.pack( side='top', fill='both', expand=1 ); DB()
 			tabframe = self.AddTab( 'overlay', 'Timings', nbname='notebook_upper' ); DB()
@@ -2113,6 +2163,7 @@ class AnalysisWindow( Dialog, TkMPL ):
 		self.DrawFigures(); DB()
 		self.latest = None
 		self.CheckUpdate(); DB()
+		DB( 'off' )
 			
 	def UpdateLines( self, rectified=False ):
 		self.overlay.Update( rectified=rectified )
