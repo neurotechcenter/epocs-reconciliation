@@ -331,33 +331,22 @@ class Operator( object ):
 		"""
 		return GetVolts( value, self.params._VoltageUnits )		
 	
-	def DataFile( self, runNumber=None, autoIncrement=False ):
-		if runNumber == None: runNumber = self.params.SubjectRun
-		runNumber = int( runNumber )
-		runString = '%02d' % runNumber
-		if runNumber == 0:
-			runNumber = 1
-			autoIncrement = True
-		if autoIncrement: runString = '*'
-		s = os.path.split( self.params.DataFile )[ 1 ]
-		for k, v in self.params.items():
-			if k is 'SubjectRun': v = runString
-			match = '${%s}' % k
-			if match in s: s = s.replace( match, v )
-		if autoIncrement:
-			d = self.DataDirectory()
-			while True:
-				candidate = s.replace( '*', '%02d' % runNumber )
-				if not os.path.isfile( d + '/' + candidate ): break
-				runNumber += 1
-			s = candidate
-		return s
-	
 	def FriendlyDate( self, stamp=None ):
+		"""
+		Convert a serial date number (in seconds since the POSIX epoch) into
+		a human-readable ISO date string suitable for datestamping a session
+		(precision only down as far as minutes).  <stamp> defaults to the
+		start time of the current session if not specified.
+		"""
 		if stamp == None: stamp = self.sessionStamp
 		return time.strftime( '%Y-%m-%d  %H:%M', time.localtime( stamp ) )
 	
 	def LastRunNumber( self, mode='' ):
+		"""
+		Return the run number of the last file recorded in the current DataDirectory().
+		If <mode> is specified as a two-letter code (e.g. 'VC', 'RC', etc), return
+		the run number of the last file recorded in the specified mode.
+		"""
 		d = self.DataDirectory()
 		if not os.path.isdir( d ): return 0
 		runs = [ self.RunNumber( x ) for x in os.listdir( d ) if x.lower().endswith( ( mode + '.' + self.params.FileFormat ).lower() ) ]
@@ -365,9 +354,16 @@ class Operator( object ):
 		return max( runs )
 		
 	def NextRunNumber( self ):
+		"""
+		Return the run number that will be used for the next recording, based on the files that are currently
+		in the DataDirectory(). Called during SetConfig() and Start()
+		"""
 		return self.LastRunNumber() + 1  # let the numbering be global - look for the last run number in *any* mode
 		
 	def RunNumber( self, datfilename ):
+		"""
+		Extract the run number from a file name. Called by LastRunNumber()
+		"""
 		parentdir, datfile = os.path.split( datfilename )
 		stem, ext = os.path.splitext( datfilename )
 		stem = '-' + '-'.join( stem.split( '-' )[ 1: ] ) + '-'
@@ -376,6 +372,8 @@ class Operator( object ):
 		return int( m.groups()[ 0 ] )
 		
 	def DataDirectory( self ):
+		"""
+		"""
 		s = '${DataDirectory}/' + self.params.DataFile
 		for k, v in self.params.items():
 			match = '${%s}' % k
@@ -598,7 +596,7 @@ class Switch( tkinter.Frame ):
 		self.offLabel.pack( side='left', fill='y', expand=True ); DB()
 		self.scale = tkinter.Scale( self, showvalue=0, orient='horizontal', from_=0, to=1, length=50, sliderlength=20, command=self.switched ); DB()
 		self.scale.configure( troughcolor=bg, borderwidth=1 ); DB()
-		self.scale.configure( **kwargs ); DB()
+		if len( kwargs ): self.scale.configure( **kwargs ); DB()
 		self.scale.pack( side='left' ); DB()
 		self.onLabel = tkinter.Label( self, text=onLabel, justify='left', bg=bg ); DB()
 		self.onLabel.pack( side='right', fill='y', expand=True ); DB()
@@ -2758,7 +2756,9 @@ class OfflineAnalysis( object ):
 		# And these are things that are knowingly used in the AnalysisWindow code:
 		for field in 'after after_cancel'.split(): setattr( self, field, getattr( self.tkparent, field ) )
 		# see also methods below
-	
+		
+		self.tkparent.clipboard_clear()
+		
 	def __repr__( self ):
 		s = object.__repr__( self ) + ':'
 		for k, v in sorted( self.operator.params.items() ): s += '\n%50s = %s' % ( k, repr( v ) )
@@ -2907,7 +2907,9 @@ class OfflineAnalysis( object ):
 		text = stamp + text + '\n'
 		if len( self.logtext ) and not self.logtext.endswith( '\n' ): self.logtext += '\n'
 		self.logtext += text
-		if self.logfile: self.logfile.write( text ) # TODO	
+		if self.logfile: self.logfile.write( text ) # TODO
+		self.tkparent.clipboard_append( text )
+		self.tkparent.update()
 	# vestigial duck traits (actually these should never even be called, if the up-conditioning and down-conditioning buttons are not made visible)
 	def SetBarLimits( self, *pargs, **kwargs ): pass
 	def SetTarget( self, *pargs, **kwargs ): pass
