@@ -150,8 +150,8 @@ def DB( *pargs, **kwargs ):
 	Call DB('on') to enable debug logging, and DB('off') to disable it.
 	In between, any call to DB() will write a date-stamped and line-number-stamped line
 	to sys.stderr,  together with any optional pargs and kwargs,  e.g.:
-	DB( 'hello', spam='SPAM', eggs=2 ) # might write:
-	2014-06-23  13:23:33  line  142  hello,  eggs=2,  spam='SPAM'
+	DB( 'hello', spam=5, eggs='EGGS' ) # might write:
+	2014-06-23  13:23:33  line  154  hello,  eggs='EGGS',  spam=5
 	"""
 	global DB_ON, DB_LOCK
 	if len( pargs ) and isinstance( pargs[ 0 ], ( bool, basestring ) ) and pargs[ 0 ] in [ True,  'ON',  'on'  ]: DB_ON = True
@@ -172,7 +172,15 @@ class Operator( object ):
 	"""
 	One Operator instance coordinates communication between one GUI instance and BCI2000's binaries.  It loads, updates and saves default
 	settings, translates these two and from BCI2000 parameter format, sends them to and receives them from the BCI2000 Operator module,
-	and receives signal information from the BCI2000 ReflexConditioningSignalProcessing module via a shared-memory mechanism
+	and receives signal information from the BCI2000 ReflexConditioningSignalProcessing module via a shared-memory mechanism.  It also
+	manages the session's settings, loading them from and saving them to disk in a subject- and session- specific way so that each
+	subject's sessions can pick up where they left off last.
+	
+	An Operator() instance is created during construction of a GUI() instance and stored as that GUI's self.operator attribute.
+	
+	The OfflineAnalysis() class tries to fool other classes into thinking it is a GUI(), and therefore also performs
+	self.operator = Operator() during construction. In this case, however, the Operator does not actually launch or talk to BCI2000,
+	but rather just handles the process of loading and saving subject-specific analysis settings.
 	"""
 	def __init__( self ):
 		
@@ -226,7 +234,7 @@ class Operator( object ):
 			_VCBackgroundBarLimit = 200,
 			_EarlyLoggedCTBaselines = {},
 			
-			_VoltageUnits = 'mV',
+			_VoltageUnits = 'mV',  # as what unit should we interpret _BackgroundMin, _BackgroundMax, _ResponseMin, _ResponseMax, _ResponseBarLimit and _VCBackgroundBarLimit
 			
 			_SecondsBetweenTriggers = 5,
 			_SecondsBetweenStimulusTests = 3,
@@ -243,9 +251,14 @@ class Operator( object ):
 		"""
 		self.remote = BCI2000Remote.BCI2000Remote()
 		self.remote.Connect()
+		# the command-line args to the .bat file are:
+		#  (1) "master" or "slave"  (the default, "master", would mean use BCI2000 standalone with no EPOCS GUI, so we will always be saying "slave" here)
+		#  (2) "replay" or "live"   (in DEVEL mode, i.e. when epocs.py is run with the --devel option, we replay data from a sample file using BCI2000's FilePlayback module; otherwise, and by default, we record live from the data acquisition board)
+		#  (3) optionally the path to a CUSTOM script (specified as a command-line option to epocs.py such as --custom=../custom/whatever.bat)
 		if DEVEL: self.bci2000( 'execute script ../batch/run-nidaqmx.bat slave replay ' + CUSTOM )
 		else:     self.bci2000( 'execute script ../batch/run-nidaqmx.bat slave live   ' + CUSTOM )
 		self.Set( TriggerExpression=self.remote.GetParameter( 'TriggerExpression' ) )
+		# We will be setting TriggerExpression to '0' to disable triggers in VC mode, and then setting it back to whatever it was before for other modes (either '', or whatever value has been set by the CUSTOM script). Therefore, we query its initial value here.
 	
 	def DataRoot( self ):
 		"""
@@ -356,13 +369,17 @@ class Operator( object ):
 	def NextRunNumber( self ):
 		"""
 		Return the run number that will be used for the next recording, based on the files that are currently
-		in the DataDirectory(). Called during SetConfig() and Start()
+		in the DataDirectory().
+		
+		Called during SetConfig() and Start()
 		"""
 		return self.LastRunNumber() + 1  # let the numbering be global - look for the last run number in *any* mode
 		
 	def RunNumber( self, datfilename ):
 		"""
-		Extract the run number from a file name. Called by LastRunNumber()
+		Extract the run number from a file name.
+		
+		Called by LastRunNumber()
 		"""
 		parentdir, datfile = os.path.split( datfilename )
 		stem, ext = os.path.splitext( datfilename )
@@ -373,6 +390,12 @@ class Operator( object ):
 		
 	def DataDirectory( self ):
 		"""
+		Return the absolute path to the directory in which data files will be recorded for the current
+		subject and session.    This function interprets self.params.DataDirectory and self.params.DataFile
+		in the same way that BCI2000 itself interprets the corresponding DataDirectory and DataFile parameters
+		(NB: BCI2000's DataDirectory parameter specifies the top-level non-subject-specific directory which
+		we prefer to call DataRoot() here in the Python code, whereas BCI2000's DataFile parameter specifies
+		the subject-specific subdirectory of the data root as well as the name of the data file itself).
 		"""
 		s = '${DataDirectory}/' + self.params.DataFile
 		for k, v in self.params.items():
@@ -382,6 +405,10 @@ class Operator( object ):
 		return ResolveDirectory( d, BCI2000LAUNCHDIR )
 	
 	def LogFile( self, autoCreate=False ):
+		"""
+		Return the absolute path to the log file for the current subject and session.
+		With autoCreate=True, the file will be created and initialized if it does not already exist.
+		"""
 		logfile = os.path.join( self.DataDirectory(), '%s-%s-log.txt' % ( self.params.SubjectName, self.params.SessionStamp ) )
 		if autoCreate and not os.path.isfile( logfile ):
 			f = open( MakeWayFor( logfile ), 'at' )
@@ -390,6 +417,12 @@ class Operator( object ):
 		return logfile
 		
 	def Set( self, **kwargs ):
+		"""
+		Set one or more members of self.params (remember, names without an underscore will be sent directly
+		to BCI2000 as parameters, whereas names beginning with underscores may be processed in SendConditioningParameters
+		and translated into BCI2000 parameters). Example:
+			Set( Spam=3, Eggs='eggs' )
+		"""
 		container = self.params
 		for key, value in kwargs.items():
 			#flush( repr( key ) + ' : ' + repr( value ) )
@@ -408,11 +441,23 @@ class Operator( object ):
 				self.sessionStamp = time.mktime( time.strptime( value, self.dateFormat ) )
 		
 	def bci2000( self, cmd ):
+		"""
+		Send a command to the BCI2000 command interpreter.
+		"""
 		#flush( cmd )
-		#os.system( os.path.join( '..', '..', '..', 'prog', 'BCI2000Shell' ) + ' -c ' + cmd )
-		return self.remote.Execute( cmd )
+		#os.system( os.path.join( '..', '..', '..', 'prog', 'BCI2000Shell' ) + ' -c ' + cmd )   # old style, via BCI2000Shell binary
+		return self.remote.Execute( cmd )  # new style, via BCI2000Remote.BCI2000Remote object
 		
 	def SendParameter( self, key, value=None ):
+		"""
+		Send the specified parameter (name specified as <key>) to BCI2000 and set its value.
+		If no <value> is specified, the current value of self.params[ key ] is used.
+		
+		Either way, SendParameter will escape the value for you according to BCI2000's
+		requirements (i.e. turn empty strings into '%', or replace spaces with '%20').
+		
+		Called by SendConditioningParameters() and SetConfig().
+		"""
 		if value == None: value = self.params[ key ]
 		value = str( value )
 		for ch in '% ${}': value = value.replace( ch, '%%%02x' % ord(ch) )
@@ -420,18 +465,24 @@ class Operator( object ):
 		self.bci2000( 'set parameter %s %s' % ( key, value ) )
 	
 	def SendConditioningParameters( self ):
-		
+		"""
+		Some of the required BCI2000 parameters have relatively complicated structure
+		(e.g. matrices of mixed content type). This method, called during SetConfig(),
+		compiles, converts and translates EPOCS settings (members of self.params whose
+		names begin with an underscore) into BCI2000 parameters and sends them to
+		BCI2000 either using SendParameter() for the simple cases, or directly using
+		bci2000() for lists and matrices.
+		"""
 		channelNames = [ x.replace( ' ', '%20' ) for x in self.params._EMGChannelNames ] # TODO: for now, we'll have to assume that these names are correctly configured in the parameter file
-		units = self.params._VoltageUnits
 		
-		def stringify( listOfNumbers ):
+		def stringify_voltages( listOfVoltages ):
 			out = []
-			for x in listOfNumbers:
+			for x in listOfVoltages:
 				if x == None: out.append( '%' )
-				else: out.append( '%g%s' % ( x, units ) )
+				else: out.append( '%g%s' % ( x, self.params._VoltageUnits ) )
 			return out
 		
-		minV, maxV = stringify( self.params._BackgroundMin ), stringify( self.params._BackgroundMax )
+		minV, maxV = stringify_voltages( self.params._BackgroundMin ), stringify_voltages( self.params._BackgroundMax )
 		if self.params.ApplicationMode.lower() in [ 'vc' ]:
 			minV, maxV = [ '%' for x in minV ], [ '%' for x in maxV ]
 		
@@ -446,7 +497,7 @@ class Operator( object ):
 		         (    name,      start[ i ],  end[ i ],                                      name,        ) for i, name in enumerate( channelNames ) ]
 		self.bci2000( 'set parameter Responses  matrix ResponseDefinition= ' + str( len( rows ) ) + ' { ' + cols + ' } ' + ' '.join( rows ) )
 
-		minV, maxV = stringify( self.params._ResponseMin ), stringify( self.params._ResponseMax )
+		minV, maxV = stringify_voltages( self.params._ResponseMin ), stringify_voltages( self.params._ResponseMax )
 		cols =   'Response%20Name     Min%20Amplitude      Max%20Amplitude    Feedback%20Weight'
 		rows = [ '     %s                  %s                  %s                    %g        ' %
 		         (    name,              minV[ i ],         maxV[ i ],             i == 0      ) for i, name in enumerate( channelNames ) ]
@@ -465,15 +516,24 @@ class Operator( object ):
 		else:                                               self.SendParameter( 'TriggerExpression' )
 		self.SendParameter( 'FeedbackTimeConstant', '%gms' % self.params._BarUpdatePeriodMsec )
 		
-		bgLimit, rLimit, rBaseline = stringify( [ self.GetBackgroundBarLimit( self.params.ApplicationMode ), self.params._ResponseBarLimit, self.params._BaselineResponse ] )
+		bgLimit, rLimit, rBaseline = stringify_voltages( [ self.GetBackgroundBarLimit( self.params.ApplicationMode ), self.params._ResponseBarLimit, self.params._BaselineResponse ] )
 		
 		self.SendParameter( 'BackgroundScaleLimit',  bgLimit )
 		self.SendParameter( 'ResponseScaleLimit',    rLimit )
 		self.SendParameter( 'BaselineResponseLevel', rBaseline )
 
 	def GetBackgroundBarLimit( self, mode ):
+		"""
+		Determine the upper y-axis limit on the graph in which the ongoing background
+		EMG level is displayed. VC mode has its own separate setting for this.  In
+		other modes, if both a minimum and maximum limit have been specified (i.e.
+		self.params._BackgroundMin[0] and self.params._BackgroundMax[0]) then ensure
+		that that range is centered vertically in the middle of the graph. If only
+		one limit has been set, ensure that that limit is centered.
+		"""
 		mode = mode.lower()
 		lower, upper = self.params._BackgroundMin[ 0 ], self.params._BackgroundMax[ 0 ]
+		if lower == 0: lower = None
 		if mode in [ 'vc' ]: return self.params._VCBackgroundBarLimit
 		elif lower == None and upper == None: return self.params._VCBackgroundBarLimit
 		elif lower == None and upper != None: return upper * 2.0
@@ -1595,7 +1655,7 @@ class GUI( tksuperclass, TkMPL ):
 			good = ( states.ResponseGreen != 0.0 )
 			self.UpdateBar( height, good, code, 'response' )
 		
-		if changed.TrialsCompleted:
+		if changed.TrialsCompleted: # the TrapFilter.cpp filter inside the ReflexConditioningSignalProcessing.exe module increments the TrialsCompleted state variable to indicate that a new trial has been trapped
 			trialCounter = self.widgets.get( code + '_label_value_trial', None )
 			successCounter = self.widgets.get( code + '_label_value_success', None )
 			if trialCounter != None:
@@ -1698,7 +1758,6 @@ class Dialog( tkinter.Toplevel ):
 	def cancel(self, event=None):
 		# put focus back to the parent window
 		if self.parent and hasattr( self.parent, 'focus_set' ): self.parent.focus_set()
-		#print self.geometry()
 		self.destroy()
 
 	# command hooks
@@ -1827,7 +1886,7 @@ class MVC( object ):
 			self.axes.set_title( '' )
 
 class ResponseOverlay( object ):
-	def __init__( self, data, fs, lookback, channel=0, axes=None, responseInterval=( .028, .035 ), comparisonInterval=None, prestimulusInterval=None, color='#0000FF', updateCommand=None, rectified=False ): 
+	def __init__( self, data, fs, lookback, channel=0, axes=None, responseInterval=( .028, .035 ), comparisonInterval=None, prestimulusInterval=None, color='#0000FF', updateCommand=None, rectified=False, emphasis=() ): 
 		# return lines, span selectors, ycon, xcon
 		if axes == None: axes = matplotlib.pyplot.gca()
 		else: matplotlib.pyplot.figure( axes.figure.number ).sca( axes )
@@ -1845,23 +1904,29 @@ class ResponseOverlay( object ):
 		self.channel = channel
 		self.fs = fs
 		self.lookback = lookback
-		self.color = color
+		self.lineprops = {
+			-1 : Bunch( color='#000000', alpha=0.0, zorder=2, linewidth=1 ),
+			 0 : Bunch( color=color,     alpha=0.3, zorder=2, linewidth=1 ),
+			+1 : Bunch( color='#FF00FF', alpha=0.8, zorder=3, linewidth=2 ),
+		}
 		self.lines = []
+		self.emphasis = list( emphasis )
 		for trial in self.data:
 			values = trial[ self.channel ]
-			self.lines += matplotlib.pyplot.plot( TimeBase( values, self.fs, self.lookback ), values, color=color, alpha=0.3 )
+			self.lines += matplotlib.pyplot.plot( TimeBase( values, self.fs, self.lookback ), values, **self.lineprops[ 0 ] )
+			if not len( emphasis ): self.emphasis.append( 0 )
 		self.yController.Home()
 		self.xController.Home()
 		self.Update( rectified=rectified )
 		
 	def Update( self, rectified=None, color=None, channel=None ):
 		if rectified != None: self.rectified = rectified
-		if color != None: self.color = color
+		if color != None: self.lineprops[ 0 ].color = color
 		if channel != None: self.channel = channel
-		for trial, line in zip( self.data, self.lines ):
+		for trial, line, emphasis in zip( self.data, self.lines, self.emphasis ):
 			if self.rectified: line.set_ydata( [ abs( value ) for value in trial[ self.channel ] ] )
 			else: line.set_ydata( trial[ self.channel ] )
-			line.set_color( self.color )
+			line.set( **self.lineprops[ emphasis ] )
 		ylim = self.axes.get_ylim()
 		if self.rectified: self.axes.set_ylim( [ 0, ylim[ 1 ] ] )
 		else: self.axes.set_ylim( [ -ylim[ 1 ], ylim[ 1 ] ] )
@@ -1872,13 +1937,14 @@ class ResponseOverlay( object ):
 		elif type == 'prestimulus': interval = self.prestimulusSelector.get()
 		return ResponseMagnitudes( data=self.data, channel=self.channel, interval=interval, fs=self.fs, lookback=self.lookback, p2p=p2p )
 
-class RecruitmentCurve( object ):
+class ResponseSequence( object ):
 	def __init__( self, overlay, axes=None, pooling=1, p2p=False, tk=False ):
 		if axes == None: axes = matplotlib.pyplot.gca()
 		else: matplotlib.pyplot.figure( axes.figure.number ).sca( axes )
 		self.axes = axes
 		self.overlay = overlay
 		self.pooling = pooling
+		self.nremoved = 0
 		self.p2p = p2p
 		self.frame = None
 		prestimColor = self.overlay.prestimulusSelector.rectprops[ 'facecolor' ]
@@ -1905,33 +1971,54 @@ class RecruitmentCurve( object ):
 	def Update( self, pooling=None, p2p=None ):
 		if pooling != None: self.pooling = pooling
 		if p2p != None: self.p2p = p2p
-		def pool( x, pooling ):
+		def pool( x, pooling, emphasis=None ):
 			ni, n, pooled = pooling, [], []
 			for start in range( 0, len( x ) - pooling + 1, pooling ):
-				pooled.append( sum( x[ start : start + pooling ] ) / float( pooling ) )
+				xsub = x[ start : start + pooling ]
+				if emphasis != None:
+					keep = [ em >= 0 for em in emphasis[ start : start + pooling ] ]
+					if sum( keep ): xsub = [ eachVal for eachVal, keepEachVal in zip( xsub, keep ) if keepEachVal ]
+					# do not remove any if you would remove *all* in the current pool (if that's the case, this data-point will be excluded completely from analysis later on anyway, but let's compute where it would have been)
+				pooled.append( sum( xsub ) / float( len( xsub ) ) )
 				n.append( ni ); ni += pooling
 			return n, pooled
-		xh, h = pool( self.overlay.ResponseMagnitudes( p2p=self.p2p, type='response'   ), self.pooling )
-		xm, m = pool( self.overlay.ResponseMagnitudes( p2p=self.p2p, type='comparison' ), self.pooling )
+		xh, h = pool( self.overlay.ResponseMagnitudes( p2p=self.p2p, type='response'   ),  pooling=self.pooling, emphasis=self.overlay.emphasis )
+		xm, m = pool( self.overlay.ResponseMagnitudes( p2p=self.p2p, type='comparison' ),  pooling=self.pooling, emphasis=self.overlay.emphasis )
+		xRemoved, removed = pool( [ float( emph < 0 ) for emph in self.overlay.emphasis ], pooling=self.pooling ) 
+		xHilited, hilited = pool( [ float( emph > 0 ) for emph in self.overlay.emphasis ], pooling=self.pooling ) 
 		b = self.overlay.ResponseMagnitudes( p2p=self.p2p, type='prestimulus' )
 		self.n = len( b )
+		self.nremoved = sum( [ emphasis < 0 for emphasis in self.overlay.emphasis ] )
 		
 		matplotlib.pyplot.figure( self.axes.figure.number ).sca( self.axes )
 		matplotlib.pyplot.cla()
-		matplotlib.pyplot.plot( xh, h, linestyle='none', marker='o', markersize=10, color=self.overlay.responseSelector.rectprops[ 'facecolor' ] )
-		matplotlib.pyplot.plot( xm, m, linestyle='none', marker='^', markersize=10, color=self.overlay.comparisonSelector.rectprops[ 'facecolor' ] )
+		mMax = hMax = bSum = bNum = 0.0
+		for x, hVal, mVal, bVal, proportionRemoved, proportionHilited in zip( xRemoved, h, m, b, removed, hilited ):
+			hHandle, = matplotlib.pyplot.plot( x, hVal, linestyle='none', marker='o', markersize=10, color=self.overlay.responseSelector.rectprops[ 'facecolor' ] )
+			mHandle, = matplotlib.pyplot.plot( x, mVal, linestyle='none', marker='^', markersize=10, color=self.overlay.comparisonSelector.rectprops[ 'facecolor' ] )
+			if proportionHilited > 0.001: [ handle.set( markeredgecolor=self.overlay.lineprops[ +1 ].color, markeredgewidth=2 ) for handle in hHandle, mHandle ]
+			if proportionHilited > 0.999: [ handle.set( markerfacecolor=self.overlay.lineprops[ +1 ].color ) for handle in hHandle, mHandle ]
+			if proportionRemoved > 0.001: [ handle.set( alpha=0.5 ) for handle in hHandle, mHandle ]
+			if proportionRemoved > 0.999: [ handle.set( markerfacecolor='#FFFFFF' ) for handle in hHandle, mHandle ]
+			else:
+				mMax = max( mVal, mMax )
+				hMax = max( hVal, hMax )
+				bSum += bVal
+				bNum += 1.0
+			
 		self.yController = AxisController( self.axes, 'y', units='V', fmt='%g', start=self.axes.get_ylim() )
 		self.yController.ChangeAxis( start=( 0, max( self.axes.get_ylim() ) ) )
 		self.axes.grid( True )
 		xt = list( xh )
 		while len( xt ) > 15: xt = xt[ 1::2 ]
 		self.axes.set( xlim=( 0	, max( xh ) + 1 ), xticks=xt )
-		self.panel.bg.set( sum( b ) / float( len( b ) ) )
-		self.panel.mmax.set( max( m ) )
-		self.panel.hmax.set( max( h ) )
+		
+		self.panel.bg.set( bSum / max( bNum, 1.0 ) )
+		self.panel.mmax.set( mMax )
+		self.panel.hmax.set( hMax )
 	
 
-class ResponseHistogram( object ):
+class ResponseDistribution( object ):
 	def __init__( self, overlay, axes=None, targetpc=66, nbins=10, p2p=False, tk=False ):
 		if axes == None: axes = matplotlib.pyplot.gca()
 		else: matplotlib.pyplot.figure( axes.figure.number ).sca( axes )
@@ -1939,6 +2026,7 @@ class ResponseHistogram( object ):
 		self.overlay = overlay
 		self.targetpc = targetpc
 		self.nbins = nbins
+		self.nremoved = 0
 		self.p2p = p2p
 		self.frame = None
 		prestimColor = self.overlay.prestimulusSelector.rectprops[ 'facecolor' ]
@@ -1973,13 +2061,14 @@ class ResponseHistogram( object ):
 			
 		def ResponseStats( type ):
 			x = self.overlay.ResponseMagnitudes( p2p=self.p2p, type=type )
+			x = [ xi for xi, emphasis in zip( x, self.overlay.emphasis ) if emphasis >= 0 ]
 			xSorted = sorted( x )
 			if len( x ) == 0: xMedian = xMean = 0.0
 			else:
 				xMean = sum( x ) / float( len ( x ) )
 				xMedian = Quantile( xSorted, 0.5, alreadySorted=True )
 			return x, xSorted, xMean, xMedian
-		
+		self.nremoved = sum( [ emphasis < 0 for emphasis in self.overlay.emphasis ] )
 		r, rSorted, rMean, rMedian = ResponseStats( 'response' )
 		c, cSorted, cMean, cMedian = ResponseStats( 'comparison' )
 		b, bSorted, bMean, bMedian = ResponseStats( 'prestimulus' )
@@ -1989,7 +2078,7 @@ class ResponseHistogram( object ):
 		matplotlib.pyplot.figure( self.axes.figure.number ).sca( self.axes )
 		matplotlib.pyplot.cla()
 		#print 'calculated = ' + repr( r )
-		if len( r ): self.counts, self.binCenters, self.patches = matplotlib.pyplot.hist( r, bins=self.nbins, facecolor=self.overlay.color, edgecolor='none' )
+		if len( r ): self.counts, self.binCenters, self.patches = matplotlib.pyplot.hist( r, bins=self.nbins, facecolor=self.overlay.lineprops[ 0 ].color, edgecolor='none' )
 		else: self.counts, self.binCenters, self.patches = [], [], []
 		self.xController = AxisController( self.axes, 'x', units='V', fmt='%g', start=self.axes.get_xlim() )
 		self.xController.Home()
@@ -2001,6 +2090,8 @@ class ResponseHistogram( object ):
 		self.panel.response.set(    [ rMedian, rMean ] )
 		self.panel.uptarget.set( uptarget )
 		self.panel.downtarget.set( downtarget )
+		if self.nremoved: self.axes.set_title( '%d of %d trials removed' % ( self.nremoved, self.nremoved + n ) )
+		else: self.axes.set_title( '' )
 		
 
 class AnalysisWindow( Dialog, TkMPL ):
@@ -2066,12 +2157,12 @@ class AnalysisWindow( Dialog, TkMPL ):
 		params = self.parent.operator.params
 		factor = self.parent.operator.GetVolts( 1 )
 		if self.acceptMode == 'up':
-			info = self.hist.panel.uptarget
+			info = self.distribution.panel.uptarget
 			critical = float( info.value ) / factor
 			critical = float( info.fmt % critical )
 			lims = ( critical, None )
 		if self.acceptMode == 'down':
-			info = self.hist.panel.downtarget
+			info = self.distribution.panel.downtarget
 			critical = float( info.value ) / factor
 			critical = float( info.fmt % critical )
 			lims = ( 0, critical )
@@ -2168,7 +2259,7 @@ class AnalysisWindow( Dialog, TkMPL ):
 				
 				figure, widget, container = self.NewFigure( parent=tabframe, prefix='sequence', suffix='main', width=figreducedwidth, height=fighalfheight ); DB()
 				panel = tkinter.Frame( tabframe, bg=tabframe[ 'bg' ] ); DB()
-				self.recruitment = RecruitmentCurve( self.overlay, pooling=1, tk=panel, p2p=False ); DB()
+				self.sequence = ResponseSequence( self.overlay, pooling=1, tk=panel, p2p=False ); DB()
 				
 				#header.pack( side='top', fill='both', expand=1 )
 				#container.pack( fill='both', expand=1 )
@@ -2194,13 +2285,13 @@ class AnalysisWindow( Dialog, TkMPL ):
 				
 				figure, widget, container = self.NewFigure( parent=tabframe, prefix='distribution', suffix='main', width=figreducedwidth, height=fighalfheight ); DB()
 				panel = tkinter.Frame( tabframe, bg=tabframe[ 'bg' ] ); DB()
-				self.hist = ResponseHistogram( self.overlay, targetpc=self.parent.operator.params._TargetPercentile, nbins=10, tk=panel ); DB()
+				self.distribution = ResponseDistribution( self.overlay, targetpc=self.parent.operator.params._TargetPercentile, nbins=10, tk=panel ); DB()
 				vcmd = ( self.register( self.TargetPCEntry ), '%s', '%P' ); DB()
-				self.hist.entry.widgets.value.configure( width=3, validatecommand=vcmd, validate='key' ); DB()
+				self.distribution.entry.widgets.value.configure( width=3, validatecommand=vcmd, validate='key' ); DB()
 
-				w = self.widgets.distribution_button_upcondition   = tkinter.Button( self.hist.frame, text="Up-Condition",   width=10, command=self.ok_up   ); DB()
+				w = self.widgets.distribution_button_upcondition   = tkinter.Button( self.distribution.frame, text="Up-Condition",   width=10, command=self.ok_up   ); DB()
 				if self.online: w.grid( row=6, column=3, sticky='nsew', padx=1, pady=1, ipadx=16 ); DB()
-				w = self.widgets.distribution_button_downcondition = tkinter.Button( self.hist.frame, text="Down-Condition", width=10, command=self.ok_down ); DB()
+				w = self.widgets.distribution_button_downcondition = tkinter.Button( self.distribution.frame, text="Down-Condition", width=10, command=self.ok_down ); DB()
 				if self.online: w.grid( row=7, column=3, sticky='nsew', padx=1, pady=1, ipadx=16 ); DB()
 
 				#header.pack( side='top', fill='both', expand=1 )
@@ -2244,19 +2335,20 @@ class AnalysisWindow( Dialog, TkMPL ):
 	def UpdateResults( self, *unused_args ):
 		if hasattr( self, 'mvc' ):
 			self.mvc.Update()
-		if hasattr( self, 'recruitment' ):
+		if hasattr( self, 'sequence' ):
 			pooling = self.widgets.sequence_entry_pooling.get()
 			try: pooling = int( pooling )
 			except: pooling = None # no change
 			p2p = self.widgets.sequence_switch_responsemode.scale.get()
-			self.recruitment.Update( pooling=pooling, p2p=p2p )
-		if hasattr( self, 'hist' ):
-			targetpc = self.hist.entry.widgets.value.get()
+			self.sequence.Update( pooling=pooling, p2p=p2p )
+		if hasattr( self, 'distribution' ):
+			targetpc = self.distribution.entry.widgets.value.get()
 			try: targetpc = float( targetpc )
 			except: targetpc = None
-			self.hist.Update( targetpc=targetpc )
+			self.distribution.Update( targetpc=targetpc )
 			EnableWidget( [ self.widgets.distribution_button_upcondition, self.widgets.distribution_button_downcondition ], self.TimingsSaved() )
 		if hasattr( self, 'overlay' ):
+			self.overlay.Update()
 			if self.TimingsSaved(): self.widgets.overlay_button_savetimings.configure( state='disabled', bg=self.colors.button )
 			else:                   self.widgets.overlay_button_savetimings.configure( state='normal',   bg='#FF4444' )
 		ax = self.artists.get( 'overlay_axes_main', None )
@@ -2270,28 +2362,34 @@ class AnalysisWindow( Dialog, TkMPL ):
 			start, end = [ sec * 1000.0 for sec in self.mvc.selector.get() ]
 			if self.mvc.estimate != None: self.parent.Log( 'MVC estimated at %s over a %g-msec window' % ( self.mvc.estimate, end - start ) )
 		elif type == 'sequence':
-			if self.recruitment.p2p: metric = 'peak-to-peak'
+			removed = self.sequence.nremoved
+			used = self.sequence.n - removed
+			if removed: self.parent.Log( '(After removal of %d of the %d trials)' % ( removed, removed + used ) )
+			if self.sequence.p2p: metric = 'peak-to-peak'
 			else: metric = 'average rectified signal'
-			self.parent.Log( 'From %d measurements, pooled in groups of %d:' % ( self.recruitment.n, self.recruitment.pooling ) )
+			self.parent.Log( 'From %d measurements, pooled in groups of %d:' % ( used, self.sequence.pooling ) )
 			start, end = [ sec * 1000.0 for sec in self.overlay.prestimulusSelector.get() ]
-			meanPrestim = self.recruitment.panel.bg.str()
+			meanPrestim = self.sequence.panel.bg.str()
 			self.parent.Log( '   Mean pre-stimulus activity (%g to %g msec) = %s (%s)' % ( start, end, meanPrestim, metric ) )
 			start, end = [ sec * 1000.0 for sec in self.overlay.comparisonSelector.get() ]
-			maxComparison = self.recruitment.panel.mmax.str()
+			maxComparison = self.sequence.panel.mmax.str()
 			self.parent.Log( '   Maximum reference response (%g to %g msec) = %s (%s)' % ( start, end, maxComparison, metric ) )
 			start, end = [ sec * 1000.0 for sec in self.overlay.responseSelector.get() ]
-			maxResponse = self.recruitment.panel.hmax.str()
+			maxResponse = self.sequence.panel.hmax.str()
 			self.parent.Log( '   Maximum target response (%g to %g msec) = %s (%s)\n' % ( start, end, maxResponse, metric ) )
 		elif type == 'distribution':
 			start, end = [ sec * 1000.0 for sec in self.overlay.responseSelector.get() ]
-			self.parent.Log( 'From %s trials using target response interval from %g to %gmsec and aiming at percentile %s: ' % ( self.hist.panel.n.str(), start, end, self.hist.entry.str() ) )
-			self.parent.Log( '   pre-stimulus activity (median, mean) = %s' % self.hist.panel.prestimulus.str() )
-			self.parent.Log( '   reference response    (median, mean) = %s' % self.hist.panel.comparison.str() )
-			self.parent.Log( '   target response       (median, mean) = %s' % self.hist.panel.response.str() )
-			self.parent.Log( '   upward target = %s' % self.hist.panel.uptarget.str() )
-			self.parent.Log( '   downward target = %s\n' % self.hist.panel.downtarget.str() )
+			removed = self.distribution.nremoved
+			used = self.distribution.panel.n.value
+			if removed: self.parent.Log( '(After removal of %d of the %d trials)' % ( removed, removed + used ) )
+			self.parent.Log( 'From %s trials using target response interval from %g to %gmsec and aiming at percentile %s: ' % ( self.distribution.panel.n.str(), start, end, self.distribution.entry.str() ) )
+			self.parent.Log( '   pre-stimulus activity (median, mean) = %s' % self.distribution.panel.prestimulus.str() )
+			self.parent.Log( '   reference response    (median, mean) = %s' % self.distribution.panel.comparison.str() )
+			self.parent.Log( '   target response       (median, mean) = %s' % self.distribution.panel.response.str() )
+			self.parent.Log( '   upward target = %s' % self.distribution.panel.uptarget.str() )
+			self.parent.Log( '   downward target = %s\n' % self.distribution.panel.downtarget.str() )
 			if self.mode in [ 'ct' ] and self.parent.operator.params._BaselineResponse == None:
-				info = self.hist.panel.response
+				info = self.distribution.panel.response
 				baselines = self.parent.operator.params._EarlyLoggedCTBaselines
 				baselines[ self.parent.operator.LastRunNumber( mode=self.mode ) ] = info.value[ 0 ]
 				meanOfMedians = sum( baselines.values() ) / float( len( baselines ) )
