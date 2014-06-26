@@ -2073,7 +2073,8 @@ class ResponseDistribution( object ):
 		c, cSorted, cMean, cMedian = ResponseStats( 'comparison' )
 		b, bSorted, bMean, bMedian = ResponseStats( 'prestimulus' )
 		n = len( r )
-		targets = Quantile( rSorted, ( self.targetpc / 100.0, 1.0 - self.targetpc / 100.0 ), alreadySorted=True )
+		if n: targets = Quantile( rSorted, ( self.targetpc / 100.0, 1.0 - self.targetpc / 100.0 ), alreadySorted=True )
+		else: targets = [ 0 ]
 		downtarget, uptarget = max( targets ), min( targets )
 		matplotlib.pyplot.figure( self.axes.figure.number ).sca( self.axes )
 		matplotlib.pyplot.cla()
@@ -2260,6 +2261,7 @@ class AnalysisWindow( Dialog, TkMPL ):
 				figure, widget, container = self.NewFigure( parent=tabframe, prefix='sequence', suffix='main', width=figreducedwidth, height=fighalfheight ); DB()
 				panel = tkinter.Frame( tabframe, bg=tabframe[ 'bg' ] ); DB()
 				self.sequence = ResponseSequence( self.overlay, pooling=1, tk=panel, p2p=False ); DB()
+				cid = self.sequence.axes.figure.canvas.mpl_connect( 'button_press_event', self.ToggleTrial )
 				
 				#header.pack( side='top', fill='both', expand=1 )
 				#container.pack( fill='both', expand=1 )
@@ -2312,6 +2314,24 @@ class AnalysisWindow( Dialog, TkMPL ):
 		self.CheckUpdate(); DB()
 		DB( 'off' )
 			
+	def ToggleTrial( self, event ):
+		'on button press event'
+		if not hasattr( self, 'sequence' ): return
+		if event.inaxes != self.sequence.axes or event.button not in [ 1, 3 ]: return
+		where = round( event.xdata )
+		rounded = int( self.sequence.pooling * round( where / self.sequence.pooling ) )
+		if abs( where - rounded ) > 0.1: return
+		if rounded not in range( self.sequence.pooling, self.sequence.n + 1, self.sequence.pooling ): return
+		indices = range( rounded - self.sequence.pooling, rounded )
+		wasNormal = sum( [ self.overlay.emphasis[ index ] != 0 for index in indices ] ) == 0 
+		if wasNormal:
+			if event.button == 1: newValue = +1
+			else:                 newValue = -1
+		else: newValue = 0
+		for index in indices: self.overlay.emphasis[ index ] = newValue
+		self.UpdateResults()
+		return False
+		
 	def UpdateLines( self, rectified=False ):
 		self.overlay.Update( rectified=rectified )
 		self.DrawFigures()
