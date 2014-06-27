@@ -45,7 +45,7 @@ def flush( s ): sys.stdout.write( str( s ) + '\n' ); sys.stdout.flush()
 
 class Bunch( dict ):
 	"""
-	A class like a dict but in which you can de-reference members like.this as well as like['this']
+	A class like a dict but in which you can de-reference members like.this as well as like['this'] .
 	Used throughout.
 	"""
 	def __init__( self, d=(), **kwargs ): dict.__init__( self, d ); dict.update( self, kwargs )
@@ -2382,9 +2382,9 @@ class AnalysisWindow( Dialog, TkMPL ):
 			start, end = [ sec * 1000.0 for sec in self.mvc.selector.get() ]
 			if self.mvc.estimate != None: self.parent.Log( 'MVC estimated at %s over a %g-msec window' % ( self.mvc.estimate, end - start ) )
 		elif type == 'sequence':
-			removed = self.sequence.nremoved
-			used = self.sequence.n - removed
-			if removed: self.parent.Log( '(After removal of %d of the %d trials)' % ( removed, removed + used ) )
+			removed = [ str( ind + 1 ) for ind, emph in enumerate( self.overlay.emphasis ) if emph < 0 ]
+			if len( removed ): self.parent.Log( 'Trials removed before analysis: #%s' % ','.join( removed ) )
+			used = self.sequence.n - len( removed )
 			if self.sequence.p2p: metric = 'peak-to-peak'
 			else: metric = 'average rectified signal'
 			self.parent.Log( 'From %d measurements, pooled in groups of %d:' % ( used, self.sequence.pooling ) )
@@ -2399,9 +2399,8 @@ class AnalysisWindow( Dialog, TkMPL ):
 			self.parent.Log( '   Maximum target response (%g to %g msec) = %s (%s)\n' % ( start, end, maxResponse, metric ) )
 		elif type == 'distribution':
 			start, end = [ sec * 1000.0 for sec in self.overlay.responseSelector.get() ]
-			removed = self.distribution.nremoved
-			used = self.distribution.panel.n.value
-			if removed: self.parent.Log( '(After removal of %d of the %d trials)' % ( removed, removed + used ) )
+			removed = [ str( ind + 1 ) for ind, emph in enumerate( self.overlay.emphasis ) if emph < 0 ]
+			if len( removed ): self.parent.Log( 'Trials removed before analysis: #%s' % ','.join( removed ) )
 			self.parent.Log( 'From %s trials using target response interval from %g to %gmsec and aiming at percentile %s: ' % ( self.distribution.panel.n.str(), start, end, self.distribution.entry.str() ) )
 			self.parent.Log( '   pre-stimulus activity (median, mean) = %s' % self.distribution.panel.prestimulus.str() )
 			self.parent.Log( '   reference response    (median, mean) = %s' % self.distribution.panel.comparison.str() )
