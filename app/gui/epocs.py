@@ -4,17 +4,23 @@ TODO
 	offline analysis
 		maybe override ResponseInterval from .dat file with ResponseInterval from -LastSettings-Offline.txt config file?
 			(but not with the setting from the online one, if present)
-		interface for removing individual trials - from sequence view and/or new outlier removal tab?
-		make "log results" results go somewhere
+		(semi-)automatic removal of individual trials? using new outlier-removal tab?
+		make "log results" results go somewhere other than just clipboard?
+		clipboard gets wiped on quit (see http://stackoverflow.com/questions/579687 )
+		save figures as pdf?
 		
 	intermittently broken zooming in VC analysis
+	
 	NB: assuming background is in range, time between triggers actually seems to come out to MinTimeBetweenTriggers + 1 sample block
-
-	investigate "python is not responding" error
-	NIDAQmx error -88709 on StopRun happened once....
 	
 	make separate settings entry to govern maximum random extra hold duration?  (if so: remember to enforce its rounding to whole number of segments)
+	
 	NIDAQmxADC: acquisition of floating-point raw data instead of integers
+	
+	NIDAQFilter: reparameterize to remove reliance on command-line parameters	
+	
+	investigate "python is not responding" error
+	NIDAQmx error -88709 on StopRun happened once....
 """
 
 import os, sys, time, math, re, threading, glob
@@ -2886,16 +2892,19 @@ class OfflineAnalysis( object ):
 			try: return time.mktime( time.strptime( os.path.split( subdir )[ -1 ][ -n : ], fmt ) )
 			except: return 0
 		if subjectName == None: subjectName = self.operator.params.SubjectName
-		self.operator.Set( SubjectName=subjectName )
-		if sessionStamp != None: self.operator.Set( SessionStamp=sessionStamp )
-		if not DecodeSessionStamp( self.operator.params.SessionStamp ):
-			self.operator.Set( SessionStamp=self.operator.LastSessionStamp() )
-		if not DecodeSessionStamp( self.operator.params.SessionStamp ):
-			d = os.path.realpath( os.path.join( self.operator.DataDirectory(), '..' ) )
-			last = max( [ 0 ] + [ DecodeSessionStamp( x, d ) for x in os.listdir( d ) ] )
-			self.operator.Set( SessionStamp=time.strftime( fmt, time.localtime( last ) ) )
-		self.operator.Set( **self.operator.ReadSubjectSettings( suffix='' ) )
-		self.operator.Set( **self.operator.ReadSubjectSettings( suffix='-Offline' ) )
+		if subjectName  not in [ None, '' ]:
+			self.operator.Set( SubjectName=subjectName )
+		if sessionStamp not in [ None ]:
+			self.operator.Set( SessionStamp=sessionStamp )
+			if not DecodeSessionStamp( self.operator.params.SessionStamp ):
+				self.operator.Set( SessionStamp=self.operator.LastSessionStamp() )
+			if not DecodeSessionStamp( self.operator.params.SessionStamp ):
+				d = os.path.realpath( os.path.join( self.operator.DataDirectory(), '..' ) )
+				last = max( [ 0 ] + [ DecodeSessionStamp( x, d ) for x in os.listdir( d ) ] )
+				self.operator.Set( SessionStamp=time.strftime( fmt, time.localtime( last ) ) )
+		if subjectName  not in [ None, '' ]:
+			self.operator.Set( **self.operator.ReadSubjectSettings( suffix='' ) )
+			self.operator.Set( **self.operator.ReadSubjectSettings( suffix='-Offline' ) )
 	
 	
 	def CloseWindow( self, window=None ):
