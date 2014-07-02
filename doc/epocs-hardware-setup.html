@@ -1,0 +1,40 @@
+<html>
+	<head>
+		<title>EPOCS hardware setup</title>
+	</head>
+	<body>
+		<h1>EPOCS hardware setup</h1>
+		
+		<p>
+			EPOCS assumes you have a National Instruments X-series data acquisition card, such as the
+			<a href="http://sine.ni.com/nips/cds/view/p/lang/en/nid/207405">PCIe 6321</a>, installed in your PC,
+			and that you have installed the NI software and drivers (including NIDAQmx version 8.5 or later).
+		</p>
+		<p>
+			By default, EPOCS will assume that the card is named Dev1 (verify this using the NIMAX program).
+		</p>
+		
+		<p>In addition to the PCIe card, you will need the following National Instruments products:</p>
+		<ul>
+			<li><a href="http://sine.ni.com/nips/cds/view/p/lang/en/nid/203462">BNC-2090A</a> rack-mountable connector block, or similar (see photo below)</li>
+			<li><a href="http://sine.ni.com/nips/cds/view/p/lang/en/nid/201628">SHC68-68-EPM</a> cable (1m) to connect the PCIe card to the connnector block</li>
+		</ul>
+		
+		The connector block is used as follows:
+		<img src="BNC2090A.JPG" width="100%"/>
+		
+		<ul>
+			<li>Blue-labelled BNC cable: amplified EMG signal #1 (agonist muscle), connected to port AI0  (may be called ACH0 on older models)</li>
+			<li>Red-labelled BNC cable: amplified EMG signal #2 (antagonist muscle), connected to port AI1  (may be called ACH1 on older models)</li>
+			<li>White-labelled BNC cable: trigger copy, connected to port AI2  (may be called ACH2 on older models). The other end of this cable is attached
+			using a <a href="http://www.pasternack.com/bnc-female-female-female-tee-adapter-pe9003-p.aspx">BNC tee piece</a> to the green-labelled cable.</li>
+			<li>Green-labelled BNC cable: trigger output, connected to port USER2. The other end of this cable is connected via the BNC tee connector to
+				<ul>
+					<li>the white-labelled cable in AI2,</li>
+					<li>the stimulator (if using a Grass S48 stimulator, connect to the "-- SYNC IN --  STIM. DELAY" port), and</li>
+					<li>any other optional equipment, such as an oscilloscope, that needs to know about trigger timing.</li>
+				</ul>
+			<li>Yellow asterisk (<span style="color:#AAAA00; background-color=#000000; font-size=400%;">*</span>): this simple wire connects P07 (previously called DIO7) with USER2 in the BNC-2090A's custom spring terminals. Without this, the green-labelled cable will not receive a signal.</li>
+		</ul>
+	</body>
+</html>
