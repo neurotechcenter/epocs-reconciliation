@@ -19,8 +19,8 @@ TODO
 	
 	NIDAQFilter: reparameterize to remove reliance on command-line parameters	
 	
-	investigate "python is not responding" error
-	NIDAQmx error -88709 on StopRun happened once....
+	investigate rare "python is not responding" error
+	NIDAQmx error -88709 on StopRun also happened once....
 """
 
 import os, sys, time, math, re, threading, glob
