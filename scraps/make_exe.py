@@ -21,10 +21,13 @@ options = {
 	},
 }
 
-data_files = matplotlib.get_py2exe_datafiles()
-data_files.append( os.path.join( PYTHON, 'tcl', 'tcl8.5', 'init.tcl' ) )
 icon = os.path.join( EPOCS, 'app', 'gui', 'epocs.ico' )
-data_files.append( icon )
+data_files = [
+	icon,
+	os.path.join( EPOCS, 'app', 'gui', 'ExampleData.pk' ),
+	os.path.join( PYTHON, 'tcl', 'tcl8.5', 'init.tcl' ),	
+]
+data_files += matplotlib.get_py2exe_datafiles()
 
 print "copying files..."
 
@@ -33,7 +36,7 @@ oldstderr, oldstdout = sys.stderr, sys.stdout
 sys.stderr = sys.stdout = open( logfile, 'wt')
 setup(
 	options=options,
-	#zipfile=None, # uncomment if attempting to make a single .exe
+	zipfile=None, # uncomment if attempting to make a single .exe
 	data_files=data_files,
 	windows=[
 		{
@@ -48,9 +51,9 @@ dependencies = sorted( [ x.strip().split( ' ', 2 )[ -1 ] for x in open( logfile,
 dependencies_sys = [ x for x in dependencies if x.startswith( os.environ[ 'SYSTEMROOT' ] ) ]
 dependencies = [ x for x in dependencies if x not in dependencies_sys ]
 
+print "copying random extra dependencies that weren't included for some bizarre reason..."
 print '\n'.join( dependencies )
-print '***********************************'
+print "\nbut omitting the following:"
 print '\n'.join( dependencies_sys )
 
-print "copying random extra dependencies that weren't included for some bizarre reason..."
 for x in dependencies:  shutil.copyfile( x, os.path.join( 'dist', os.path.split( x )[ 1 ] ) )
