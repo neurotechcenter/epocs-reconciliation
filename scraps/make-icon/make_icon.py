@@ -13,7 +13,7 @@ def make_icon_layers( image, layer ):
 	def gprint( x ): return g.gimp_message( str( x ) )
 	#image = gimp.image_list()[ 0 ]
 	#layer = image.layers[ 0 ]
-	for size in [ 64, 48, 32, 16 ]:
+	for size in [ 16, 32, 48, 64 ]:
 		duplicate = g.gimp_layer_copy( layer, TRUE )
 		g.gimp_image_insert_layer( image, duplicate, None, -1 )	
 		g.gimp_item_set_name( duplicate, '%dx%d' % ( size, size ) )

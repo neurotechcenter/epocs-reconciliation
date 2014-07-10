@@ -6,5 +6,7 @@ app/prog/Operator.ini
 system-logs
 *.psftp
 scraps/make-icon/epocs_icon.*
+app/dist
+scraps/make_exe.log
 syntax: regexp
 data/(?!sample)
