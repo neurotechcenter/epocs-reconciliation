@@ -1,9 +1,5 @@
 import os, sys, shutil
 
-
-EPOCS = os.path.realpath( '..' )
-PYTHON = os.environ[ 'PYTHONHOME' ]
-
 from distutils.core import setup
 import py2exe
 
@@ -21,15 +17,14 @@ options = {
 	},
 }
 
-icon = os.path.join( EPOCS, 'app', 'gui', 'epocs.ico' )
 data_files = [
-	icon,
-	os.path.join( EPOCS, 'app', 'gui', 'ExampleData.pk' ),
-	os.path.join( PYTHON, 'tcl', 'tcl8.5', 'init.tcl' ),	
+	'epocs.ico',
+	'ExampleData.pk',
+	os.path.join( os.environ[ 'PYTHONHOME' ], 'tcl', 'tcl8.5', 'init.tcl' ),
 ]
 data_files += matplotlib.get_py2exe_datafiles()
 
-print "copying files..."
+print "running py2exe..."
 
 logfile = 'make_exe.log'
 oldstderr, oldstdout = sys.stderr, sys.stdout
@@ -40,8 +35,8 @@ setup(
 	data_files=data_files,
 	windows=[
 		{
-			        'script' : os.path.join( EPOCS, 'app', 'gui', 'epocs.py' ),
-			'icon_resources' : [ ( 1, icon ) ],
+			        'script' : 'epocs.py',
+			'icon_resources' : [ ( 1, 'epocs.ico' ) ],
 		}
 	],
 )

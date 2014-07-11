@@ -1,12 +1,12 @@
 syntax: glob
+*.pyc
+*.psftp
 app/gui/epocs.ini
+app/gui/make_exe.log
 app/prog/epocs.mmap
 app/prog/Operator.ini
-*.pyc
-system-logs
-*.psftp
-scraps/make-icon/epocs_icon.*
 app/dist
-scraps/make_exe.log
+system-logs
+scraps/make-icon/epocs_icon.*
 syntax: regexp
 data/(?!sample)
