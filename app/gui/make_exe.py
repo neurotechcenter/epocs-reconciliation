@@ -22,12 +22,18 @@ options = {
 	},
 }
 
+# assume Python 2.7.5 with tcl8.5:
+tclfiles = [
+	os.path.join( os.environ[ 'PYTHONHOME' ], 'tcl', 'tcl8.5', 'init.tcl' ),
+]
+
 data_files = [
 	'epocs.ico',
 	'ExampleData.pk',
-	os.path.join( os.environ[ 'PYTHONHOME' ], 'tcl', 'tcl8.5', 'init.tcl' ),
 ]
 data_files += matplotlib.get_py2exe_datafiles()
+data_files += tclfiles
+
 
 # awkward kludge to include BCPy2000.SigTools.NumTools.py by hand but do not include the rest of SigTools
 numtools_src = [ os.path.join( x, 'BCPy2000', 'SigTools', 'NumTools.py' ) for x in sys.path ]
@@ -41,7 +47,7 @@ oldstderr, oldstdout = sys.stderr, sys.stdout
 sys.stderr = sys.stdout = open( logfile, 'wt')
 setup(
 	options=options,
-	#zipfile=None, # uncomment if attempting to make a single .exe (incompatible with the zipfile manipulations below however)
+	zipfile=None, # uncomment if attempting to make a single .exe (incompatible with the zipfile manipulations below however)
 	data_files=data_files,
 	windows=[
 		{
