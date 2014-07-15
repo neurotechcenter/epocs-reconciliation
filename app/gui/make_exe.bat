@@ -12,7 +12,7 @@
 @rd /s /q build > NUL 2> NUL
 
 @echo Moving directory into place
-@rd /s /q ..\gui-bin > NUL || goto skipmove
+@dir ..\gui-bin > NUL 2> NUL && ( rd /s /q ..\gui-bin > NUL || goto skipmove )
 move dist ..\gui-bin
 :skipmove
 
