@@ -6,13 +6,17 @@ import py2exe
 if not hasattr( sys, 'argv' ): sys.argv = [ 'make_exe' ]
 if len( sys.argv ) < 2: sys.argv.append( 'py2exe' )
 
+
+
 import matplotlib
 import matplotlib.backends.backend_tkagg
+includes = [ 'matplotlib.backends.backend_tkagg' ]
+excludes = [ 'scipy', 'BCPy2000.SigTools' ]
 
 options = {
 	'py2exe': {
-		    'excludes' : [ 'scipy', 'BCPy2000.WavTools' ],
-		    'includes' : [ 'matplotlib.backends.backend_tkagg' ],
+		    'excludes' : excludes,
+		    'includes' : includes,
 		#'bundle_files' : 1,      # uncomment if attempting to make a single .exe
 		  'compressed' : True,    # uncomment if attempting to make a single .exe
 	},
@@ -25,8 +29,13 @@ data_files = [
 ]
 data_files += matplotlib.get_py2exe_datafiles()
 
-print "running py2exe..."
+# awkward kludge to include BCPy2000.SigTools.NumTools.py by hand but do not include the rest of SigTools
+numtools_src = [ os.path.join( x, 'BCPy2000', 'SigTools', 'NumTools.py' ) for x in sys.path ]
+numtools_src = [ x for x in numtools_src if os.path.isfile( x ) ][ 0 ]
+shutil.copyfile( numtools_src, 'NumTools.py' ); import NumTools; includes.append( 'NumTools' ) 
+# remember to delete ./NumTools.py and ./NumTools.pyc again afterwards
 
+print "running py2exe..."
 logfile = 'make_exe.log'
 oldstderr, oldstdout = sys.stderr, sys.stdout
 sys.stderr = sys.stdout = open( logfile, 'wt')
@@ -42,24 +51,8 @@ setup(
 	],
 )
 sys.stderr, sys.stdout = oldstderr, oldstdout
-
-import zipfile
-zinname = os.path.join( 'dist', 'library.zip' )
-zoutname = os.path.join( 'dist', 'library2.zip' )
-zin = zipfile.ZipFile( zinname, 'r' )
-zout = zipfile.ZipFile( zoutname, 'w' )
-for item in zin.infolist():
-	arcname = item.filename
-	buffer = zin.read( arcname )
-	if 'SigTools/__init__.py' in arcname:
-		print 'replacing ', arcname, 'in', zinname
-		arcname = arcname.rstrip( 'c' )
-		buffer = ''
-	zout.writestr( arcname, buffer )
-zout.close()
-zin.close()
-shutil.move( zoutname, zinname )
-
+os.remove( 'NumTools.py' )
+os.remove( 'NumTools.pyc' )
 
 dependencies = sorted( [ x.strip().split( ' ', 2 )[ -1 ] for x in open( logfile, 'rt' ).readlines() if x.startswith( ' ' ) and ' - ' in x ] )
 dependencies_sys = [ x for x in dependencies if x.startswith( os.environ[ 'SYSTEMROOT' ] ) ]

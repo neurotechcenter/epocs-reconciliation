@@ -2927,7 +2927,7 @@ class OfflineAnalysis( object ):
 		
 	def ReadDatFile( self, filename, **kwargs ):
 		from BCPy2000.BCI2000Tools.Chain import bci2000root, bci2000chain  # also imports BCI2000Tools.Parameters as a central component and SigTools for a few things
-		from BCPy2000.SigTools.NumTools import edges, epochs # TODO: it would be nice to use the TrapFilter as well, instead of edges() and epochs(), but BCI2000 framework bugs prevent it for now
+		
 		if bci2000root() == None: bci2000root( os.path.join( BCI2000LAUNCHDIR, '..' ) )
 		filename = TryFilePath( filename, os.path.join( self.operator.DataDirectory(), filename ) )
 		self.Log( 'reading ' + filename )
@@ -2945,9 +2945,17 @@ class OfflineAnalysis( object ):
 			ApplicationMode  = s.Parms.ApplicationMode.Value.lower(),
 			ResponseInterval = tuple( s.Parms.ResponseDefinition.ScaledValue[ 0, [ 1, 2 ] ] ), 
 		)
-		edgeIndices = edges( s.Signal[ :, trigIndex ] >= s.Parms.TriggerThreshold.ScaledValue )
+
+		try: import BCPy2000.SigTools.NumTools as NumTools # TODO: it would be nice to use the TrapFilter as a command-line filter as well, instead of the NumTools code (edges, epochs, refrac and diffx are needed). But for now BCI2000 framework bugs prevent this (or at least make it impossibly difficult to debug the problems I have observed if they really arise from TrapFilter itself)
+		except ImportError: import NumTools # py2exe fallback: the file for BCPy2000.SigTools.NumTools will be included by hand but the rest of BCPy2000.SigTools will be excluded
 		s.Epochs = s.__class__()
-		s.Epochs.Data, s.Epochs.Time, s.Epochs.Indices = epochs( s.Signal / 1e6, edgeIndices, length=p.LookForward + p.LookBack, offset=-p.LookBack, refractory=0.5, fs=p.SamplingRate, axis=0, return_array=True )
+		# In FullMonty-based operation using epocs.py, scipy will be available, so BCI2000Tools.Chain will successfully import SigTools,
+		# so the container class will be a SigTools.sstruct and the above command will be unnecessary.   By contrast, in the py2exe-made
+		# version, scipy and SigTools will be excluded. Later versions of BCI2000Tools (bci2000.org r4734 and up) are sensitive to this
+		# possibility, and fall back on the lighter-weight code in BCI2000Tools.LoadStream2Mat, where our Bunch() class is replicated -
+		# in this case, the line above is necessary to initialize the empty substruct container.
+		edgeIndices = NumTools.edges( s.Signal[ :, trigIndex ] >= s.Parms.TriggerThreshold.ScaledValue )
+		s.Epochs.Data, s.Epochs.Time, s.Epochs.Indices = NumTools.epochs( s.Signal / 1e6, edgeIndices, length=p.LookForward + p.LookBack, offset=-p.LookBack, refractory=0.5, fs=p.SamplingRate, axis=0, return_array=True )
 		self.Log( 'used %d of %d triggers' % ( len( s.Epochs.Indices ), len( edgeIndices ) ) )
 		if len( s.Epochs.Data ): s.Epochs.Data = list( s.Epochs.Data.transpose( 0, 2, 1 ) ) # AnalysisWindow and its subplots will expect trials by channels by time
 		return s
