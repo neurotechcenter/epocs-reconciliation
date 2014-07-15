@@ -93,7 +93,7 @@ def ResolveDirectory( d, startDir=None ):
 	"""
 	Return an absolute path to <d>, relative to <startDir>
 	(or, if <startDir> is not specified, relative to the
-	current working directory.
+	current working directory).
 	"""
 	oldDir = os.getcwd()
 	if startDir == None: startDir = oldDir
@@ -2927,7 +2927,7 @@ class OfflineAnalysis( object ):
 		
 	def ReadDatFile( self, filename, **kwargs ):
 		from BCPy2000.BCI2000Tools.Chain import bci2000root, bci2000chain  # also imports BCI2000Tools.Parameters as a central component and SigTools for a few things
-		import BCPy2000.SigTools as SigTools
+		from BCPy2000.SigTools.NumTools import edges, epochs # TODO: it would be nice to use the TrapFilter as well, instead of edges() and epochs(), but BCI2000 framework bugs prevent it for now
 		if bci2000root() == None: bci2000root( os.path.join( BCI2000LAUNCHDIR, '..' ) )
 		filename = TryFilePath( filename, os.path.join( self.operator.DataDirectory(), filename ) )
 		self.Log( 'reading ' + filename )
@@ -2945,11 +2945,10 @@ class OfflineAnalysis( object ):
 			ApplicationMode  = s.Parms.ApplicationMode.Value.lower(),
 			ResponseInterval = tuple( s.Parms.ResponseDefinition.ScaledValue[ 0, [ 1, 2 ] ] ), 
 		)
-		# TODO: it would be nice to use the TrapFilter as well, instead of SigTools.edges and SigTools.epochs,
-		#       but BCI2000 framework bugs prevent it for now
-		edges = SigTools.edges( s.Signal[ :, trigIndex ] >= s.Parms.TriggerThreshold.ScaledValue )
-		s.Epochs.Data, s.Epochs.Time, s.Epochs.Indices = SigTools.epochs( s.Signal / 1e6, edges, length=p.LookForward + p.LookBack, offset=-p.LookBack, refractory=0.5, fs=p.SamplingRate, axis=0, return_array=True )
-		self.Log( 'used %d of %d triggers' % ( len( s.Epochs.Indices ), len( edges ) ) )
+		edgeIndices = edges( s.Signal[ :, trigIndex ] >= s.Parms.TriggerThreshold.ScaledValue )
+		s.Epochs = s.__class__()
+		s.Epochs.Data, s.Epochs.Time, s.Epochs.Indices = epochs( s.Signal / 1e6, edgeIndices, length=p.LookForward + p.LookBack, offset=-p.LookBack, refractory=0.5, fs=p.SamplingRate, axis=0, return_array=True )
+		self.Log( 'used %d of %d triggers' % ( len( s.Epochs.Indices ), len( edgeIndices ) ) )
 		if len( s.Epochs.Data ): s.Epochs.Data = list( s.Epochs.Data.transpose( 0, 2, 1 ) ) # AnalysisWindow and its subplots will expect trials by channels by time
 		return s
 		

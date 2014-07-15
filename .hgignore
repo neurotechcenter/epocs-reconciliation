@@ -5,8 +5,8 @@ app/gui/epocs.ini
 app/gui/make_exe.log
 app/prog/epocs.mmap
 app/prog/Operator.ini
-app/dist
 system-logs
 scraps/make-icon/epocs_icon.*
+app/gui-bin
 syntax: regexp
 data/(?!sample)
