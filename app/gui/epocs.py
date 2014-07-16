@@ -1,25 +1,28 @@
 """
 TODO
 
-	offline analysis
-		make progress-when-reading / logged-results prettier (esp. in py2exe version)?
-		related issue: make log-file go somewhere saveable other than just clipboard?
-		clipboard gets wiped on quit (see http://stackoverflow.com/questions/579687 ) - NB: problem seems to go away in py2exe'd version
-		
-		maybe override ResponseInterval from .dat file with ResponseInterval from -LastSettings-Offline.txt config file?
-			(but not with the setting from the online one, if present)
-		(semi-)automatic removal of individual trials? using new outlier-removal tab?
-		save figures as pdf?
-		
 	intermittently broken zooming in VC analysis
 	
-	NB: assuming background is in range, time between triggers actually seems to come out to MinTimeBetweenTriggers + 1 sample block
+	caveats and gotchas:
+		assuming background is in range, time between triggers actually seems to come out to MinTimeBetweenTriggers + 1 sample block
+		py2exe compiled version does not produce a system-logs/*-python.txt log, presumably because output is redirected via a different mechanism, to the log file inside gui-bin
 	
-	make separate settings entry to govern maximum random extra hold duration?  (if so: remember to enforce its rounding to whole number of segments)
+	nice-to-haves:
+		make separate settings entry to govern maximum random extra hold duration?  (if so: remember to enforce its rounding to whole number of segments)
 	
-	NIDAQmxADC: acquisition of floating-point raw data instead of integers
+		NIDAQmxADC: acquisition of floating-point raw data instead of integers
 	
-	NIDAQFilter: reparameterize to remove reliance on command-line parameters	
+		NIDAQFilter: reparameterize to remove reliance on command-line parameters	
+		
+		offline analysis
+			make progress-when-reading / logged-results prettier (esp. in py2exe version)?
+			related issue: make log-file go somewhere saveable other than just clipboard?
+			clipboard gets wiped on quit (see http://stackoverflow.com/questions/579687 ) - NB: problem seems to go away in py2exe'd version
+			
+			maybe override ResponseInterval from .dat file with ResponseInterval from -LastSettings-Offline.txt config file?
+				(but not with the setting from the online one, if present)
+			(semi-)automatic removal of individual trials? using new outlier-removal tab?
+			save figures as pdf?
 """
 
 import os, sys, time, math, re, threading, glob
