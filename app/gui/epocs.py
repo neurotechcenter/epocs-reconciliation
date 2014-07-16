@@ -2,11 +2,13 @@
 TODO
 
 	offline analysis
+		make progress-when-reading / logged-results prettier (esp. in py2exe version)?
+		related issue: make log-file go somewhere saveable other than just clipboard?
+		clipboard gets wiped on quit (see http://stackoverflow.com/questions/579687 ) - NB: problem seems to go away in py2exe'd version
+		
 		maybe override ResponseInterval from .dat file with ResponseInterval from -LastSettings-Offline.txt config file?
 			(but not with the setting from the online one, if present)
 		(semi-)automatic removal of individual trials? using new outlier-removal tab?
-		make "log results" results go somewhere other than just clipboard?
-		clipboard gets wiped on quit (see http://stackoverflow.com/questions/579687 )
 		save figures as pdf?
 		
 	intermittently broken zooming in VC analysis
@@ -18,9 +20,6 @@ TODO
 	NIDAQmxADC: acquisition of floating-point raw data instead of integers
 	
 	NIDAQFilter: reparameterize to remove reliance on command-line parameters	
-	
-	investigate rare "python is not responding" error
-	NIDAQmx error -88709 on StopRun also happened once....
 """
 
 import os, sys, time, math, re, threading, glob
@@ -3048,6 +3047,11 @@ class OfflineAnalysis( object ):
 if __name__ == '__main__':
 	
 	args = getattr( sys, 'argv', [] )[ 1: ]
+	
+	try: import EpocsCommandLineArguments  # if present, this might say something like args = [ "--offline" ]
+	except ImportError: pass  # if absent, no biggy
+	else: args += EpocsCommandLineArguments.args  # this is a way of smuggling hard-coded command-line arguments into a py2exe binary
+		
 	import getopt
 	opts, args = getopt.getopt( args, '', [ 'log=', 'devel', 'debug', 'offline', 'custom=' ] )
 	opts = dict( opts )
