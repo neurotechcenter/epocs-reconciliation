@@ -2,17 +2,18 @@
 TODO
 
 	intermittently broken zooming in VC analysis
+	better ExampleData for all modes
 	
 	caveats and gotchas:
-		assuming background is in range, time between triggers actually seems to come out to MinTimeBetweenTriggers + 1 sample block
 		py2exe compiled version does not produce a system-logs/*-python.txt log, presumably because output is redirected via a different mechanism, to the log file inside gui-bin
+		BackgroundTriggerFilter.cpp issue: assuming background is in range, time between triggers actually seems to come out to MinTimeBetweenTriggers + 1 sample block
 	
 	nice-to-haves:
-		make separate settings entry to govern maximum random extra hold duration?  (if so: remember to enforce its rounding to whole number of segments)
-	
 		NIDAQmxADC: acquisition of floating-point raw data instead of integers
 	
 		NIDAQFilter: reparameterize to remove reliance on command-line parameters	
+		
+		make separate settings entry to govern maximum random extra hold duration?  (if so: remember to enforce its rounding to whole number of segments)
 		
 		offline analysis
 			make progress-when-reading / logged-results prettier (esp. in py2exe version)?
@@ -22,34 +23,41 @@ TODO
 			maybe override ResponseInterval from .dat file with ResponseInterval from -LastSettings-Offline.txt config file?
 				(but not with the setting from the online one, if present)
 			(semi-)automatic removal of individual trials? using new outlier-removal tab?
-			save figures as pdf?
+			button for saving figures as pdf?
 """
 
 import os, sys, time, math, re, threading, glob
 import mmap, struct
 import inspect
 import Tkinter as tkinter
-import matplotlib, matplotlib.pyplot   # this is the online GUI's only third-party dependency besides Python itself (although implicitly, matplotlib in turn also requires numpy)
+import matplotlib, matplotlib.pyplot   # this is the online GUI's only non-bundled third-party dependency besides Python itself (although implicitly, matplotlib in turn also requires numpy)
 
 tksuperclass = tkinter.Tk
 try: import ttk
-except ImportError: import Tix; tksuperclass = Tix.Tk  # ...because Python 2.5 does not have ttk
+except ImportError: import Tix; tksuperclass = Tix.Tk  # ...because Python 2.5 does not have ttk. Included for legacy compatibility:  this GUI was originally developed under Python 2.5.4 without ttk, but has now transitioned to Python 2.7.5 with ttk
 
 import ctypes
 try: ctypes.windll.nicaiu
 except: DEVEL = True    # automatically pop into DEVEL mode (using FilePlayback instead of live signal recording) if no NIDAQmx interface found on this computer
-else:   DEVEL = False   # otherwise, DEVEL mode will only be activated if you have supplied the --devel command-line switch
+else:   DEVEL = False   # otherwise, DEVEL mode will only be activated if you have started EPOCS with the --devel command-line switch
 
 DEBUG = False  # if set to true with the --debug command-line switch, print debug/version info to the system log (even if we're not in FilePlayback mode)
 CUSTOM = ''    # BCI2000 script file to run (set with command-line switch --custom=foo.bat )
 
-GUIDIR = os.path.dirname( os.path.realpath( inspect.getfile( inspect.currentframe() ) ) ) # GUIDIR the directory where this python file lives - will also be expected to contain .ico file and .ini files
+GUIDIR = os.path.dirname( os.path.realpath( inspect.getfile( inspect.currentframe() ) ) ) # GUIDIR is the directory where this executable lives - will also be expected to contain .ico file and .ini files
 BCI2000LAUNCHDIR = os.path.abspath( os.path.join( GUIDIR, '../prog' ) ) # BCI2000LAUNCHDIR contains the BCI2000 binaries: it is expected to be in ../prog relative to this python file
 if not os.path.isfile( os.path.join( BCI2000LAUNCHDIR, 'BCI2000Remote.py' ) ): raise ImportError( 'could not find the prog directory containing BCI2000Remote.py' )
 if BCI2000LAUNCHDIR not in sys.path: sys.path.append( BCI2000LAUNCHDIR )
 import BCI2000Remote
 
-def flush( s ): sys.stdout.write( str( s ) + '\n' ); sys.stdout.flush()
+#### Very generic global functions and classes
+
+def flush( s ):
+	"""
+	Like print, but without buffering: writes a string to the console, followed by a newline,
+	and flushes the buffer so that it appears immediately. Used for debugging.
+	"""
+	sys.stdout.write( str( s ) + '\n' ); sys.stdout.flush()
 
 class Bunch( dict ):
 	"""
@@ -69,9 +77,10 @@ class Bunch( dict ):
 
 def Curry( func, *creation_time_pargs, **creation_time_kwargs ):
 	"""
-	Return a callable object with argument values already baked (or "curried") in. Example
+	Return a callable object with default argument values already baked (or "curried") in. Example:
+	
 	def AddTwoNumbers( first, second ): return first + second
-	PlusFive = Curry(AddTwoNumbers, second=5.0)
+	PlusFive = Curry( AddTwoNumbers, second=5.0 )
 	print PlusFive( 10 )
 	"""
 	def curried( *call_time_pargs, **call_time_kwargs ):
@@ -93,8 +102,8 @@ def GenericCallback( *pargs, **kwargs ):
 
 def ResolveDirectory( d, startDir=None ):
 	"""
-	Return an absolute path to <d>, relative to <startDir>
-	(or, if <startDir> is not specified, relative to the
+	Return an absolute path to <d>, on the assumption that <d> is either already absolute,
+	or expressed relative to <startDir> (if <startDir> is not specified, it defaults to the
 	current working directory).
 	"""
 	oldDir = os.getcwd()
@@ -176,6 +185,60 @@ def DB( *pargs, **kwargs ):
 	DB_LOCK.release()
 
 
+#### Very general global functions for dealing with signals
+
+def GetVolts( value, units ):
+	"""
+	Assuming <value> is expressed in <units> (which might be 'V', 'mV', 'uV' or 'muV'), return the
+	corresponding value unequivocally in Volts.  You can also process a whole sequence (tuple or list)
+	of values this way.  Usually not called directly, but rather via the Operator.GetVolts() method.
+	"""
+	if isinstance( value, ( tuple, list ) ): return value.__class__( GetVolts( x, units ) for x in value )
+	if value == None: return None
+	factors = { '' : 1e0, 'v' : 1e0, 'mv' : 1e-3, 'muv' : 1e-6, 'uv' : 1e-6 }
+	return value * factors[ units.lower() ]
+
+def FormatWithUnits( value, context=None, units='', fmt='%+g', stripZeroSign=True, appendUnits=True ):
+	"""
+	Let's say your <value> is expressed in uninflected <units> ('V' for Volts or 's' for seconds)
+	and you want a string representation of that value in the most convenient form of those units
+	(nano-, micro-, or milli- units, or just plain units).  This function formats such a string,
+	appending the inflected units string itself unless you explicitly say appendUnits=False.  The
+	decision about whether to go nano, micro, or milli is taken according to the magnitude of
+	<value> itself, unless you supply a list of values in <context>:  in the latter case, the
+	maximum absolute value in <context> is used to set the scale.  For example, you might want
+	to call FormatWithUnits once for each tick label on an axis, but with <context> equal to the
+	full set of tick values each time so that they are all scaled the same.
+	
+	Used in multiple graphical rendering routines throughout the GUI, SettingsWindow and AnalysisWindow.
+	"""
+	if context == None: context = [ value ]
+	extreme = max( abs( x ) for x in context )
+	if units == None: units = ''
+	if units == '':           factor = 1e0; prefix = ''
+	elif extreme <=  2000e-9: factor = 1e9; prefix = 'n'
+	elif extreme <=  2000e-6: factor = 1e6; prefix = u'\u00b5'   # up to +/- 2 milliVolts, use microVolts
+	elif extreme <=  2000e-3: factor = 1e3; prefix = 'm'         # up to +/- 2 Volts, use milliVolts
+	else:                     factor = 1e0; prefix = ''
+	s = fmt % ( value * factor )
+	if stripZeroSign and value == 0.0 and s.startswith( ( '-', '+' ) ): s = s[ 1: ]
+	if appendUnits: s += prefix + units
+	return s
+
+def TimeBase( values, fs, lookback ):
+	"""
+	Given a sequence of voltage <values> that make up an epoch, return a list of time
+	values (in seconds) against which to plot them, on the assumption that <fs> samples
+	are recorded per second and that the epoch starts <lookback> seconds before
+	nominal time 0.
+	
+	Used in graphical rendering routines throughout the GUI, SettingsWindow and AnalysisWindow.
+	"""
+	return [ float( sample ) / fs - lookback for sample, value in enumerate( values ) ]
+
+
+#### Operator class
+
 class Operator( object ):
 	"""
 	One Operator instance coordinates communication between one GUI instance and BCI2000's binaries.  It loads, updates and saves default
@@ -187,8 +250,8 @@ class Operator( object ):
 	An Operator() instance is created during construction of a GUI() instance and stored as that GUI's self.operator attribute.
 	
 	The OfflineAnalysis() class tries to fool other classes into thinking it is a GUI(), and therefore also performs
-	self.operator = Operator() during construction. In this case, however, the Operator does not actually launch or talk to BCI2000,
-	but rather just handles the process of loading and saving subject-specific analysis settings.
+	self.operator = Operator() during construction. In this case, however, the Operator is never actually told to launch or talk to
+	BCI2000, but rather just handles the process of loading and saving subject-specific analysis settings.
 	"""
 	def __init__( self ):
 		
@@ -348,7 +411,7 @@ class Operator( object ):
 	def GetVolts( self, value ):
 		"""
 		Assuming <value> is expressed in the default voltage units stored in self.params._VoltageUnits, return the
-		corresponding value in Volts.
+		corresponding value in Volts. Called in many places.  Uses the global GetVolts() function.
 		"""
 		return GetVolts( value, self.params._VoltageUnits )		
 	
@@ -549,6 +612,22 @@ class Operator( object ):
 		else: return lower + upper
 	
 	def SetConfig( self, work_around_bci2000_bug=False ):
+		"""
+		Update parameters ready for the next run, transfer them to BCI2000, call
+		WriteSubjectSettings(), and issue a SETCONFIG command to BCI2000 (i.e.
+		virtually press its "Set Config" button).
+		
+		NB:  because of a bug in BCI2000, documented at
+		http://bci2000.org/tracproj/ticket/131 , one should not issue a SETCONFIG command
+		without then starting a run:  if you do, BCI2000 may ignore future SET PARAMETER
+		updates you might need to perform before actually starting the run.  In EPOCS, this is
+		only a problem the *first* time SetConfig() is called, immediately after Launch().
+		At all other times SetConfig() will only be called immediately before starting a run.
+		To cope with this, we pass work_around_bci2000_bug=True in the former case: then,
+		parameters are updated but the setconfig command is not actually issued. This has the
+		minor disadvantage that any BCI2000 misconfiguration will not become obvious immediately
+		on launch, but only when EPOCS's "Start" button is pressed for the first time.
+		"""
 		self.params.SubjectRun = '%02d' % self.NextRunNumber()
 		for p in self.params:
 			if not p.startswith( '_' ): self.SendParameter( p )
@@ -569,6 +648,10 @@ class Operator( object ):
 		
 		
 	def Stop( self ):
+		"""
+		Tell BCI2000 to stop the currently ongoing run, if any, and stop listening for
+		input on the SharedMemory connection.
+		"""
 		if self.mm:
 			self.mmlock.acquire()
 			self.mm = None
@@ -578,6 +661,13 @@ class Operator( object ):
 		self.started = False
 		
 	def Start( self, mode=None ):
+		"""
+		Tell BCI2000 to start a new run.  If this involves a different mode or
+		different parameters than the last run (the latter being detected by the
+		fact that self.needSetConfig is set to True), then call SetConfig() first.
+		At the same time, create, open and initialize the memory-mapped file for
+		inter-process communication (see ReadMM() below).
+		"""
 		if self.started: raise RuntimeError( 'must call Stop() method first' )
 		if mode: self.Set( ApplicationMode=mode )
 		if self.needSetConfig: self.SetConfig()
@@ -594,6 +684,31 @@ class Operator( object ):
 		self.started = True
 
 	def ReadMM( self ):
+		"""
+		self.mm is a memory-mapped file (mmap.mmap instance). It serves as the Python end
+		of an inter-process communication link for transferring signal data. The other end
+		is in the C++ code of the SharedMemoryOutputConnector component of the
+		ReflexConditioningSignalProcessing BCI2000 module. self.mm is initialized in Start()
+		read/decoded here, and de-initialized in Stop().  ReadMM() is called by GUI.WatchMM(),
+		which runs in its own thread (hence the use of self.mmlock, a threading.Lock instance).
+		
+		ReadMM() returns a list of lists of floating-point signal values, and a dict of
+		floating-point State variable values. Together, these comprise one SampleBlock's worth
+		of information from BCI2000.  They are unpacked from shared memory according to
+		the protocol established in SharedMemoryOutputConnector::Process(), as follows:
+			1. Four unsigned 32-bit integers:
+				a. SampleBlock counter
+				b. number of channels (will determine the length of the outer list)
+				c. number of samples per block (will determine the length of each inner list)
+				d. number of State variables (will determine the number of dict entries)
+			2. Signal values as a packed array of double-precision floating-point numbers
+			   in row- (i.e. sample-)first order.
+			3. State-variable values as double-precsion floating-point numbers
+			4. A space-delimited ASCII byte string specifying the corresponding State variable
+			   names in order, followed by a newline, followed by a null terminator.
+		Since this protocol is for transmission between processes on the *same* CPU, native
+		endianness is assumed throughout.
+		"""
 		def chomp( mm, fmt ): return struct.unpack( fmt, mm.read( struct.calcsize( fmt ) ) )
 		if not self.started or not self.mm: return None, None
 		self.mmlock.acquire()
@@ -607,12 +722,29 @@ class Operator( object ):
 		return signal, states
 	
 	def MMCounter( self ):
+		"""
+		Like ReadMM(), but only decode and return the first piece of information in shared memory,
+		i.e. the SampleBlock counter.  This is always the last piece of information to be updated
+		by SharedMemoryOutputConnector::Process() C++ code on any given SampleBlock, and is
+		monitored in the GUI.WatchMM() Python thread to determine when a new SampleBlock is
+		available.
+		"""
 		if not self.mm: return 0
 		fmt = '@L'
 		return struct.unpack( fmt, self.mm[ :struct.calcsize( fmt ) ])[ 0 ]
 
+#### A couple of global functions for dealing with Tkinter widgets
+
 def FixAspectRatio( widget, aspect_ratio=None, relx=0.5, rely=0.5, anchor='center' ):
-	"Adapted from Bryan Oakley's answer to http://stackoverflow.com/questions/16523128 "
+	"""
+	Enforce a fixed aspect ratio for a Tkinter widget.
+	
+	This is a hack (adapted from Bryan Oakley's answer to http://stackoverflow.com/questions/16523128 )
+	and can only be achieved by using the .place() layout manager to place the widget in question
+	(which this function does implicitly, using the specified relx, rely and anchor arguments). So if
+	you wanted to .grid() or .pack() it, wrap your widget in a Tkinter.Frame and .grid() or .pack()
+	that instead.
+	"""
 	if aspect_ratio == None: aspect_ratio = float( widget[ 'height' ] ) / float( widget[ 'width' ] )
 	def EnforceAspectRatio( event ):
 		desired_width = event.width
@@ -625,37 +757,32 @@ def FixAspectRatio( widget, aspect_ratio=None, relx=0.5, rely=0.5, anchor='cente
 	return widget
 	
 def EnableWidget( widget, enabled=True ):
+	"""
+	Place a Tkinter widget (or each one of a tuple or list of Tkinter widgets) into
+	either the 'normal' or 'disabled' state according to the boolean value <enabled>.
+	"""
 	if isinstance( widget, ( tuple, list ) ):
 		for w in widget: EnableWidget( w, enabled )
 		return
 	if enabled: widget.configure( state='normal' )
 	else: widget.configure( state='disabled' )
 
-def FormatWithUnits( value, context=None, units='', fmt='%+g', stripZeroSign=True, appendUnits=True ):
-	if context == None: context = [ value ]
-	extreme = max( abs( x ) for x in context )
-	if units == None: units = ''
-	if units == '':           factor = 1e0; prefix = ''
-	elif extreme <=  2000e-9: factor = 1e9; prefix = 'n'
-	elif extreme <=  2000e-6: factor = 1e6; prefix = u'\u00b5'   # up to +/- 2 milliVolts, use microVolts
-	elif extreme <=  2000e-3: factor = 1e3; prefix = 'm'         # up to +/- 2 Volts, use milliVolts
-	else:                     factor = 1e0; prefix = ''
-	s = fmt % ( value * factor )
-	if stripZeroSign and value == 0.0 and s.startswith( ( '-', '+' ) ): s = s[ 1: ]
-	if appendUnits: s += prefix + units
-	return s
-
-def TimeBase( values, fs, lookback ):
-	return [ float( sample ) / fs - lookback for sample, value in enumerate( values ) ]
-
-def GetVolts( value, units ):
-	if isinstance( value, ( tuple, list ) ): return value.__class__( GetVolts( x, units ) for x in value )
-	if value == None: return None
-	factors = { '' : 1e0, 'v' : 1e0, 'mv' : 1e-3, 'muv' : 1e-6, 'uv' : 1e-6 }
-	return value * factors[ units.lower() ]
+#### Helper classes for graphical rendering
 
 class Switch( tkinter.Frame ):
+	"""
+	This Tkinter.Frame subclass is a compound widget that presents itself as
+	a sliding single-pole-double-throw switch. Its value, queried using get() or
+	changed programmatically using set(), can be either 0 or 1.
+	"""
 	def __init__( self, parent, title='', offLabel='off', onLabel='on', initialValue=0, command=None, values=( False, True ), bg=None, **kwargs ):
+		"""
+		<parent> is the parent Tkinter widget.
+		<command> is the callback function to be called whenever the switch is switched
+		<values> specifies the possible input arguments to <command>:  the callback will
+		be called with a single argument, which will be either values[0] or values[1]
+		depending on whether the switch has just been turned off or on.
+		"""
 		if bg == None: bg = parent[ 'bg' ]
 		tkinter.Frame.__init__( self, parent, bg=bg )
 		self.title = tkinter.Label( self, text=title, justify='right', bg=bg )
@@ -670,6 +797,7 @@ class Switch( tkinter.Frame ):
 		self.onLabel.pack( side='right', fill='y', expand=True )
 		self.command = command
 		self.values = values
+		self.set( initialValue )
 	def get( self ): return self.scale.get()
 	def set( self, value ): return self.scale.set( value )
 	def switched( self, arg=None ):
@@ -762,7 +890,18 @@ class AxisController( object ):
 		return float( '%.8g' % value ) # crude but effective way of getting rid of nasty numerical precision errors
 
 class PlusMinus( object ):
+	"""
+	This is the superclass of PlusMinusMPL and PlusMinusTk.  It is an abstract representation
+	of the compound graphical widget consisting of adjacent "-" (zoom out) and "+" (zoom in)
+	buttons and it links these to one or more AxisController() instances.
+	"""
 	def __init__( self, controllers, orientation=None ):
+		"""
+		<controllers> is an AxisController() instance or a list of such instances.
+		<orientation> may be 'vertical' or 'horizontal'  (for which 'y' and 'x', respectively,
+		are synonyms). If left blank (equal to None), orientation will be inferred from the
+		AxisController objects.
+		"""
 		if not isinstance( controllers, ( tuple, list ) ): controllers = [ controllers ]
 		self.controllers = controllers
 		if orientation == None: orientation = self.controllers[ 0 ].axisname
@@ -770,15 +909,37 @@ class PlusMinus( object ):
 		elif orientation.lower() in [ 'x', 'horizontal' ]: self.orientation = 'horizontal'
 		else: raise ValueError( 'unrecognized orientation="%s"' % orientation )
 	def ChangeAxis( self, event=None, direction=+1 ):
+		"""
+		This method, possibly with a specific <direction> baked into it using Curry(), will be
+		used as the button callback for the underlying Tkinter or matplotlib button object.
+		It calls the AxisController.ChangeAxis() method of each of the associated AxisController
+		instances, then calls Draw() to update the display.
+		
+		Additionally, this method may take an optional input argument, which will presumably
+		be some kind of event instance when the Tkinter (and possibly matplotlib?) framework
+		calls it.  The information in the event instance is ignored, but if supplied, the
+		instance will be used internally to prevent the same event from being handled twice.
+		"""
 		if event != None:
 			if getattr( event, 'AlreadyHandled', None ) != None: return # don't know why this should be necessary, or how to avoid it in some better way, but hey, this works
 			event.AlreadyHandled = 1
 		for c in self.controllers: c.ChangeAxis( direction )
 		self.Draw()
 		return self
-	def Enable( self ):
+	def Enable( self, button, value ):
+		"""
+		The subclass (PlusMinusMPL or PlusMinusTk) must overshadow this.
+		<button> will be either self.plusButton or self.minusButton, a Tkinter or matplotlib
+		object representing one of the two buttons.  <value> will be either True (enabled)
+		or False (disabled).
+		"""
 		raise TypeError( 'cannot use the %s superclass - use a subclass instead' % self.__class__.__name__ )
 	def Draw( self ):
+		"""
+		Call the subclass Enable() method according to whether the buttons should be enabled or
+		disabled, then call AxisController.DrawAxes() for each of the AxisController instances,
+		to update the display.
+		"""
 		plusEnabled = minusEnabled = False
 		for c in self.controllers:
 			if c.canZoomOut: minusEnabled = True
@@ -788,6 +949,11 @@ class PlusMinus( object ):
 		for c in self.controllers: c.DrawAxes()
 
 class PlusMinusMPL( PlusMinus ):
+	"""
+	A PlusMinus() subclass that implements zoom buttons using matplotlib buttons.
+	This was used in initial development of EPOCS but was then supplanted by the
+	PlusMinusTk() class.
+	"""
 	def __init__( self, figure, x, y, width, height, controllers, orientation=None, anchor='' ):
 		PlusMinus.__init__( self, controllers=controllers, orientation=orientation )
 		self.figure = figure
@@ -828,7 +994,16 @@ class PlusMinusMPL( PlusMinus ):
 			# button.set_axis_bgcolor( ) # TODO: do this, or grey out the text instead?
 		
 class PlusMinusTk( PlusMinus ):
+	"""
+	A PlusMinus() subclass that implements zoom buttons using the Tkinter toolkit.
+	It presents itself (actually duck-types itself) as a compound Tkinter widget
+	by implementing grid(), pack() and place() methods.
+	"""
 	def __init__( self, parent, controllers, orientation=None ):
+		"""
+		<parent> is the parent Tkinter widget.  For the rest, see the PlusMinus()
+		superclass documentation.
+		"""
 		PlusMinus.__init__( self, controllers=controllers, orientation=orientation )
 		self.parent = parent
 		self.frame = tkinter.Frame( parent )
@@ -844,7 +1019,13 @@ class PlusMinusTk( PlusMinus ):
 	def grid( self, *pargs, **kwargs ): self.frame.grid( *pargs, **kwargs ); return self
 	def pack( self, *pargs, **kwargs ): self.frame.pack( *pargs, **kwargs ); return self
 	def place( self, *pargs, **kwargs ): self.frame.place( *pargs, **kwargs ); return self
-	def Enable( self, button, state ): EnableWidget( button, state )
+	def Enable( self, button, state ):
+		"""
+		<button> will be either self.plusButton or self.minusButton, a Tkinter or matplotlib
+		object representing one of the two buttons.  <value> will be either True (enabled)
+		or False (disabled). Called by the superclass PlusMinus.Draw() method.
+		"""
+		EnableWidget( button, state )
 
 class StickySpanSelector( object ): # definition copied and tweaked from matplotlib.widgets.SpanSelector in matplotlib version 0.99.0
 	def __init__( self, ax, onselect=None, initial=None, direction='horizontal', fmt='%+g', units='', minspan=None, granularity=None, useblit=False, **props ):
@@ -1078,6 +1259,8 @@ class StickySpanSelector( object ): # definition copied and tweaked from matplot
 		if not gran: return value
 		return gran * round( value / gran )
 
+#### Main GUI superclass and subclass
+
 class TkMPL( object ):
 	
 	def __init__( self ):
@@ -1186,7 +1369,10 @@ class TkMPL( object ):
 MODENAMES = Bunch( st='Stimulus Test', vc='Voluntary Contraction', rc='Recruitment Curve', ct='Control Trials', tt='Training Trials', mixed='Mixed', offline='Offline' )
 
 class GUI( tksuperclass, TkMPL ):
-	
+	"""
+	A class representing the main EPOCS GUI window.  One instance of this, called self, will be created when
+	you run EPOCS.  Almost everything else is a child attribute of the this GUI instance.
+	"""
 	def __init__( self, operator=None ):
 		
 		tksuperclass.__init__( self )
