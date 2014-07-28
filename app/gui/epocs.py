@@ -1,7 +1,17 @@
 """
 TODO
 
-	intermittently broken zooming in VC analysis
+	intermittently broken zooming in VC analysis, e.g. with range 11.7--13.9s in --devel:
+		2014-07-22  22:11:58  line  864 (ChangeAxis)  on
+		2014-07-22  22:11:58  line  874 (ChangeAxis)  x,  narrowest=[10.600000000000001, 15.0]
+		2014-07-22  22:11:58  line  878 (ChangeAxis)  x,  lims=[0.0, 32.799999999999997]
+		2014-07-22  22:11:58  line  880 (ChangeAxis)  x,  lims=[-12.800000000000001, 19.999999999999996]
+		2014-07-22  22:11:58  line  883 (ChangeAxis)  x,  lims=[-20.0, 20.0]
+		2014-07-22  22:11:58  line  885 (ChangeAxis)  x,  lims=[-7.199999999999999, 32.8]
+		2014-07-22  22:11:58  line  889 (ChangeAxis)  x,  lims=[-7.199999999999999, 32.8]
+		2014-07-22  22:11:58  line  893 (ChangeAxis)  x,  lims=[0.0, 32.8]
+		2014-07-22  22:11:58  line  900 (ChangeAxis)  off
+
 	better ExampleData for all modes
 	
 	caveats and gotchas:
@@ -851,6 +861,7 @@ class AxisController( object ):
 		return self.ChangeAxis( direction=0.0, start=lims )
 
 	def ChangeAxis( self, direction=0.0, start=None ):
+		DB( 'start' )
 		lims = list( self.get() )
 		if start != None: lims = list( start )
 		center = 0.0
@@ -860,21 +871,29 @@ class AxisController( object ):
 			except: roi = [ roi ]
 			center = sum( roi ) / float( len( roi ) )
 			self.narrowest = [ min( roi ) - ( center - min( roi ) ), max( roi ) + ( max( roi ) - center ) ]
+			DB( self.axisname, narrowest=self.narrowest )
 			#ticks = self.axis.get_ticklocs()
 			#howclose = [ min( abs( tick - min( roi ) ), abs( tick - max( roi ) ) ) for tick in ticks ]
 			#center = ticks[ howclose.index( min( howclose ) ) ]
+		DB( self.axisname, lims=lims )
 		lims = [ x - center for x in lims ]
+		DB( self.axisname, lims=lims )
 		if lims[ 0 ] < 0.0: lims[ 0 ] = -self.ChangeValue( -lims[ 0 ], direction )
 		if lims[ 1 ] > 0.0: lims[ 1 ] = self.ChangeValue( lims[ 1 ], direction )
+		DB( self.axisname, lims=lims )
 		lims = [ x + center for x in lims ]
+		DB( self.axisname, lims=lims )
 		if self.narrowest != None:
 			lims[ 0 ] = min( min( self.narrowest ), lims[ 0 ] )
 			lims[ 1 ] = max( max( self.narrowest ), lims[ 1 ] )
-			self.canZoomIn = ( lims[ 0 ] < min( self.narrowest ) or lims[ 1 ] > max( self.narrowest ) )
+		DB( self.axisname, lims=lims )
 		if self.widest != None:
 			lims[ 0 ] = max( min( self.widest ), lims[ 0 ] )
 			lims[ 1 ] = min( max( self.widest ), lims[ 1 ] )
-			self.canZoomOut = ( lims[ 0 ] > min( self.widest ) or lims[ 1 ] < max( self.widest ) )
+		DB( self.axisname, lims=lims )
+		
+		self.canZoomIn  = ( self.narrowest == None or lims[ 0 ] < min( self.narrowest ) or lims[ 1 ] > max( self.narrowest ) or self.focusFunction != None )
+		self.canZoomOut = ( self.widest    == None or lims[ 0 ] > min( self.widest    ) or lims[ 1 ] < max( self.widest    ) )
 		self.lims = tuple( lims )
 		if   self.axisname == 'x': self.axes.set_xlim( lims )
 		elif self.axisname == 'y': self.axes.set_ylim( lims )
@@ -883,11 +902,16 @@ class AxisController( object ):
 	def Home( self ): return self.ChangeAxis( direction=0.0, start=self.start )
 		
 	def ChangeValue( self, value, direction ):
+		def rnd( x ): return float( '%.8g' % x ) # crude but effective way of getting rid of nasty numerical precision errors
+		DB( value=value )
 		x = 10.0 ** round( math.log10( value ) )
+		DB( x=x )
 		vals = [ x*0.1, x*0.2, x*0.5, x*1.0, x*2.0, x*5.0, x*10.0 ]
-		if direction > 0.0: value = min( x for x in vals if x > value )
-		elif direction < 0.0: value = max( x for x in vals if x < value )
-		return float( '%.8g' % value ) # crude but effective way of getting rid of nasty numerical precision errors
+		DB( vals=vals )
+		if   direction > 0.0: value = min( x for x in vals if rnd( x ) > rnd( value ) )
+		elif direction < 0.0: value = max( x for x in vals if rnd( x ) < rnd( value ) )
+		DB( value=value )
+		return rnd( value )
 
 class PlusMinus( object ):
 	"""
@@ -2056,16 +2080,32 @@ class MVC( object ):
 		self.axes = axes
 		self.data = data
 		self.fs = fs
+		self.callback = callback
 		self.time = TimeBase( self.data, fs=self.fs, lookback=0 )
 		self.line = matplotlib.pyplot.plot( self.time, self.data )[ 0 ]
 		self.axes.grid( True )
 		peaktime = self.time[ self.data.index( max( self.data ) ) ]
-		self.selector = StickySpanSelector( self.axes, initial=( peaktime - 0.1, peaktime + 0.1 ), onselect=callback, granularity=0.050, units='s', fmt='%g', color='#FF6666', text_y=0.98, text_verticalalignment='top', text_visible=False )
+		self.selector = StickySpanSelector( self.axes, initial=( peaktime - 0.1, peaktime + 0.1 ), onselect=self.callback, granularity=0.050, units='s', fmt='%g', color='#FF6666', text_y=0.98, text_verticalalignment='top', text_visible=False )
 		self.ycon = AxisController( self.axes, 'y', fmt='%g', units='V', start=self.axes.get_ylim(), narrowest=self.axes.get_ylim() ).Home()
 		self.xcon = AxisController( self.axes, 'x', fmt='%g', units='s', start=self.axes.get_xlim(),    widest=self.axes.get_xlim() ).Home()
 		self.xcon.focusFunction = self.selector.get
+		if DEBUG: self.selector.set( ( 11.7, 13.9 ) )
+		self.cid = self.axes.figure.canvas.mpl_connect( 'key_press_event', self.KeyPress )
 		self.Update()
+		DB( 'on' )
 	
+	def KeyPress( self, event ):
+		code = str( event.key ).split( '+' )[ -1 ]
+		if code in [ 'escape' ]:
+			self.xcon.set( self.xcon.widest )
+			if self.callback:
+				self.callback() # calls AnalysisWindow.Changed() which leads to AnalysisWindow.UpdateResults() in due course, and that updates the state of the plusminus widget in addition to redrawing the figure
+			else:
+				self.Update()
+				self.axes.figure.canvas.draw()
+			return False
+		return True
+		
 	def Update( self, range=None ):
 		if range == None: range = self.selector.get()
 		if range == None: ysub = []
@@ -2566,6 +2606,7 @@ class AnalysisWindow( Dialog, TkMPL ):
 		if ax: matplotlib.pyplot.figure( ax.figure.number ).sca( ax )
 		self.DrawFigures()
 		for button in self.MatchWidgets( 'button', 'log' ): button[ 'state' ] = 'normal'
+		for pm in self.MatchWidgets( 'xadjust', 'mvc' ): pm.Draw()
 	
 	def Log( self, type ):
 		self.parent.Log( '===== %s Analysis (%s) =====' % ( self.parent.modenames[ self.mode ], self.description ) )
