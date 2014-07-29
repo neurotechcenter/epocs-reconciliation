@@ -1,16 +1,50 @@
 """
-TODO
+This is a graphical user interface (GUI) implementation for the evoked potential operant
+conditioning system (EPOCS). This Python 2.x code uses the built-in Tkinter toolkit for
+organizing and rendering GUI elements, and the third-party matplotlib package for rendering
+graphs and other custom graphics.   The EPOCS GUI calls BCI2000 binaries under the hood.
+BCI2000 does most of the actual real-time processing and saves the data file, but this GUI
+replaces the BCI2000 Operator window and config dialog by propviding an interface for the
+therapist/researcher to configure, start and stop runs; it also replaces the BCI2000
+Application module by providing real-time biofeedback to the patient/subject; finally it
+provides specialized offline analysis of the most recently collected data.
 
-	intermittently broken zooming in VC analysis, e.g. with range 11.7--13.9s in --devel:
-		2014-07-22  22:11:58  line  864 (ChangeAxis)  on
-		2014-07-22  22:11:58  line  874 (ChangeAxis)  x,  narrowest=[10.600000000000001, 15.0]
-		2014-07-22  22:11:58  line  878 (ChangeAxis)  x,  lims=[0.0, 32.799999999999997]
-		2014-07-22  22:11:58  line  880 (ChangeAxis)  x,  lims=[-12.800000000000001, 19.999999999999996]
-		2014-07-22  22:11:58  line  883 (ChangeAxis)  x,  lims=[-20.0, 20.0]
-		2014-07-22  22:11:58  line  885 (ChangeAxis)  x,  lims=[-7.199999999999999, 32.8]
-		2014-07-22  22:11:58  line  889 (ChangeAxis)  x,  lims=[-7.199999999999999, 32.8]
-		2014-07-22  22:11:58  line  893 (ChangeAxis)  x,  lims=[0.0, 32.8]
-		2014-07-22  22:11:58  line  900 (ChangeAxis)  off
+This file may be run as a standalone python file.  It may take the following optional
+command-line arguments:
+
+--custom=XXX : specify a path XXX to a custom batch file, relative to the current (gui or
+               gui-bin) directory.  For example,  --custom=../custom/VisualizeSource.bat
+               The specified file will be interpreted by the BCI2000 scripting engine
+               and run when BCI2000 has launched (see the web documentation on "BCI2000
+               operator module scripting"). The custom script can be used to add custom
+               parameters and state variables, and set parameter values---for example,
+               to open BCI2000 visualization windows and to increase the number of
+               acquired channels.  The best place to add a --custom switch is in the
+               "Target" line in the properties of the shortcut you use to launch EPOCS.
+
+--offline    : start in "offline analysis" mode (perform analysis on old files) instead of
+               the default "online" mode.
+ 
+--devel      : start in "development" mode:  use the BCI2000 FilePlayback module as source
+               instead of the live data acquisition module, and pre-load memory with so
+               some example data so that the "Analysis" buttons can be pressed immediately
+               without having to wait to gather data. Internally, this causes the global
+               variable DEVEL to be set to True.   The application also starts in
+               development mode automatically if no interface to the acquisition hardware
+               API can be found at the time of launch.
+ 
+--debug      : start in "debug" mode:  this is usually but not always used in conjunction
+               with --devel.  It causes the global variable DEBUG to be set to True.  This
+               contingency may be used to trigger behavior that is useful in debugging but
+               which might not normally occur (for example, it was useful in debugging a
+               problem with the StickySpanSelector in the Voluntary Contraction analysis
+               window, which would prevent zooming when its value was set to some values
+               but not others:   if DEBUG==True: set_to_problematic_values()   ) 
+"""
+
+
+"""
+TODO
 
 	better ExampleData for all modes
 	
@@ -811,6 +845,11 @@ class Switch( tkinter.Frame ):
 	def get( self ): return self.scale.get()
 	def set( self, value ): return self.scale.set( value )
 	def switched( self, arg=None ):
+		"""
+		Callback for internal use.  Calls whichever callback was set by the
+		<command> parameter to the object constructor, as well as updating
+		the appearance of the switch.
+		"""
 		colors = '#000000', '#888888'
 		state = self.scale.get()
 		if state: colors = colors[ ::-1 ]
@@ -818,6 +857,26 @@ class Switch( tkinter.Frame ):
 		if self.command: self.command( self.values[ state ] )
 	
 class AxisController( object ):
+	"""
+	A helper class for controlling the scaling and managing the tick labels on
+	the horizontal (axisname='x') or vertical (axisname='y') axis of the specified
+	matplotlib <axes> instance.
+	
+	You can specify two-element tuples to specify the <narrowest> and <widest>
+	allowable limits, and also where to <start>.   You can also specify the
+	<units> (e.g. 'V' for Volts or 's' for seconds) if you want the tick labels
+	to be intelligently labelled according to the order-of-magnitude of the
+	scaling using FormatWithUnits().
+	
+	Use the set() method to change the limits, or ChangeAxis( -1 ) and ChangeAxis( +1 )
+	to zoom in and out by a pretty-printable amount.
+	
+	By default, the origin of expansion/contraction for zooming is 0.  The only place
+	where 0 isn't appropriate is in the VC AnalysisWindow:  then the .focusFunction
+	of the AxisController object is set manually to a function that return a tuple
+	specifying the region-of-interest (the get() method of a StickSpanSelector instance,
+	in fact) and this provides a crude way of allowing the origin to change.	
+	"""
 	def __init__( self, axes, axisname='x', start=None, narrowest=None, widest=None, units=None, fmt='%+g' ):
 		self.axes = axes
 		self.axisname = axisname
@@ -844,24 +903,45 @@ class AxisController( object ):
 		self.ChangeAxis( 0.0, start=self.start )
 		
 	def DrawAxes( self ):
+		"""
+		Redraw the associated figure.  Called for example by PlusMinus.Draw()
+		"""
 		self.axes.figure.canvas.draw()
 		
 	def FormatTicks( self, value, index ):
+		"""
+		Function for formatting the tick labels according to FormatWithUnits. Not called directly, but
+		gets registered with the matplotlib API via matplotlib.pyplot.axes.set_major_formatter
+		"""
 		fudge = 0.001 * ( max( self.lims ) - min( self.lims ) )
 		locs = [ x for x in self.axis.get_majorticklocs() if min( self.lims ) - fudge <= x <= max( self.lims ) + fudge ]
 		appendUnits = value >= max( locs ) * ( 1 - 1e-8 ) # allow a small tolerance, again to account for precision errors
 		return FormatWithUnits( value=value, context=locs, units=self.units, fmt=self.fmt, appendUnits=appendUnits )
 	
 	def get( self ):
+		"""
+		Return the current axes limits.
+		"""
 		if   self.axisname == 'x': lims = self.axes.get_xlim()
 		elif self.axisname == 'y': lims = self.axes.get_ylim()
 		return lims
 	
 	def set( self, lims ):
+		"""
+		Change the axes limits to the tuple specified by <lims>.
+		Note: does not call DrawAxes() automatically.
+		"""
 		return self.ChangeAxis( direction=0.0, start=lims )
 
 	def ChangeAxis( self, direction=0.0, start=None ):
-		DB( 'start' )
+		"""
+		Widen (direction=+1), narrow (direction=-1), or set
+		(direction=0, start=some tuple) the axes limits. Acts
+		as the underlyng implementation for set() and Home()
+		and is also called by PlusMinus.ChangeAxis()
+		
+		Note: does not call DrawAxes() automatically.
+		"""
 		lims = list( self.get() )
 		if start != None: lims = list( start )
 		center = 0.0
@@ -871,26 +951,19 @@ class AxisController( object ):
 			except: roi = [ roi ]
 			center = sum( roi ) / float( len( roi ) )
 			self.narrowest = [ min( roi ) - ( center - min( roi ) ), max( roi ) + ( max( roi ) - center ) ]
-			DB( self.axisname, narrowest=self.narrowest )
 			#ticks = self.axis.get_ticklocs()
 			#howclose = [ min( abs( tick - min( roi ) ), abs( tick - max( roi ) ) ) for tick in ticks ]
 			#center = ticks[ howclose.index( min( howclose ) ) ]
-		DB( self.axisname, lims=lims )
 		lims = [ x - center for x in lims ]
-		DB( self.axisname, lims=lims )
 		if lims[ 0 ] < 0.0: lims[ 0 ] = -self.ChangeValue( -lims[ 0 ], direction )
 		if lims[ 1 ] > 0.0: lims[ 1 ] = self.ChangeValue( lims[ 1 ], direction )
-		DB( self.axisname, lims=lims )
 		lims = [ x + center for x in lims ]
-		DB( self.axisname, lims=lims )
 		if self.narrowest != None:
 			lims[ 0 ] = min( min( self.narrowest ), lims[ 0 ] )
 			lims[ 1 ] = max( max( self.narrowest ), lims[ 1 ] )
-		DB( self.axisname, lims=lims )
 		if self.widest != None:
 			lims[ 0 ] = max( min( self.widest ), lims[ 0 ] )
 			lims[ 1 ] = min( max( self.widest ), lims[ 1 ] )
-		DB( self.axisname, lims=lims )
 		
 		self.canZoomIn  = ( self.narrowest == None or lims[ 0 ] < min( self.narrowest ) or lims[ 1 ] > max( self.narrowest ) or self.focusFunction != None )
 		self.canZoomOut = ( self.widest    == None or lims[ 0 ] > min( self.widest    ) or lims[ 1 ] < max( self.widest    ) )
@@ -899,18 +972,23 @@ class AxisController( object ):
 		elif self.axisname == 'y': self.axes.set_ylim( lims )
 		return self
 	
-	def Home( self ): return self.ChangeAxis( direction=0.0, start=self.start )
+	def Home( self ):
+		"""
+		Go back to the limits that the AxisController had when created (self.start).
+		Note: does not call DrawAxes() automatically.
+		"""
+		return self.ChangeAxis( direction=0.0, start=self.start )
 		
 	def ChangeValue( self, value, direction ):
+		"""
+		Stateless helper function for ChangesAxis().  Returns the next largest (direction=-1)
+		or next smallest (direction=-1) pretty-printable value relative to <value>.
+		"""
 		def rnd( x ): return float( '%.8g' % x ) # crude but effective way of getting rid of nasty numerical precision errors
-		DB( value=value )
 		x = 10.0 ** round( math.log10( value ) )
-		DB( x=x )
 		vals = [ x*0.1, x*0.2, x*0.5, x*1.0, x*2.0, x*5.0, x*10.0 ]
-		DB( vals=vals )
 		if   direction > 0.0: value = min( x for x in vals if rnd( x ) > rnd( value ) )
 		elif direction < 0.0: value = max( x for x in vals if rnd( x ) < rnd( value ) )
-		DB( value=value )
 		return rnd( value )
 
 class PlusMinus( object ):
@@ -1052,8 +1130,45 @@ class PlusMinusTk( PlusMinus ):
 		EnableWidget( button, state )
 
 class StickySpanSelector( object ): # definition copied and tweaked from matplotlib.widgets.SpanSelector in matplotlib version 0.99.0
+	"""
+	A novel matplotlib widget loosely based on matplotlib.widgets.SpanSelector
+	The main difference is that the StickySpanSelector is visible all the time.
+	Its edges can be adjusted by clicking near them and dragging, or by using
+	the arrow keys (press the enter key to toggle between edges, and between
+	StickySpanSelectors if there's more than one on the axes).
+	"""
 	def __init__( self, ax, onselect=None, initial=None, direction='horizontal', fmt='%+g', units='', minspan=None, granularity=None, useblit=False, **props ):
-
+		"""
+		<ax> is the matplotlib.pyplot.axes instance on which the widget will be drawn
+		
+		<onselect> is the callback called whenever the span changes (the callback
+		should take the upper and lower values of the span as two separate arguments).
+		
+		<initial> can be None (in which case the selector does not appear until the
+		user clicks for the first time) or it can specify the initial range over which
+		to draw the selector.
+		
+		<direction> may be 'horizontal' (the default) or 'vertical'.
+		
+		<fmt> and <units> are passed onto FormatWithUnits to pretty-print the numeric
+		values of the span limits at the top of the selector.
+		
+		<minspan> is a scalar value specifying the minimum allowable width of the selector.
+		
+		<granularity> specifies the base to which span endpoints are rounded.
+		
+		<useblit> can remain equal to False (its implementation was copied from
+		matplotlib.widgets.SpanSelector but I'm not sure what it is for - it hasn't ever
+		proved necessary).
+		
+		Additional keyword arguments may specify color, etc and are applied to both the
+		matplotlib.patches.Rectangle that forms the main body of the rendered selector, and
+		the text objects that render the numerical limit values. To restrict to one or the
+		other, prepend rect_ or text_ to the keyword (e.g.  text_color='#000000')
+		text_y  and text_verticalalignment are useful for changing the position of the text
+		labels so that the labels from multiple selectors do not clash.  text_visible=False
+		is an easy way to get rid of the labels.
+		"""
 		if direction not in ['horizontal', 'vertical']: raise ValueError( 'Must choose "horizontal" or "vertical" for direction' )
 		self.direction = direction
 		self.ax = None
@@ -1093,11 +1208,20 @@ class StickySpanSelector( object ): # definition copied and tweaked from matplot
 		self.set( initial )
 		
 	def sibs( self ):
+		"""
+		Return a list of pointers to other StickySpanSelectors that go in
+		the same direction on the same axes as self.
+		"""
 		attr = self.direction + 'StickySpanSelectors'
 		if not hasattr( self.ax, attr ): setattr( self.ax, attr, [] )
 		return getattr( self.ax, attr )
 				
 	def new_axes( self, ax ):
+		"""
+		Helper function for creating the actual matplotlib artists and
+		performing one-time setup of the mouse and keyboard callbacks.
+		Called during construction of the instance.
+		"""
 		self.ax = ax
 		self.sibs().append( self )
 		if self.canvas is not ax.figure.canvas:
@@ -1122,6 +1246,9 @@ class StickySpanSelector( object ): # definition copied and tweaked from matplot
 		self.update_text()
 	
 	def keypress( self, event ):
+		"""
+		matplotlib key-press callback, registered during new_axes() using the matplotlib canvas's mpl_connect() method
+		"""
 		if self.ax is not self.ax.figure.gca(): return True
 		if self is not self.sibs()[ -1 ]: return True
 		if event.key == None: return True
@@ -1152,6 +1279,9 @@ class StickySpanSelector( object ): # definition copied and tweaked from matplot
 		return False
 	
 	def get( self ):
+		"""
+		Return the current span, as a two-element tuple.
+		"""
 		if self.direction == 'horizontal':
 			start = self.rect.get_x()
 			extent = self.rect.get_width()
@@ -1161,6 +1291,12 @@ class StickySpanSelector( object ): # definition copied and tweaked from matplot
 		return ( start, start + extent )
 		
 	def set( self, span, trigger_callback=True ):
+		"""
+		Set the <span> as a two-element tuple or list.
+		By default, call self.onselect (but do not do so
+		if trigger_callback=False - this mode will not
+		normally be needed but is used internally in onmove() )
+		"""
 		if span == None:
 			self.rect.set_visible( False )
 			self.mintext.set_visible( False )
@@ -1182,12 +1318,16 @@ class StickySpanSelector( object ): # definition copied and tweaked from matplot
 		self.canvas.draw()
 
 	def update_background(self, event):
-		'force an update of the background'
+		"""
+		force an update of the background (relevant for useblit=True mode only)
+		"""
 		if self.useblit:
 			self.background = self.canvas.copy_from_bbox( self.ax.bbox )
 
 	def ignore( self, event, v ):
-		'return True if event should be ignored'
+		"""
+		return True if event should be ignored
+		"""
 		if event.inaxes != self.ax or not self.visible or event.button != 1: return True
 		sibs = self.sibs()
 		nearest = None
@@ -1198,6 +1338,9 @@ class StickySpanSelector( object ): # definition copied and tweaked from matplot
 		return ( self is not nearest )
 
 	def focus( self ):
+		"""
+		Helper method: ensure that this selector's host axes object has keyboard focus.
+		"""
 		sibs = self.sibs()
 		sibs.remove( self )
 		sibs.append( self )
@@ -1206,7 +1349,9 @@ class StickySpanSelector( object ): # definition copied and tweaked from matplot
 		except: pass
 		
 	def press( self, event ):
-		'on button press event'
+		"""
+		matplotlib mouse-button-press callback, registered during new_axes() using the matplotlib canvas's mpl_connect() method 
+		"""
 		if self.direction == 'horizontal': v = event.xdata
 		else:                              v = event.ydata
 			
@@ -1221,7 +1366,9 @@ class StickySpanSelector( object ): # definition copied and tweaked from matplot
 		return self.onmove( event ) # if you press and hold without moving, the line still responds
 		
 	def release( self, event ):
-		'on button release event'
+		"""
+		matplotlib mouse-button-release callback, registered during new_axes() using the matplotlib canvas's mpl_connect() method 
+		"""
 		
 		vmin = self.pressv
 		if self.direction == 'horizontal': vmax = event.xdata or self.prev[ 0 ]
@@ -1241,7 +1388,10 @@ class StickySpanSelector( object ): # definition copied and tweaked from matplot
 		return False
 
 	def onmove( self, event ):
-		'on motion notify event'
+		"""
+		matplotlib mouse-moved callback, registered during new_axes() using the matplotlib canvas's mpl_connect() method
+		Calls set() and hence update().		
+		"""
 		x, y = event.xdata, event.ydata
 		if self.direction == 'horizontal': v = x
 		else:                              v = y
@@ -1251,7 +1401,10 @@ class StickySpanSelector( object ): # definition copied and tweaked from matplot
 		return False
 
 	def update( self ):
-		'draw using newfangled blit or oldfangled draw depending on useblit'
+		"""
+		(Re-)render using newfangled blit or oldfangled draw depending on useblit.
+		Called automatically by set(), which is in turn called during onmove()
+		"""
 		if self.useblit:
 			if self.background is not None: self.canvas.restore_region( self.background )
 			self.ax.draw_artist( self.rect )
@@ -1261,6 +1414,10 @@ class StickySpanSelector( object ): # definition copied and tweaked from matplot
 		return False
 
 	def update_text( self ):
+		"""
+		Separate update() function for the text label artists. Called automatically by set()
+		when appropriate.
+		"""
 		minv, maxv = self.get()
 		context = self.axislimits()
 		minvtext = FormatWithUnits( value=minv, context=context, units=self.units, fmt=self.fmt )
@@ -1273,10 +1430,17 @@ class StickySpanSelector( object ): # definition copied and tweaked from matplot
 			self.maxtext.set( y=maxv, text=maxvtext, visible=self.visible, verticalalignment='bottom' )
 			
 	def axislimits( self ):
+		"""
+		Return, as a two-element sequence, the current axes' axis limits in the relevant direction.
+		"""
 		if self.direction == 'horizontal': return self.ax.get_xlim()
 		else:                              return self.ax.get_ylim()
 			
 	def round( self, value ):
+		"""
+		Helper method: if self.granularity has been set, return an accordingly round()ed
+		version of the input <value>.
+		"""
 		gran = self.granularity
 		#lims = self.axislimits()
 		#gran = max( abs( x ) for x in lims ) * self.granularity
@@ -1286,11 +1450,38 @@ class StickySpanSelector( object ): # definition copied and tweaked from matplot
 #### Main GUI superclass and subclass
 
 class TkMPL( object ):
+	"""
+	This is a general class that allows you to keep track of a lot of Tkinter widgets
+	(in a Bunch() called self.widgets) and a lot of matplotlib artists (in a Bunch()
+	called self.artists).  Subsets of them can be retrieved by the MatchWidgets() and
+	MatchArtists() methods.
 	
+	The convention is to use the Bunch() key to code a number of different specifiers,
+	delimited by underscores. Typically this will be a location or context, followed by
+	a type, followed by an individual identifier - for example, self.artists.st_axes_emg1
+	is the matplotlib artist of type axes, located on the 'st' (Stimulus Test) tab, and
+	specifically for the purpose of displaying the first EMG signal.  That particular
+	pointer will be returned among the artists whenever 'st' and/or 'axes' and/or
+	'emg1' are included in the input terms to self.MatchArtists().   Sometimes there
+	will exist both a widget and an artist for the same logical object:  for example,
+	the NewFigure() method called with prefix='st' and suffix='main' creates both
+	self.artists.st_figure_main (the matplotlib figure handle for the main figure on the
+	Stimulus Test tab) and self.widgets.st_figure_main (the Tkinter widget that the
+	matplotlib back-end creates for that same figure's canvas).
+	
+	In addition to MatchArtists() and MatchWidgets() for element management,  methods
+	include NewFigure() as mentioned above,  DrawFigures() for refreshing/redrawing all
+	(or a subset of) the handles that can be retrieved by self.MatchArtists( 'figure' );
+	and several helper methods for creating and manipulating tabbed panes in the GUI.
+	
+	The TkMPL class is an abstract class, used as superclass for the main GUI() class,
+	as well as the AnalysisWindow() and SettingsWindow(), and also the InfoItem() helper
+	class.
+	"""
 	def __init__( self ):
 		self.artists = Bunch()
 		self.widgets = Bunch()
-		self.colors = Bunch(
+		self.colors = Bunch(  # also define the colour-scheme.  Note that HTML-style colour strings are accepted by both Tkinter and matplotlib, so let's stick to that format
 			           figure = '#CCCCCC',
 			               bg = '#CCCCCC',
 			               fg = '#000000',
@@ -1310,6 +1501,9 @@ class TkMPL( object ):
 		)
 
 	def Match( self, things, *terms ):
+		"""
+		Helper function for MatchArtists() and MatchWidgets()
+		"""
 		keys = []
 		matches = []
 		for key, thing in things.items():
@@ -1322,17 +1516,41 @@ class TkMPL( object ):
 		return keys, matches
 		
 	def MatchArtists( self, *terms ):
+		"""
+		Return all matplotlib artists that contain all the *terms, underscore-delimited,
+		in their keys.  For example,  if self is a GUI() instance, then
+		self.MatchArtists( 'axes', 'st' ) will return all matplotlib artists that are of
+		type 'axes' on the 'st' (Stimulus Test) tab, i.e. it will return
+		[ self.artists.st_axes_emg1, self.artists.st_axes_emg2 ]
+		"""
 		keys, things = self.Match( self.artists, *terms )
 		return things
 		
 	def MatchWidgets( self, *terms ):
+		"""
+		Similar to MatchArtists, but retrieves Tkinter widgets from self.widgets instead of
+		matplotlib artists from self.artists
+		"""
 		keys, things = self.Match( self.widgets, *terms )
 		return things
 		
 	def DrawFigures( self, *terms ):
+		"""
+		Refresh/redraw all the matplotlib 'figure' artists registered in self.artists
+		If optional *terms are supplied, use these to narrow the list of figures-to-
+		redraw further, as per MatchArtists().
+		"""
 		for fig in self.MatchArtists( 'figure', *terms ): fig.canvas.draw()
 			
 	def NewFigure( self, parent, prefix, suffix, fig=None, color=None, **kwargs ):
+		"""
+		Create a figure, registering both a matplotlib artist and a Tkinter widget
+		For example, the NewFigure() method called with prefix='st' and suffix='main'
+		creates both self.artists.st_figure_main (the matplotlib figure handle for
+		the main figure on the Stimulus Test tab) and self.widgets.st_figure_main
+		(the Tkinter widget that the matplotlib back-end creates for that same
+		figure's canvas). 
+		"""
 		name = prefix + '_figure_' + suffix
 		if fig: matplotlib.pyplot.figure( fig.number )
 		else: fig = matplotlib.pyplot.figure()
@@ -1353,6 +1571,18 @@ class TkMPL( object ):
 		return fig, widget, container
 		
 	def MakeNotebook( self, parent=None, name='notebook' ):
+		"""
+		Creates a tabbed notebook widget using ttk.Notebook() if the
+		built-in ttk module is available (Python 2.7) or as a somewhat
+		clunkier Tix.Notebook if not (Python 2.5).
+
+		<parent> may be a Tkinter widget, or None.
+		<name> specifies the key under which the resulting notebook widget
+		is stored in self.widgets.
+		
+		Use the TkMPL methods AddTab(), EnableTab() and SelectTab() to
+		configure and manipulate the notebook's tabs.		
+		"""
 		if parent == None: parent = self
 		if 'ttk' in sys.modules:
 			notebook = self.widgets[ name ] = ttk.Notebook( parent )
@@ -1363,6 +1593,16 @@ class TkMPL( object ):
 		return notebook
 		
 	def AddTab( self, key, title, makeframe=True, nbname='notebook' ):
+		"""
+		Create a new tab, stored in self.widgets under the specified
+		<key> (to which '_tab' is automatically appended). Render the <title>
+		text on the tab itself, and unless makeframe=False, make a Tkinter.Frame
+		inside the tab, store it in self.widgets under the specified <key> with
+		'_frame_main' appended, and return that instead of the raw tab.
+		
+		You should specify the appropriate <nbname> if the notebook in question
+		was created using a non-default <name> argument to MakeNotebook().
+		"""
 		if 'ttk' in sys.modules:
 			tab = self.widgets[ key + '_tab' ] = tkinter.Frame( self, bg=self.colors.bg )
 			tab.pack()
@@ -1378,6 +1618,14 @@ class TkMPL( object ):
 			return frame
 		
 	def EnableTab( self, whichTab='all', nbname='notebook' ):
+		"""
+		Either enable all notebook tabs (whichTab='all') or enable just one tab and
+		disable all the others (e.g. whichTab='st' will enable self.widges.st_tab
+		and disable its siblings). Disabled tabs cannot be clicked on.
+		
+		As for AddTab(), specify <nbname> if the notebook in question was created
+		with a custom name.
+		"""
 		tabNames = [ k for k in self.widgets.keys() if 'tab' in k.lower().split( '_' ) ]
 		for tabName in tabNames:
 			if whichTab == 'all' or whichTab.lower() in tabName.lower().split( '_' ): state = 'normal'
@@ -1386,10 +1634,18 @@ class TkMPL( object ):
 			else: self.widgets[ nbname ].tk.call( self.widgets[ nbname ]._w, 'pageconfigure', tabName, '-state', state )
 	
 	def SelectTab( self, whichTab, nbname='notebook' ):
+		"""
+		Select (i.e. raise above its siblings, as if clicked by the user) the specified
+		notebook tab.  For example self.SelectTab( 'st' ) will raise self.widgets.st_tab
+		
+		As for AddTab(), specify <nbname> if the notebook in question was created
+		with a custom name.
+		"""
 		tabName = whichTab + '_tab'
 		if 'ttk' in sys.modules: self.widgets[ nbname ].select( self.widgets[ tabName ] )
 		else: self.widgets[ nbname ].raise_page( tabName )
 
+# Definitive translations between mode abbreviations as used in the code, and their formal names as displayed on the GUI tabs / in the title bars of analysis windows / in the log:
 MODENAMES = Bunch( st='Stimulus Test', vc='Voluntary Contraction', rc='Recruitment Curve', ct='Control Trials', tt='Training Trials', mixed='Mixed', offline='Offline' )
 
 class GUI( tksuperclass, TkMPL ):
@@ -1401,10 +1657,15 @@ class GUI( tksuperclass, TkMPL ):
 		
 		tksuperclass.__init__( self )
 		TkMPL.__init__( self )
-
+		
+		# Kill any previous instances of Tkinter windows
 		try: tkinter.ALLWINDOWS # TODO: remove this section
 		except: tkinter.ALLWINDOWS = []
 		tkinter.ALLWINDOWS.append( self )
+		# NB: if you have a sub-window like an AnalysisWindow open when you restart
+		# the GUI, then at this point you may get a message that looks something like
+		# invalid command name "189065776callit" while executing "189065776callit" ("after" script)
+		# You can ignore it :-)
 		
 		self.option_add( '*Font', 'TkDefaultFont 13' )
 		self.option_add( '*Label*Font', 'TkDefaultFont 13' )
@@ -1453,19 +1714,22 @@ class GUI( tksuperclass, TkMPL ):
 		self.operator.Set( **ReadDict( self.inifile ) )
 		
 		if DEVEL: self.bind( "<Escape>", self.destroy )
+		
+		# Choose the subject ID and whether to start a new or continue an old session:
 		if not SubjectChooser( self, initialID=self.operator.params.SubjectName ).successful: self.destroy(); return		
 		WriteDict( self.operator.params, self.inifile, 'SubjectName', 'DataDirectory' )
 		
+		# Launch BCI2000:
 		label = tkinter.Label( self, text='Launching BCI2000 system...', font=( 'Helvetica', 15 ) )
 		label.grid( row=1, column=1, sticky='nsew', padx=100, pady=100 )
 		self.update()
 		label.destroy()
-		
 		self.protocol( 'WM_DELETE_WINDOW', self.CloseWindow )
 		self.operator.Launch()
 		self.operator.SetConfig( work_around_bci2000_bug=True )
 		self.GetSignalParameters()
 				
+		# From here on: configure the GUI
 		self.MakeNotebook().pack( expand=1, fill='both', padx=5, pady=5 ,side='top' )
 		
 		self.modenames = MODENAMES
@@ -1476,6 +1740,9 @@ class GUI( tksuperclass, TkMPL ):
 		
 		matplotlib.pyplot.close( 'all' )
 		
+		# OK, you ready?
+		
+		# Create the "Stimulus Test" tab
 		frame = self.AddTab( 'st', title=self.modenames.st )
 		fig, widget, container = self.NewFigure( parent=frame, prefix='st', suffix='emg' )
 		self.FooterFrame( 'st', analysis=False )
@@ -1499,6 +1766,7 @@ class GUI( tksuperclass, TkMPL ):
 		if len( self.operator.params.TriggerExpression ): reminder += '\nExtra trigger condition: ' + self.operator.params.TriggerExpression
 		tkinter.Label( frame.master, text=reminder, bg=self.colors.footer ).place( in_=frame.master, relx=1.0, rely=1.0, anchor='se' )
 		
+		# Add the "Voluntary Contraction" tab
 		frame = self.AddTab( 'vc', title=self.modenames.vc )
 		fig, widget, container = self.NewFigure( parent=frame, prefix='vc', suffix='emg' )
 		self.FooterFrame( 'vc' )
@@ -1508,6 +1776,7 @@ class GUI( tksuperclass, TkMPL ):
 		frame.pack( side='left', padx=2, pady=2, fill='both', expand=1 )
 
 		
+		# Add the "Recruitment Curve" tab
 		frame = self.AddTab( 'rc', title=self.modenames.rc )
 		fig, widget, container = self.NewFigure( parent=frame, prefix='rc', suffix='emg' )
 		self.FooterFrame( 'rc' )
@@ -1528,6 +1797,7 @@ class GUI( tksuperclass, TkMPL ):
 		frame.pack( side='left', padx=2, pady=2, fill='both', expand=1 )
 
 
+		# Add the "Control Trials" tab
 		frame = self.AddTab( 'ct', title=self.modenames.ct )
 		fig, widget, container = self.NewFigure( parent=frame, prefix='ct', suffix='emg' )
 		self.FooterFrame( 'ct' )
@@ -1537,6 +1807,7 @@ class GUI( tksuperclass, TkMPL ):
 		frame.pack( side='left', padx=2, pady=2, fill='both', expand=1 )
 
 		
+		# Add the "Training Trials" tab
 		frame = self.AddTab( 'tt', title=self.modenames.tt )
 		fig, widget, container = self.NewFigure( parent=frame, prefix='tt', suffix='emg' )
 		self.FooterFrame( 'tt' )
@@ -1547,28 +1818,31 @@ class GUI( tksuperclass, TkMPL ):
 		container.pack( side='top', fill='both', expand=True, padx=20, pady=5 )
 		frame.pack( side='left', padx=2, pady=2, fill='both', expand=1 )
 
-
+		# Add the "Log" tab
 		tab = self.AddTab( 'log', title='Log', makeframe=False )
 		logfile = self.operator.LogFile( autoCreate=True )
 		frame = self.widgets.log_scrolledtext = ScrolledText( parent=tab, filename=logfile, font='{Courier} 12', bg='#FFFFFF' )
 		frame.pack( side='top', padx=2, pady=2, fill='both', expand=1 )
 		
-		
+		# Finish up
 		self.SetBarLimits( 'vc', 'rc', 'ct', 'tt' )
 		self.SetTargets(   'vc', 'rc', 'ct', 'tt' )
 		self.DrawFigures()
 		#self.resizable( True, False ) # STEP 13 from http://sebsauvage.net/python/gui/
 		self.update(); self.geometry( self.geometry().split( '+', 1 )[ 0 ] + '+25+25' ) # prevents Tkinter from resizing the GUI when component parts try to change size (STEP 18 from http://sebsauvage.net/python/gui/ )
-		self.wm_state( 'zoomed' )
+		self.wm_state( 'zoomed' ) # maximize the window
 		self.ready = True
 	
 	def GetSignalParameters( self ):
+		"""
+		TODO: this is how far I've got with the docstrings and comments
+		"""
 		self.fs = float( self.operator.remote.GetParameter( 'SamplingRate' ).lower().strip( 'hz' ) )
 		self.sbs = float( self.operator.remote.GetParameter( 'SampleBlockSize' ) )
 		self.lookback = float( self.operator.params.LookBack.strip( 'ms' ) ) / 1000.0
 		
 	def Start( self, mode ):
-		self.run = 'R%02d' % self.operator.NextRunNumber() # must query this before starting the run
+		self.run = 'R%02d' % self.operator.NextRunNumber() # must query this *before* starting the run
 		self.operator.Start( mode.upper() )
 		self.EnableTab( mode )
 		EnableWidget( self.MatchWidgets( mode, 'button' ), False )
@@ -2089,10 +2363,8 @@ class MVC( object ):
 		self.ycon = AxisController( self.axes, 'y', fmt='%g', units='V', start=self.axes.get_ylim(), narrowest=self.axes.get_ylim() ).Home()
 		self.xcon = AxisController( self.axes, 'x', fmt='%g', units='s', start=self.axes.get_xlim(),    widest=self.axes.get_xlim() ).Home()
 		self.xcon.focusFunction = self.selector.get
-		if DEBUG: self.selector.set( ( 11.7, 13.9 ) )
 		self.cid = self.axes.figure.canvas.mpl_connect( 'key_press_event', self.KeyPress )
 		self.Update()
-		DB( 'on' )
 	
 	def KeyPress( self, event ):
 		code = str( event.key ).split( '+' )[ -1 ]
@@ -3293,7 +3565,7 @@ if __name__ == '__main__':
 		if not os.path.isdir( logDir ): os.mkdir( logDir )
 		sys.stdout = sys.stderr = open( log, 'wt', 0 )
 	if '--devel' in opts: DEVEL = True  # use FilePlayback as signal source, and load example data at launch for easy test of analysis window
-	if '--debug' in opts: DEBUG = True  # print debug messages to the system log (independent of whether we're in FilePlayback mode)
+	if '--debug' in opts: DEBUG = True  # print debug messages to the system log, and possibly perform other temporary "weird" debugging operations (independent of whether we're in FilePlayback mode)
 	CUSTOM = opts.get( '--custom', '' )
 	
 	try: tkinter.ALLWINDOWS
