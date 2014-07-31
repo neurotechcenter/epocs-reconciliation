@@ -26,8 +26,8 @@ command-line arguments:
                the default "online" mode.
  
 --devel      : start in "development" mode:  use the BCI2000 FilePlayback module as source
-               instead of the live data acquisition module, and pre-load memory with so
-               some example data so that the "Analysis" buttons can be pressed immediately
+               instead of the live data acquisition module, and pre-load memory with some
+               example data so that the "Analysis" buttons can be pressed immediately
                without having to wait to gather data. Internally, this causes the global
                variable DEVEL to be set to True.   The application also starts in
                development mode automatically if no interface to the acquisition hardware
@@ -1550,6 +1550,7 @@ class TkMPL( object ):
 		the main figure on the Stimulus Test tab) and self.widgets.st_figure_main
 		(the Tkinter widget that the matplotlib back-end creates for that same
 		figure's canvas). 
+		<parent> is the Tkinter.Frame in which the new figure should be rendered.
 		"""
 		name = prefix + '_figure_' + suffix
 		if fig: matplotlib.pyplot.figure( fig.number )
@@ -1651,7 +1652,10 @@ MODENAMES = Bunch( st='Stimulus Test', vc='Voluntary Contraction', rc='Recruitme
 class GUI( tksuperclass, TkMPL ):
 	"""
 	A class representing the main EPOCS GUI window.  One instance of this, called self, will be created when
-	you run EPOCS.  Almost everything else is a child attribute of the this GUI instance.
+	you run EPOCS.  Almost everything else is a child attribute of this GUI instance.  The GUI instance
+	will use an Operator instance (stored under self.operator) to manage settings and communicate with BCI2000.
+	The GUI instance will be called <self> in an interactive session (i.e. if you run this file from IPython
+	and then press ctrl-c to force the GUI update thread into the background).
 	"""
 	def __init__( self, operator=None ):
 		
@@ -1659,7 +1663,7 @@ class GUI( tksuperclass, TkMPL ):
 		TkMPL.__init__( self )
 		
 		# Kill any previous instances of Tkinter windows
-		try: tkinter.ALLWINDOWS # TODO: remove this section
+		try: tkinter.ALLWINDOWS
 		except: tkinter.ALLWINDOWS = []
 		tkinter.ALLWINDOWS.append( self )
 		# NB: if you have a sub-window like an AnalysisWindow open when you restart
@@ -1745,8 +1749,8 @@ class GUI( tksuperclass, TkMPL ):
 		# Create the "Stimulus Test" tab
 		frame = self.AddTab( 'st', title=self.modenames.st )
 		fig, widget, container = self.NewFigure( parent=frame, prefix='st', suffix='emg' )
-		self.FooterFrame( 'st', analysis=False )
-		self.HeaderFrame( 'st', success=False )
+		self.ControlPanel( 'st', analysis=False )
+		self.ProgressPanel( 'st', success=False )
 		ax1 = self.artists.st_axes_emg1 = matplotlib.pyplot.subplot( 2, 1, 1 )
 		self.artists.st_line_emg1 = matplotlib.pyplot.plot( ( 0, 0 ), ( 0, 0 ), color=self.colors.emg1 )[ 0 ] # NB: axes=blah kwarg doesn't work here
 		ax1.grid( True )
@@ -1769,8 +1773,8 @@ class GUI( tksuperclass, TkMPL ):
 		# Add the "Voluntary Contraction" tab
 		frame = self.AddTab( 'vc', title=self.modenames.vc )
 		fig, widget, container = self.NewFigure( parent=frame, prefix='vc', suffix='emg' )
-		self.FooterFrame( 'vc' )
-		self.HeaderFrame( 'vc', trials=False, success=False )
+		self.ControlPanel( 'vc' )
+		self.ProgressPanel( 'vc', trials=False, success=False )
 		self.NewBar( parent=frame, figure=fig, axes=( 1, 2, 1 ), prefix='vc', suffix='background', title='Muscle Activity' )
 		container.pack( side='top', fill='both', expand=True, padx=20, pady=5 )
 		frame.pack( side='left', padx=2, pady=2, fill='both', expand=1 )
@@ -1779,8 +1783,8 @@ class GUI( tksuperclass, TkMPL ):
 		# Add the "Recruitment Curve" tab
 		frame = self.AddTab( 'rc', title=self.modenames.rc )
 		fig, widget, container = self.NewFigure( parent=frame, prefix='rc', suffix='emg' )
-		self.FooterFrame( 'rc' )
-		self.HeaderFrame( 'rc', success=False )
+		self.ControlPanel( 'rc' )
+		self.ProgressPanel( 'rc', success=False )
 		self.NewBar( parent=frame, figure=fig, axes=( 1, 2, 1 ), prefix='rc', suffix='background', title='Muscle Activity' )
 		ax1 = self.artists.rc_axes_emg1 = matplotlib.pyplot.subplot( 2, 2, 2 )
 		self.artists.rc_line_emg1 = matplotlib.pyplot.plot( ( 0, 0 ), ( 0, 0 ), color=self.colors.emg1 )[ 0 ]
@@ -1800,8 +1804,8 @@ class GUI( tksuperclass, TkMPL ):
 		# Add the "Control Trials" tab
 		frame = self.AddTab( 'ct', title=self.modenames.ct )
 		fig, widget, container = self.NewFigure( parent=frame, prefix='ct', suffix='emg' )
-		self.FooterFrame( 'ct' )
-		self.HeaderFrame( 'ct', success=False )
+		self.ControlPanel( 'ct' )
+		self.ProgressPanel( 'ct', success=False )
 		self.NewBar( parent=frame, figure=fig, axes=( 1, 2, 1 ), prefix='ct', suffix='background', title='Muscle Activity' )
 		container.pack( side='top', fill='both', expand=True, padx=20, pady=5 )
 		frame.pack( side='left', padx=2, pady=2, fill='both', expand=1 )
@@ -1810,8 +1814,8 @@ class GUI( tksuperclass, TkMPL ):
 		# Add the "Training Trials" tab
 		frame = self.AddTab( 'tt', title=self.modenames.tt )
 		fig, widget, container = self.NewFigure( parent=frame, prefix='tt', suffix='emg' )
-		self.FooterFrame( 'tt' )
-		self.HeaderFrame( 'tt', success=True )
+		self.ControlPanel( 'tt' )
+		self.ProgressPanel( 'tt', success=True )
 		self.NewBar( parent=frame, figure=fig, axes=( 1, 2, 1 ), prefix='tt', suffix='background', title='Muscle Activity' )
 		self.NewBar( parent=frame, figure=fig, axes=( 1, 2, 2 ), prefix='tt', suffix='response', title='Response' )
 		self.artists.tt_line_baseline = matplotlib.pyplot.plot( ( 0, 1 ), ( -1, -1 ), color='#000088', alpha=0.7, linewidth=4, transform=fig.gca().get_yaxis_transform() )[ 0 ]
@@ -1835,13 +1839,19 @@ class GUI( tksuperclass, TkMPL ):
 	
 	def GetSignalParameters( self ):
 		"""
-		TODO: this is how far I've got with the docstrings and comments
+		Query the few pieces of information that the GUI needs to know back from BCI2000,
+		to do its own signal processing. Called after every BCI2000 SETCONFIG command, i.e.
+		directly after BCI2000 launch, and also during Start().
 		"""
 		self.fs = float( self.operator.remote.GetParameter( 'SamplingRate' ).lower().strip( 'hz' ) )
 		self.sbs = float( self.operator.remote.GetParameter( 'SampleBlockSize' ) )
 		self.lookback = float( self.operator.params.LookBack.strip( 'ms' ) ) / 1000.0
 		
 	def Start( self, mode ):
+		"""
+		Start a new run in the specified <mode> (which will be one of 'st', 'vc, 'rc', 'ct' or 'tt').
+		One run = one BCI2000 .dat file.
+		"""
 		self.run = 'R%02d' % self.operator.NextRunNumber() # must query this *before* starting the run
 		self.operator.Start( mode.upper() )
 		self.EnableTab( mode )
@@ -1866,6 +1876,9 @@ class GUI( tksuperclass, TkMPL ):
 		self.Log( 'Started run %s (%s)' % ( self.run, self.modenames[ self.mode ] ) )
 	
 	def Stop( self ):
+		"""
+		Stop the current run, if any, closing the associated BCI2000 .dat file.
+		"""
 		self.operator.Stop()
 		self.EnableTab( 'all' )
 		EnableWidget( self.MatchWidgets( self.mode, 'button' ), True )
@@ -1879,6 +1892,13 @@ class GUI( tksuperclass, TkMPL ):
 		self.run = None
 	
 	def SetBarLimits( self, *modes ):
+		"""
+		According to the settings stored in the operator for the upper limits of the
+		axes on which the background-EMG and target response bars are displayed, 
+		as well as the position of the baseline marker (if any), update the graphics
+		on the GUI tabs corresponding to the specified *modes.  This is done whenever
+		settings might have changed.
+		"""
 		for mode in modes:
 			for a in self.MatchArtists( mode, 'axiscontroller', 'background' ):
 				a.ChangeAxis( start=( 0, self.operator.GetVolts( self.operator.GetBackgroundBarLimit( mode ) ) ) )
@@ -1893,6 +1913,11 @@ class GUI( tksuperclass, TkMPL ):
 				self.NeedsUpdate( a.axes.figure )
 				
 	def SetTargets( self, *modes ):
+		"""
+		This updates the positions of the shaded target regions of background-EMG and
+		target-response graphs, for the GUI tabs corresponding to the specified *modes.
+		This is done whenever settings might have changed.
+		"""
 		for mode in modes:
 			if mode in [ 'rc', 'ct', 'tt' ]:
 				min, max = self.operator.GetVolts( ( self.operator.params._BackgroundMin[ 0 ], self.operator.params._BackgroundMax[ 0 ] ) )
@@ -1901,6 +1926,11 @@ class GUI( tksuperclass, TkMPL ):
 				self.UpdateTarget( min, max, mode, 'target', 'response' )
 
 	def SettingsFrame( self, code, settings=True, analysis=True ):
+		"""
+		Create and lay out the "Analysis" and "Settings" buttons.  Called once for each
+		GUI tab, with <code> equal to 'st', 'vc', 'rc', 'ct' or 'tt' in each case, during
+		construction.
+		"""
 		if settings: settings_tag = '_button_settings'
 		else: settings_tag = '_fakebutton_settings'
 		if analysis: analysis_tag = '_button_analysis'
@@ -1916,6 +1946,15 @@ class GUI( tksuperclass, TkMPL ):
 		frame.pack( side=self.settings_location, fill='y', padx=5 )
 		
 	def InfoFrame( self, code, name, title, value, size=14, labelsize=10, parent=None, color='#000000' ):
+		"""
+		Create and lay out a pair of text widgets for displaying a certain piece of
+		information in the "footer" (for example, title='Last Recording:', value'='R01').
+		<code>:  the two-letter code for the GUI tab (see the MODENAMES global variable)
+		<name>:  the suffix for the key in self.widgets (see the TkMPL class documentation)
+		         indicates to the program what this particular info frame is about
+		<title>: text indicating to the user what kind information is being displayed
+		<value>: text telling the user the information itself
+		"""
 		if parent == None: parent = self.widgets[ code + '_frame_footer' ]
 		frame = self.widgets[ code + '_frame_info_' + name ] = tkinter.Frame( parent, bg=parent[ 'bg' ] )
 		tLabel = self.widgets[ code + '_label_title_' + name ] = tkinter.Label( frame, text=title, font=( 'Helvetica', labelsize ), bg=parent[ 'bg' ], fg=color )
@@ -1924,7 +1963,11 @@ class GUI( tksuperclass, TkMPL ):
 		vLabel.pack( side='bottom', fill='both', padx=2, pady=4, expand=1 )
 		return frame
 		
-	def HeaderFrame( self, code, trials=True, success=False ):
+	def ProgressPanel( self, code, trials=True, success=False ):
+		"""
+		Create and lay out, on the GUI tab indicated by the two-letter <code>, a frame
+		containing a trial counter and (if success=True) a success rate counter.
+		"""
 		tabkey = code + '_tab'
 		tab = self.widgets[ code + '_tab' ]
 		frame = self.widgets[ code + '_frame_header' ] = tkinter.Frame( tab, bg=self.colors.header )
@@ -1938,7 +1981,12 @@ class GUI( tksuperclass, TkMPL ):
 		frame.pack( side='right', fill='y' )
 		return frame
 		
-	def FooterFrame( self, code, **kwargs ):
+	def ControlPanel( self, code, **kwargs ):
+		"""
+		Create and lay out, on the GUI tab indicated by the two-letter <code>, a frame
+		containing all the necessary buttons (Start, Stop, Analysis, Settings) as well
+		as information panels (subject and session ID, last run).
+		"""
 		tabkey = code + '_tab'
 		tab = self.widgets[ code + '_tab' ]
 		frame = self.widgets[ code + '_frame_footer' ] = tkinter.Frame( tab, bg=self.colors.footer )
@@ -1958,6 +2006,14 @@ class GUI( tksuperclass, TkMPL ):
 		return frame
 	
 	def NewBar( self, parent, prefix, suffix, figure=None, axes=None, **kwargs ):
+		"""
+		Create a new figure on the Tkinter.Frame <parent>, unless a <figure> is already
+		supplied.  Create a new axes artist on that figure, unless an <axes> instance
+		is already supplied.  Create an associated AxisController for the vertical axis
+		and draw a patch that will form the feedback bar.  Store all the relevant widgets
+		and artists in self.widgets and self.artists, using the specified <prefix> and
+		<suffix> in the manner of NewFigure()  (see the TkMPL superclass documentation).
+		"""
 		widget = None
 		if figure == None and isinstance( axes, ( tuple, list, type( None ) ) ):
 			figure, widget, container = self.NewFigure( parent=parent, prefix=prefix, suffix=suffix )
@@ -1999,10 +2055,17 @@ class GUI( tksuperclass, TkMPL ):
 		return figure, widget, widget.master, axes, bar
 				
 	def NeedsUpdate( self, fig ):
+		"""
+		Flag the specified matplotlib.pyplot.figure instance <fig> as needing to be re-drawn.
+		"""
 		if fig not in self.pendingFigures:
 			self.pendingFigures.append( fig )
 			
 	def UpdateTarget( self, min, max, *terms ):
+		"""
+		Lower-level routine, called by SetTargets(), for changing the position of one or
+		more shaded target regions.
+		"""
 		for target in self.MatchArtists( 'target', *terms ):
 			if min == None: min = 0.0
 			if max == None: max = target.axes.get_ylim()[ 1 ]
@@ -2010,6 +2073,9 @@ class GUI( tksuperclass, TkMPL ):
 			self.NeedsUpdate( target.figure )
 		
 	def UpdateBar( self, height, good, *terms ):
+		"""
+		Change the height and color of one or more feedback bars.
+		"""
 		keys, things = self.Match( self.artists, 'bar', *terms )
 		if len( keys ) == 0: return
 		key = keys[ 0 ]
@@ -2033,14 +2099,29 @@ class GUI( tksuperclass, TkMPL ):
 		self.NeedsUpdate( bar.figure )
 	
 	def After( self, msec, key, func ):
+		"""
+		Wraps the Tkinter.Tk.after() method - i.e. the method for calling <func>
+		after a delay of <msec> milliseconds safely in a Tk-compatible background thread.
+		The <key> is used to identify the operation: any pending calls with the same key
+		are cancelled before registering this one.
+		"""
 		old = self.afterIDs.get( key, None )
 		if old != None: self.after_cancel( old )
 		self.afterIDs[ key ] = self.after( msec, func )
 	
 	def GetDescription( self, mode ):
+		"""
+		Called by the AnalysisWindow constructor to know how to refer to the current
+		data. For the online GUI, we'll just use the label of the current run (e.g. 'R06').
+		"""
 		return self.MatchWidgets( mode, 'label', 'value', 'run' )[ 0 ][ 'text' ]
 	
 	def CloseWindow( self ):
+		"""
+		Callback called when the user attempts to close the main window. If a run is
+		still running, the attempt is denied.  If not, an "are you sure?" confirmation
+		dialog is implemented.
+		"""
 		if self.mode != None: return
 		if getattr( self, 'areyousure', False ): return
 		class AreYouSure( Dialog ):
@@ -2056,6 +2137,11 @@ class GUI( tksuperclass, TkMPL ):
 		if sure: self.destroy()
 		
 	def destroy( self, arg=None ):
+		"""
+		Overshadows and wraps the standard destroy() method of the Tk superclass.
+		Stops ongoing threads, cancels pending tasks, saves settings, shuts down BCI2000
+		and closes matplotlib figures before finally destroying the widget.
+		"""
 		self.StopThreads()
 		if getattr( self, 'operator', None ):
 			con1 = getattr( self, 'axiscontrollers_emg1', [ None ] )[ 0 ]
@@ -2077,15 +2163,29 @@ class GUI( tksuperclass, TkMPL ):
 		self.quit()
 	
 	def Log( self, text, datestamp=True ):
+		"""
+		Callback for logging results information.
+		"""
 		if datestamp: stamp = self.operator.FriendlyDate( time.time() ) + '       '
 		else: stamp = ''
 		self.widgets.log_scrolledtext.append( stamp + text + '\n', ensure_newline_first=True )
 	
 	def ScheduleTask( self, key, func ):
+		"""
+		Add a callable <func> to the set of tasks that should be performed during
+		the regular calls to HandlePendingTasks().
+		"""
 		self.pendingTasks[ key ] = func
 		
 	def HandlePendingTasks( self ):
-		
+		"""
+		Call, and remove from the pending list, any tasks registered with ScheduleTask().
+		Note that functions are not called in any defined order. 
+		Also, re-draw any figures that have been flagged with NeedsUpdate().
+		Finally, re-schedule the next call of HandlePendingTasks after a fixed short
+		interval, using After().  The initial registration happens in Loop(), which is
+		called in the __main__ part of the file.
+		"""
 		for v in self.pendingTasks.values(): v()
 		self.pendingTasks.clear()
 			
@@ -2096,9 +2196,15 @@ class GUI( tksuperclass, TkMPL ):
 		self.After( 10, 'HandlePendingTasks', self.HandlePendingTasks )
 
 	def WatchMM( self ):
-		# NB: this is run in a thread. tkinter is not thread-safe.
-		# So do not touch any tk widgets from this code.
-		# Use ScheduleTask instead - HandlePendingTasks mops these up every 10ms.
+		"""
+		Check at 1-millisecond intervals until the Operator's shared memory area reports
+		that a new SampleBlock has been made available by BCI2000. When a new block arrives,
+		read it, decode it, and schedule it for processing.
+		
+		NB: this is run in a thread, and TkInter is not thread-safe. So we cannot touch
+		any Tk widgets from this code. We use ScheduleTask instead - HandlePendingTasks
+		mops these up every 10ms.
+		"""
 		counter = prev = 0
 		while self.keepgoing:
 			while self.keepgoing and ( counter == prev or counter == 0 ):
@@ -2110,11 +2216,32 @@ class GUI( tksuperclass, TkMPL ):
 				self.ScheduleTask( 'update_states_and_signal', Curry( self.ProcessStatesAndSignal, states=states, signal=signal ) )
 				
 	def ProcessStatesAndSignal( self, states, signal ):
+		"""
+		Called with the decoded contents of shared memory whenever a new SampleBlock arrives
+		from BCI2000. First calls Incoming() to deal with the incoming state variables.
+		Then, if the result of this indicates that a new *trial* has arrived (i.e. the
+		TrialsCompleted state variable has increased).
+		"""
 		if self.Incoming( states, 'States' ):
 			self.Incoming( signal, 'Signal' )
 		
 	def Incoming( self, block, queue ):
+		"""
+		Process information in <block> in the context specified by <queue>.  <queue>
+		may be 'Signal' or 'States'.
 		
+		In the 'States' queue, this method returns True if a change in the state variable
+		TrialsCompleted indicates that a new trial has arrived, or False otherwise.
+		This code also updates the visible trial counter and success-rate counter.
+		
+		The 'Signal' queue assumes that the signal belongs to a new trial and passes
+		it straight on to NewTrial().
+		
+		Sorry about this slightly convoluted way of doing things: the architecture was
+		designed during the transition/performance-debugging period between UDP
+		ConnectorOutput communication and shared-memory communication.  There used to be
+		an alternative queue called 'ConnectorOutput' for the UDP information.
+		"""
 		code = self.mode
 		if code == None: return False
 		states = self.states[ code ]
@@ -2172,6 +2299,14 @@ class GUI( tksuperclass, TkMPL ):
 		return newTrial
 				
 	def	NewTrial( self, signal, store=True ):
+		"""
+		Called during Incoming() operations on the 'Signal' queue, which is called during
+		ProcessStatesAndSignal() if there is an increment in the TrialsCompleted state
+		variable indicating that a new trial has arrived (ProcessStatesAndSignal itself is
+		called indirectly via ScheduleTask() during the WatchMM() thread).
+		
+		Stores the data, and updates any graphical traces of the EMG epoch.
+		"""
 		if signal == None: return
 		if store and self.mode not in [ 'vc' ]: self.data[ self.mode ].append( signal )
 		for channelIndex, values in enumerate( signal ):
@@ -2182,15 +2317,30 @@ class GUI( tksuperclass, TkMPL ):
 			self.NeedsUpdate( line.figure )
 				
 	def StartThread( self, name, func, *pargs, **kwargs ):
-		# NB: tkinter is not thread-safe. So do not touch any tk widgets from inside func.
-		# Use ScheduleTask instead - HandlePendingTasks mops these up every 10ms.
+		"""
+		Create, register and start a threading.Thread which runs the specified <func>
+		with the specified positional arguments and keyword arguments.
+		
+		NB: TkInter is not thread-safe, so the code in <func> should not touch any Tk widgets.
+		ScheduleTask can be used instead - HandlePendingTasks mops these up every 10ms.
+		"""
 		t = self.threads[ name ] = threading.Thread( target=func, args=pargs, kwargs=kwargs )
 		t.start()
 
 	def StopThreads( self ):
+		"""
+		Set the self.keepgoing flag to False.  Thread target functions should monitor this
+		flag.
+		"""
 		self.keepgoing = False
 	
 	def Loop( self ):
+		"""
+		This is the "main" function of the GUI.  It is called during the __main__ part of
+		the Python file (i.e. when the file is run). It can be interrupted with ctrl-c:
+		the shared-memory thread then halts, but everything else (e.g. tk updates) continues
+		to happen in the background. 
+		"""
 		self.keepgoing = True
 		self.StartThread( 'watch_mm', self.WatchMM )
 		self.After( 50, 'HandlePendingTasks', self.HandlePendingTasks )
@@ -2202,7 +2352,13 @@ class GUI( tksuperclass, TkMPL ):
 class Dialog( tkinter.Toplevel ):
 	""" Modal dialog box courtesy of Fredrik Lundh: http://effbot.org/tkinterbook/tkinter-dialog-windows.htm """
 	def __init__( self, parent, title=None, icon=None, geometry=None, blocking=True, modal=True ):
-
+		"""
+		Set modal=False to instantiate this as a normal window (with buttons to maximize,
+		minimize or close it).
+		
+		With modal=True and blocking=True, this constructor will not return until the
+		dialog is dismissed.
+		"""
 		tkinter.Toplevel.__init__( self, parent )
 		if parent and modal: self.transient( parent )
 		if title: self.title( title )
@@ -2257,7 +2413,13 @@ class Dialog( tkinter.Toplevel ):
 	def apply(self): pass # override
 		
 class ScrolledText( tkinter.Frame ):
-	"""Adapted from Stephen Chappell's post at http://code.activestate.com/recipes/578569-text-editor-in-python-33/ """
+	"""
+	A text area into which the user can type arbitrary text. Supports ctrl-x/c/v for
+	cut/copy/paste, and ctrl-z/y for undo/redo.  Optionally can save the text
+	automatically to a specified file.
+	
+	Adapted from Stephen Chappell's post at http://code.activestate.com/recipes/578569-text-editor-in-python-33/
+	"""
 	def __init__( self, parent=None, text='', filename=None, **kwargs ):
 		tkinter.Frame.__init__( self, parent )
 		self.scrollbar = tkinter.Scrollbar( self )
@@ -2323,6 +2485,15 @@ class ScrolledText( tkinter.Frame ):
 		return self.text.get( '1.0', 'end-1c' )
 
 def ResponseMagnitudes( data, channel, interval, fs, lookback, p2p=False ):
+	"""
+	Global helper function called by ResponseOverlay.ResponseMagnitudes():
+	assuming each data[ trialIndex ][ channelIndex ][ sampleIndex ] is a floating-point
+	number, and given a tuple specifying the endpoints of the <interval> of interest in
+	seconds, as well as the sampling frequency <fs> in Hz and the <lookback> in seconds,
+	return a list of response magnitudes, one per trial, for the specified <channel>.
+	If p2p=True, these are peak-to-peak values in the interval of interest. If not, they
+	are mean rectified values across the interval of interest.
+	"""
 	interval = min( interval ), max( interval )
 	r = []
 	for trial in data:
@@ -2336,6 +2507,16 @@ def ResponseMagnitudes( data, channel, interval, fs, lookback, p2p=False ):
 	return r
 
 def Quantile( x, q, alreadySorted=False ):
+	"""
+	Global helper function called by ResponseDistribution.Update()
+	Given a list of floating-point values <x>, which may or may not already be sorted
+	in ascending order (pass alreadySorted=True if they are, to save computational effort),
+	return the q'th quantile of the values. If q is out of range (e.g. q=0, q=1, or too
+	close to 0 or 1 given the number of samples in x) then min(x) or max(x) is returned.	
+	
+	q may be a scalar floating-point quantile specifier ( 0 <= q <= 1 ) or it may be
+	a tuple/list of quantile specifiers: in the latter case, a list of values is returned.
+	"""
 	if not alreadySorted: x = sorted( x )
 	if isinstance( q, ( tuple, list ) ): return [ Quantile( x, qi, alreadySorted=True ) for qi in q ]
 	n = ( len( x ) + 1 ) * q - 1
@@ -2348,7 +2529,20 @@ def Quantile( x, q, alreadySorted=False ):
 	return x[ lo ] * ( up - n ) + x[ up ] * ( n - lo )
 
 class MVC( object ):
+	"""
+	An object which manages the graphical/interactive analysis of a Voluntary Contraction
+	run with the aim of finding the maximum voluntary contraction (MVC). An MVC instance
+	is created by an AnalysisWindow object when its mode is 'vc'.
+	"""
 	def __init__( self, data, fs, axes=None, callback=None ):
+		"""
+		Create the necessary matplotlib artists  (no Tk code or objects here)
+		
+		<data>     : a list of EMG values, one per SampleBlock
+		<fs>       : the sampling rate of <data>, i.e. the SampleBlock rate (not the raw sampling rate of the BCI2000 signal)
+		<axes>     : optionally specify an existing matplotlib axes to draw on
+		<callback> : function to be called whenever the StickySpanSelector self.selector changes
+		"""
 		if axes == None: axes = matplotlib.pyplot.gca()
 		else: matplotlib.pyplot.figure( axes.figure.number ).sca( axes )
 		self.axes = axes
@@ -2367,6 +2561,10 @@ class MVC( object ):
 		self.Update()
 	
 	def KeyPress( self, event ):
+		"""
+		This callback is registered with matplotlib during construction so that the
+		operator can press escape to zoom all the way out.
+		"""
 		code = str( event.key ).split( '+' )[ -1 ]
 		if code in [ 'escape' ]:
 			self.xcon.set( self.xcon.widest )
@@ -2379,6 +2577,10 @@ class MVC( object ):
 		return True
 		
 	def Update( self, range=None ):
+		"""
+		Compute and display the maximum EMG signal associated with voluntary contraction.
+		Called by AnalysisWindow.UpdateResults()
+		"""
 		if range == None: range = self.selector.get()
 		if range == None: ysub = []
 		else: ysub = [ y for t, y in zip( self.time, self.data ) if range[ 0 ] <= t <= range[ 1 ] ]
@@ -2391,8 +2593,17 @@ class MVC( object ):
 			self.axes.set_title( '' )
 
 class ResponseOverlay( object ):
+	"""
+	An object which manages the graphical/interactive analysis of a Recruitment Curve,
+	Control Trials and Training Trials run by plotting overlaid EMG traces, with the
+	aim of allowing the operator to specify the timing of the intervals of interest. 
+	A ResponseOverlay instance is created by an AnalysisWindow object when its mode is
+	'rc', 'ct' or 'tt', and rendered in the upper tab marked "Timing".
+	"""
 	def __init__( self, data, fs, lookback, channel=0, axes=None, responseInterval=( .028, .035 ), comparisonInterval=None, prestimulusInterval=None, color='#0000FF', updateCommand=None, rectified=False, emphasis=() ): 
-		# return lines, span selectors, ycon, xcon
+		"""
+		Each data[ trialIndex ][ channelIndex ][ sampleIndex ] is a floating-point number.
+		"""
 		if axes == None: axes = matplotlib.pyplot.gca()
 		else: matplotlib.pyplot.figure( axes.figure.number ).sca( axes )
 		self.axes = axes
@@ -2425,6 +2636,9 @@ class ResponseOverlay( object ):
 		self.Update( rectified=rectified )
 		
 	def Update( self, rectified=None, color=None, channel=None ):
+		"""
+		Update the display. Called by AnalysisWindow.UpdateResults()
+		"""
 		if rectified != None: self.rectified = rectified
 		if color != None: self.lineprops[ 0 ].color = color
 		if channel != None: self.channel = channel
@@ -2436,14 +2650,44 @@ class ResponseOverlay( object ):
 		if self.rectified: self.axes.set_ylim( [ 0, ylim[ 1 ] ] )
 		else: self.axes.set_ylim( [ -ylim[ 1 ], ylim[ 1 ] ] )
 		
-	def ResponseMagnitudes( self, type='response', p2p=False ):
+	def ResponseMagnitudes( self, type='target', p2p=False ):
+		"""
+		Compute trial-by-trial response magnitudes from the data stored in this object,
+		either as mean rectified EMG (p2p=False) or peak-to-peak values (p2p=True).
+		type='prestimulus' : pre-stimulus interval
+		type='comparison'  : use the comparison (aka "reference") response interval
+		type='response'    : use the target response interval
+		
+		(Note that these keywords, like many of the attribute/variable names in the code,
+		reflect an older convention, whereas in the user interface and in the documentation
+		these should consistently be referred to as "pre-stimulus", "reference" response
+		and "target" response respectively.)
+		"""
 		if   type == 'response':    interval = self.responseSelector.get()
 		elif type == 'comparison':  interval = self.comparisonSelector.get()
 		elif type == 'prestimulus': interval = self.prestimulusSelector.get()
 		return ResponseMagnitudes( data=self.data, channel=self.channel, interval=interval, fs=self.fs, lookback=self.lookback, p2p=p2p )
 
 class ResponseSequence( object ):
+	"""
+	An object which manages the graphical/interactive analysis of a Recruitment Curve,
+	Control Trials and Training Trials run by plotting reference response magnitude
+	and target response magnitude sequentially, i.e. as a function of trial index.
+	A ResponseSequence instance is created by an AnalysisWindow object when its mode is
+	'rc', 'ct' or 'tt', and rendered in the lower tab marked "Sequence".
+	"""
 	def __init__( self, overlay, axes=None, pooling=1, p2p=False, tk=False ):
+		"""
+		Render the necessary matplotlib artists and TkInter widgets.
+		
+		<overlay> is a ResponseOverlay instance, from which the data will be taken.
+		<axes>    is an optional matplotlib.pyplot.axes instance to draw into
+		<pooling> is the number of trials to pool initially
+		<p2p>     is a boolean flag dictating whether to use averaged rectified
+		          magnitude (p2p=False) or peak-to-peak magnitude (p2p=True)
+		<tk>      is a TkInter widget to draw into:  if supplied, create TkInter.Label
+		          instances (via the InfoItem class) for displaying the computed information.
+		"""
 		if axes == None: axes = matplotlib.pyplot.gca()
 		else: matplotlib.pyplot.figure( axes.figure.number ).sca( axes )
 		self.axes = axes
@@ -2474,6 +2718,9 @@ class ResponseSequence( object ):
 		self.Update()
 					
 	def Update( self, pooling=None, p2p=None ):
+		"""
+		Update the display. Called by AnalysisWindow.UpdateResults()
+		"""
 		if pooling != None: self.pooling = pooling
 		if p2p != None: self.p2p = p2p
 		def pool( x, pooling, emphasis=None ):
@@ -2524,7 +2771,26 @@ class ResponseSequence( object ):
 	
 
 class ResponseDistribution( object ):
+	"""
+	An object which manages the graphical/interactive analysis of a Recruitment Curve,
+	Control Trials and Training Trials run by plotting a histogram of target response
+	magnitudes.
+	A ResponseDistribution instance is created by an AnalysisWindow object when its mode
+	is 'rc', 'ct' or 'tt', and rendered in the lower tab marked "Distribution".
+	"""
 	def __init__( self, overlay, axes=None, targetpc=66, nbins=10, p2p=False, tk=False ):
+		"""
+		Render the necessary matplotlib artists and TkInter widgets.
+		
+		<overlay>  is a ResponseOverlay instance, from which the data will be taken.
+		<axes>     is an optional matplotlib.pyplot.axes instance to draw into
+		<targetpc> is the initial target percentile for specifying training targets
+		<nbins>    is the number of bins in the histogram
+		<p2p>      is a boolean flag dictating whether to use averaged rectified
+		           magnitude (p2p=False) or peak-to-peak magnitude (p2p=True)
+		<tk>       is a TkInter widget to draw into:  if supplied, create TkInter widgets
+		           (via the InfoItem class) for displaying the computed information.
+		"""
 		if axes == None: axes = matplotlib.pyplot.gca()
 		else: matplotlib.pyplot.figure( axes.figure.number ).sca( axes )
 		self.axes = axes
@@ -2560,6 +2826,9 @@ class ResponseDistribution( object ):
 		self.Update()
 					
 	def Update( self, nbins=None, targetpc=None, p2p=None ):
+		"""
+		Update the display. Called by AnalysisWindow.UpdateResults()
+		"""
 		if nbins != None: self.nbins = nbins
 		if targetpc != None: self.targetpc = targetpc
 		if p2p != None: self.p2p = p2p
@@ -2601,8 +2870,26 @@ class ResponseDistribution( object ):
 		
 
 class AnalysisWindow( Dialog, TkMPL ):
+	"""
+	An AnalysisWindow is created as a modal Dialog() when the "Analysis" button is
+	pressed on the vc, rc, ct or tt tab of the GUI().
 	
+	If DEVEL is True (i.e. if this file was run with the --devel flag) then the
+	AnalysisWindow instance is available as the .child attribute of the parent GUI()
+	or OfflineAnalysis() instance, and the constructor will not block.
+	"""
 	def __init__( self, parent, mode, geometry=None, modal=True, online=True ):
+		"""
+		AnalysisWindow constructor
+		
+		<parent>   : the GUI or OfflineAnalysis instance that created this
+		<mode>     : 'vc', 'rc', 'ct', 'tt' or 'offline'
+		<geometry> : an optional TkInter geometry string that is passed through to the
+		             Dialog superclass constructor
+		<modal>    : passed through to the Dialog superclass constructor
+		<online>   : True in the context of a GUI, False for an OfflineAnalysis (in the
+		             latter case, Up-Condition and Down-Condition buttons are not created).
+		"""
 		self.mode = mode
 		self.channel = 0 # first EMG channel
 		self.data = parent.data[ mode ]
@@ -2616,6 +2903,9 @@ class AnalysisWindow( Dialog, TkMPL ):
 		if DEVEL: self.parent.child = self  # only do this during DEVEL because it creates a mutual reference loop and hence a memory leak
 		
 	def buttonbox( self ): # override default OK + cancel buttons (and <Return> key binding)
+		"""
+		No standard OK/cancel buttons.
+		"""
 		pass
 		
 	def ok_down( self, event=None ): self.acceptMode = 'down'; self.ok()
@@ -2630,6 +2920,11 @@ class AnalysisWindow( Dialog, TkMPL ):
 		Dialog.cancel( self )
 	
 	def TimingsSaved( self ):
+		"""
+		Check whether the timings (i.e. endpoints of the prestimulus, reference and target
+		response interval selectors) have been remembered (stored in self.parent.operator.params)
+		by pressing the "Use Marked Timings" button. Return True or False accordingly.
+		"""
 		result = True
 		params = self.parent.operator.params
 		def equal( a, b ): return float( '%g' % a ) == float( '%g' % b )
@@ -2645,6 +2940,12 @@ class AnalysisWindow( Dialog, TkMPL ):
 		return result
 	
 	def PersistTimings( self ):
+		"""
+		Store timing information from the ResponseOverlay object self.overlay.  This
+		information consists of the endpoints of the prestimulus, reference and target
+		response interval selectors. Store them in self.parent.operator.params
+		This is called when the "Use Marked Timings" button is pressed.
+		"""
 		if self.overlay.prestimulusSelector:
 			start, end = [ sec * 1000.0 for sec in self.overlay.prestimulusSelector.get() ]
 			self.parent.operator.Set( _PrestimulusStartMsec=[ start, start ], _PrestimulusEndMsec=[ end, end ] )
@@ -2660,6 +2961,10 @@ class AnalysisWindow( Dialog, TkMPL ):
 		self.UpdateResults()
 		
 	def apply( self ):
+		"""
+		Called by the superclass Dialog.ok() method, which in turn is called by either
+		ok_up() or ok_down() when the "Up-Condition" or "Down-Condition" button is pressed.
+		"""
 		params = self.parent.operator.params
 		factor = self.parent.operator.GetVolts( 1 )
 		if self.acceptMode == 'up':
@@ -2687,6 +2992,9 @@ class AnalysisWindow( Dialog, TkMPL ):
 			self.parent.Log( '%s conditioning target set: %g-%g msec response will be rewarded %s %s%s' % ( direction, start, end, preposition, critical, self.parent.operator.params._VoltageUnits ) )
 		
 	def body( self, frame ):
+		"""
+		Construct the Tk widgets and matplotlib artists that make up the analysis window.
+		"""
 		frame[ 'bg' ] = self.colors.bg
 
 		figwidth, figheight = 0.75 * self.winfo_screenwidth(), 0.75 * self.winfo_screenheight()
@@ -2818,7 +3126,11 @@ class AnalysisWindow( Dialog, TkMPL ):
 		self.CheckUpdate()
 			
 	def ToggleTrial( self, event ):
-		'on button press event'
+		"""
+		Callback registered as the matplotlib mouse-button-press event handler for any analysis
+		window that implements a ResponseSequence object. Allows highlighting to be toggled
+		with the left mouse button, and removal with the right button.
+		"""
 		if not hasattr( self, 'sequence' ): return
 		if event.inaxes != self.sequence.axes or event.button not in [ 1, 3 ]: return
 		where = round( event.xdata )
@@ -2836,15 +3148,31 @@ class AnalysisWindow( Dialog, TkMPL ):
 		return False
 		
 	def UpdateLines( self, rectified=False ):
+		"""
+		Callback for the "mean rect." vs "peak-to-peak" switch: re-draws the ResponseOverlay
+		according to the current switch setting.
+		"""
 		self.overlay.Update( rectified=rectified )
 		self.DrawFigures()
 		
-	def Changed( self, *pargs ): self.latest = time.time()
-	def CheckUpdate( self ): # check every 100 msec: if there is new activity, and the latest activity occurred more than 2s ago, then call autosave()
+	def Changed( self, *pargs ):
+		"""
+		Flag that something has changed and needs updating
+		"""
+		self.latest = time.time()
+		
+	def CheckUpdate( self ):
+		"""
+		Check every 100 msec: if there is new activity flagged by Changed(), and the latest
+		activity occurred more than 2s ago, then call UpdateResults().
+		This function renews its own schedule using Tk.after().  The initial scheduling
+		is done by an explicit call to CheckUpdate() in body()
+		"""
 		if self.latest != None and time.time() - self.latest > 0.5: self.UpdateResults(); self.latest = None
 		self.after_id = self.parent.after( 100, self.CheckUpdate )
 	
 	def PoolingEntry( self, oldValue, newValue ):
+		# TODO:  only got this far with method-by-method docstrings
 		if len( newValue ) == 0: return True
 		if newValue == oldValue: return True
 		try: val = float( newValue )
@@ -2931,6 +3259,14 @@ class AnalysisWindow( Dialog, TkMPL ):
 		return True
 	
 class InfoItem( TkMPL ):
+	"""
+	A class representing a labelled piece of information which has a label and a value
+	that are both made visible to the user.  These are used by the ResponseSequence and
+	ResponseDistribution classes to display statistics that have been computed from the
+	data.   Can also be a labelled text *input* rather than output (for the "target
+	percentile" setting) but this functionality is not as sophisticated as that in the
+	LabelledEntry class.
+	"""
 	def __init__( self, label, value, fmt='%s', units=None, color='#000000' ):
 		TkMPL.__init__( self )
 		self.label = label
@@ -2976,6 +3312,12 @@ class InfoItem( TkMPL ):
 		return self
 
 def AxesPosition( axes, left=None, right=None, top=None, bottom=None, width=None, height=None ):
+	"""
+	A global function for getting and/or setting all the position information about a
+	matplotlib.pyplot.axes object.  There should/must surely be an easier way of doing
+	this but I couldn't find it.  Used by the ResponseSequence and ResponseDistribution
+	classes.
+	"""
 	p = axes.get_position()
 	pleft, pbottom = p.get_points()[ 0 ]
 	pwidth, pheight = p.size
@@ -2992,6 +3334,14 @@ def AxesPosition( axes, left=None, right=None, top=None, bottom=None, width=None
 	return Bunch( left=p[ 0 ], bottom=p[ 1 ], width=p[ 2 ], height=p[ 3 ], right=p[ 0 ] + p[ 2 ], top=p[ 1 ] + p[ 3 ] )
 
 class LabelledEntry( tkinter.Frame ):
+	"""
+	A helper subclass used heavily by the SettingsWindow class.  It instantiates tkinter
+	widgets for a label adjacent to a text input field.  It also allows you to connect()
+	the value entered in the text field to a certain .resource  (which could be a dict or
+	Bunch - in fact we use the .params Bunch from an Operator class, where session
+	settings are stored).  Thereafter, the LabelledEntry can pull() its value from that
+	resource or push() it back.
+	"""
 	def __init__( self, parent, label, value='', width=5, bg=None ):
 		if bg == None: bg = parent[ 'bg' ]
 		tkinter.Frame.__init__( self, parent, bg=bg )
@@ -3062,7 +3412,10 @@ class LabelledEntry( tkinter.Frame ):
 	def place( self, *pargs, **kwargs ): tkinter.Frame.place( self, *pargs, **kwargs ); return self
 	
 class SettingsWindow( Dialog, TkMPL ):
-	
+	"""
+	A Dialog subclass implementing the window that opens when the "Settings" button is
+	pressed.
+	"""	
 	def __init__( self, parent, mode ):
 		self.mode = mode
 		TkMPL.__init__( self )
@@ -3246,7 +3599,14 @@ class SettingsWindow( Dialog, TkMPL ):
 #	def buttonbox( self ): self.bind( "<Escape>", self.cancel )
 
 class SubjectChooser( tkinter.Frame ):
+	"""
+	A Tkinter.Frame subclass containing the GUI elements for specifying a subject ID and
+	launching a session.
 	
+	The early implementation of this was as a separate Dialog subclass - the Dialog methods
+	were retained when this transitioned to using the existing main EPOCS window and became
+	just a type of Frame. 
+	"""
 	def __init__( self, parent, initialID='' ):
 		tkinter.Frame.__init__( self, parent, bg=parent[ 'bg' ] )
 		self.parent = parent
@@ -3326,6 +3686,12 @@ class SubjectChooser( tkinter.Frame ):
 
 OFFLINE_ROOT = None		
 class OfflineAnalysis( object ):
+	"""
+	This class impersonates the GUI class in a duck-typed sort of way when EPOCS is
+	run in --offline mode.  It is like GUI() in that it creates both an Operator()
+	instance (for managing settings) and an AnalysisWindow() instance, which will call
+	methods of that Operator.
+	"""
 	def __init__( self, data='ExampleData.pk', mode='tt' ):  # TODO: axe ExampleData.pk
 
 		if isinstance( data, basestring ) and data.lower().endswith( '.pk' ):
