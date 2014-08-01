@@ -8,5 +8,7 @@ app/prog/Operator.ini
 system-logs
 scraps/make-icon/epocs_icon.*
 app/gui-bin
+unins000.dat
+unins000.exe
 syntax: regexp
 data/(?!sample)
