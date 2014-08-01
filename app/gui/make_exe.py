@@ -43,6 +43,8 @@ shutil.copyfile( numtools_src, 'NumTools.py' ); import NumTools; includes.append
 dependencies = []
 oldstderr, oldstdout = sys.stderr, sys.stdout
 print "running py2exe..."
+open( 'EpocsCommandLineArguments.py', 'wt' ).write( 'args = [ "--log=../../system-logs/###-python.txt" ]\n' )
+import EpocsCommandLineArguments; includes.append( 'EpocsCommandLineArguments' ); tmpfiles.append( 'EpocsCommandLineArguments' )
 logfile = 'make_exe.log'; sys.stderr = sys.stdout = open( logfile, 'wt')
 setup(
 	options=options,
@@ -59,7 +61,6 @@ sys.stderr, sys.stdout = oldstderr, oldstdout
 dependencies += [ x.strip().split( ' ', 2 )[ -1 ] for x in open( logfile, 'rt' ).readlines() if x.startswith( ' ' ) and ' - ' in x ]
 print "running py2exe again..."
 open( 'EpocsCommandLineArguments.py', 'wt' ).write( 'args = [ "--offline" ]\n' )
-import EpocsCommandLineArguments; includes.append( 'EpocsCommandLineArguments' ); tmpfiles.append( 'EpocsCommandLineArguments' )
 logfile = 'make_exe.log'; sys.stderr = sys.stdout = open( logfile, 'wt')
 setup(
 	options=options,

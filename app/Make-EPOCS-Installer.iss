@@ -4,7 +4,7 @@
 #define MyAppName "EPOCS"
 #define MyAppVersion "1.0"
 #define MyAppPublisher "Translational Neurological Research Laboratory"
-
+#define UserProfile GetEnv('USERPROFILE')
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application.
 ; Do not use the same AppId value in installers for other applications.
@@ -16,6 +16,7 @@ AppVersion={#MyAppVersion}
 AppPublisher={#MyAppPublisher}
 DefaultDirName={pf}\{#MyAppName}
 DefaultGroupName={#MyAppName}
+OutputDir={#UserProfile}\Desktop
 OutputBaseFilename=Install-EPOCS
 SetupIconFile=.\gui\epocs.ico
 Compression=lzma
@@ -30,6 +31,9 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 [Files]
 Source: "..\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
+
+[Dirs]
+Name: "{app}"; Permissions: users-modify
 
 [Icons]
 Name: "{group}\EPOCS"; Filename: "{app}\app\gui-bin\epocs.exe"

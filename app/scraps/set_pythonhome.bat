@@ -17,7 +17,7 @@
 
 @set "EnvKey=HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Environment"
 @echo Adding PYTHONHOME_EPOCS=%PYTHONHOME_EPOCS% to system environment variables:
-@reg add "%EnvKey%" /v PYTHONHOME_EPOCS /t REG_SZ /d "%PYTHONHOME_EPOCS% || (pause && exit)
+@reg add "%EnvKey%" /v PYTHONHOME_EPOCS /t REG_SZ /d "%PYTHONHOME_EPOCS%
 
 @echo You will have to open Windows' "Environment Variables" window and press "OK" for the change to be recognized.
 
