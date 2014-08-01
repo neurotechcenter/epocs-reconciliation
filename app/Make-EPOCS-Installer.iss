@@ -43,3 +43,11 @@ Name: "{commondesktop}\EPOCS"; Filename: "{app}\app\gui-bin\epocs.exe"; Tasks: d
 Name: "{commondesktop}\EPOCS Offline Analysis"; Filename: "{app}\app\gui-bin\epocs-offline.exe"; Tasks: desktopicon
 Name: "{commondesktop}\EPOCS Data"; Filename: "{app}\data"; Tasks: desktopicon
 
+[UninstallDelete]
+Type: files; Name: "{app}\app\gui\epocs.ini"
+Type: files; Name: "{app}\app\gui-bin\epocs.ini"
+Type: files; Name: "{app}\app\gui-bin\epocs.exe.log"
+Type: files; Name: "{app}\app\prog\BCI2000Remote.pyc"
+Type: files; Name: "{app}\app\prog\Operator.ini"
+Type: files; Name: "{app}\app\prog\epocs.mmap"
+
