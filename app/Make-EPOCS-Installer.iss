@@ -37,9 +37,13 @@ Name: "{app}"; Permissions: users-modify
 
 [Icons]
 Name: "{group}\EPOCS"; Filename: "{app}\app\gui-bin\epocs.exe"
-Name: "{group}\Offline Analysis"; Filename: "{app}\app\gui-bin\epocs-offline.exe"
-Name: "{group}\Data"; Filename: "{app}\data"
-Name: "{group}\Documentation"; Filename: "{app}\doc\Home.html"
+Name: "{group}\EPOCS Offline Analysis"; Filename: "{app}\app\gui-bin\epocs-offline.exe"
+Name: "{group}\EPOCS Data Directory"; Filename: "{app}\data"
+Name: "{group}\EPOCS Documentation"; Filename: "{app}\doc\Home.html"
+Name: "{commondesktop}\EPOCS"; Filename: "{app}\app\gui-bin\epocs.exe"; Tasks: desktopicon
+Name: "{commondesktop}\EPOCS Offline Analysis"; Filename: "{app}\app\gui-bin\epocs-offline.exe"; Tasks: desktopicon
+Name: "{commondesktop}\EPOCS Data Directory"; Filename: "{app}\data"; Tasks: desktopicon
+Name: "{commondesktop}\EPOCS Documentation"; Filename: "{app}\doc\Home.html"; Tasks: desktopicon
 
 [UninstallDelete]
 Type: files; Name: "{app}\app\gui\epocs.ini"

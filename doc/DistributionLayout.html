@@ -92,11 +92,22 @@
 </li>
 </ul>
 </li>
+<li>
+<p><code>app/Make-EPOCS-Installer.iss</code></p>
+<p>This file can be compiled by <a href="http://www.jrsoftware.org/isinfo.php">Inno Setup</a> to produce an installer <code>.exe</code> on the Desktop.  For now, it also includes the <code>.hg</code> directory, so the
+installer will actually install a full mercurial repository/working copy under <code>Program Files (x86)</code>.   Remember to <a href="DocumentationSystem.html">build the static html documentation files</a>
+and commit everything to the mercurial repo before compiling.</p>
+</li>
 </ul>
 </li>
 <li>
 <p><code>data</code></p>
 <p>Unlike standard BCI2000 distributions, data are stored outside the main BCI2000 directory structure.  The <code>data</code> directory contains a subdirectory for each distinct patient ID. Each patient subdirectory will in turn contain a subsubdirectory for each distinct session, and each of these session subsubdirectories will contain BCI2000 <code>.dat</code> files and a log file with the extension <code>.txt</code>.     Note: the <a href="EPOCSGUI.html">EPOCS GUI</a> leaves small text files in the patient subdirectories, with names ending in <code>-LastSettings.txt</code>: these are a convenience for the operator, allowing each session to start with the settings that were last used in the same subject's previous session. These files are not required for subsequent data analysis.</p>
+</li>
+<li>
+<p><code>doc</code></p>
+<p>This directory contains a static html copy of the EPOCS documentation, converted from a separate repository/online wiki at <a href="http://bitbucket.org/jezhill/epocs/wiki">http://bitbucket.org/jezhill/epocs/wiki</a>
+See the <a href="DocumentationSystem.html">Documentation System</a> page for technical details on conversion.</p>
 </li>
 <li>
 <p><code>system-logs</code></p>
