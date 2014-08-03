@@ -1,0 +1,54 @@
+
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML+RDFa 1.0//EN"
+    "http://www.w3.org/MarkUp/DTD/xhtml-rdfa-1.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en"
+      xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+      xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+      xmlns:dc="http://purl.org/dc/elements/1.1/"
+      xmlns:foaf="http://xmlns.com/foaf/0.1/">
+  <head>
+        <meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
+        <link rel="stylesheet" type="text/css" href="theme.css" />
+      <title>
+        BackgroundTriggerFilter
+      </title>
+  </head>
+  <body>
+  <img src="logo.png" width="100%" />
+<h1>BackgroundTriggerFilter</h1>
+<h2>Synopsis</h2>
+<p>TODO</p>
+<h2>Authors</h2>
+<p>Jeremy Hill</p>
+<h2>Parameters</h2>
+<h3></h3>
+<p>TODO</p>
+<pre><code>Background:Triggering%20Conditions matrix     BackgroundChannels= 
+                2 { Input%20Channel Subtract%20Mean? Norm Min%20Amplitude Max%20Amplitude Feedback%20Weight } 
+                         EMG1              yes         1       10mV           25mV               1.0          
+                         EMG2              yes         1        0mV           15mV               0.0          
+                % % % // specification of signal channels used to monitor baseline compliance
+Background:Triggering%20Conditions float      BackgroundHoldDuration=               2s     2s   0 % // the duration for which consecutive time segments must comply with the target baseline activity ranges
+Background:Triggering%20Conditions float      MaxRandomExtraHoldDuration=           1s     1s   0 % // a random extra duration may be added to BackgroundHoldDuration on each trial, up to this amount
+Background:Triggering%20Conditions float      BackgroundSegmentDuration=          200ms  200ms  1 % // the duration of one background segment in sampleblocks (or in milliseconds if \&quot;ms\&quot; is appended)
+Background:Background%20Feedback   float      FeedbackTimeConstant=               200ms  200ms  0 % // length of time over which to average the feedback signal (will be rounded up to a whole number of segment lengths)
+
+Trigger:Triggering%20Conditions    string     TriggerExpression=                    %      %    % % // optional BCI2000 Expression that must be satisfied for trigger to fire
+Trigger:Trigger%20Output           float      TriggerStateDuration=                 2      2    1 % // duration (whole number of sampleblocks) for which the EnableTrigger output state is kept high
+Trigger:Triggering%20Conditions    float      MinTimeBetweenTriggers=               5s     5s   2 % // trigger refractory time in sampleblocks (or in seconds if \&quot;s\&quot; is appended)
+
+Visualize:Processing%20Stages      int        VisualizeBackgroundAverages=          0      0    0 1 // Visualize segment averages from BackgroundTriggerFilter (boolean)
+Visualize:Processing%20Stages      float      BackgroundVisualizationUnit=          1mV    1mV  0 % // Unit for numerical representation of BackgroundTriggerFilter
+</code></pre>
+
+<h2>States</h2>
+<h3></h3>
+<p>TODO</p>
+<pre><code>BackgroundFeedbackValue    32 0
+BackgroundGreen             1 0
+EnableTrigger               1 0
+TriggerExpressionSatisfied  1 0
+</code></pre>
+  </body>
+</html>

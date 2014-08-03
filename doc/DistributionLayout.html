@@ -1,0 +1,107 @@
+
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML+RDFa 1.0//EN"
+    "http://www.w3.org/MarkUp/DTD/xhtml-rdfa-1.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en"
+      xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+      xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+      xmlns:dc="http://purl.org/dc/elements/1.1/"
+      xmlns:foaf="http://xmlns.com/foaf/0.1/">
+  <head>
+        <meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
+        <link rel="stylesheet" type="text/css" href="theme.css" />
+      <title>
+        Layout of the EPOCS Distribution
+      </title>
+  </head>
+  <body>
+  <img src="logo.png" width="100%" />
+<h1>Layout of the EPOCS Distribution</h1>
+<p>Here is an overview of the layout of the EPOCS distribution, describing the role of each directory and subcomponent.  It is aimed at developers/maintainers/programmers of EPOCS, and familiarity with BCI2000 development is assumed.</p>
+<ul>
+<li>
+<p><code>app</code></p>
+<p>The <code>app</code> directory contains all the code for running EPOCS.  This is the developer's kingdom: end-users should stay out of here.  It is laid out approximately like a standard, but stripped-down, BCI2000 distribution. The only major differences are a couple of additional directories whose function is specific to the <a href="EPOCSGUI.html">EPOCS GUI</a>, and the fact that the <code>data</code> directory (which end-users <em>may</em> wish to explore) is outside, one level above.</p>
+<ul>
+<li>
+<p><code>app/batch</code></p>
+<p>This corresponds to the <code>batch</code> directory in a standard BCI2000 distribution.</p>
+<ul>
+<li>
+<p><code>app/batch/run-nidaqmx.bat</code></p>
+<p>This batch file launches BCI2000.  If double-clicked it will run in "master live" mode.   It can also be launched with certain command-line arguments.  These are:</p>
+<p><code>run-nidaqmax [ master | slave ]  [ live | replay ] [ &lt;path-to-custom-script&gt; ]</code></p>
+<p>The <code>master</code> argument causes the system to run in "master" mode—i.e. without the <a href="EPOCSGUI.html">EPOCS GUI</a>, with windows that will look very familiar to experienced BCI2000 users.   The <code>slave</code> argument causes the system to run invisibly and await instructions (this is how the <a href="EPOCSGUI.html">GUI</a> launches it).</p>
+<p>The <code>live</code> argument causes BCI2000 to launch the <code>NIDAQ_mx_Source</code> source acquisition module, and therefore to attempt to acquire data from National Instruments data-acquisition hardware compatible with NIDAQmx versions 8.5 and up.  By contrast, the <code>replay</code> argument causes BCI2000 to launch the <code>FilePlayback</code> source acquisition module so that data are played back from a particular data file in the <code>data/sample</code> directory.  The <a href="EPOCSGUI.html">EPOCS GUI</a> will use "replay" mode if it is started with the <code>--devel</code> flag, or if it fails to find a system installation of the National Instruments API (it tests for the presence of <code>nicai.dll</code>). Otherwise, the GUI will use "live" mode.</p>
+<p>The optional custom-script argument should be a path (relative to <code>app/prog</code>) allows another batch file (specifically, a <a href="http://doc.bci2000.org/User_Reference%3AOperator_Module_Scripting">BCI2000 script file</a>) to be executed.  It will be executed near the end of <code>run-nidaqmx.bat</code>,  after the BCI2000 modules have all connected and the initial parameters have been loaded, but before the "Set Config" command is issued for the first time.  An example value for this third argument might be <code>../custom/VisualizeSource.bat</code>.   The <a href="EPOCSGUI.html">EPOCS GUI</a> puts a file path X in this third position if it (the GUI) was started with the <code>--custom=X</code> flag.</p>
+</li>
+</ul>
+</li>
+<li>
+<p><code>app/custom</code></p>
+<p>The <code>app/custom</code> subdirectory is a convenient place to store batch files (written in <a href="http://doc.bci2000.org/User_Reference%3AOperator_Module_Scripting">BCI2000's own scripting language</a> that customize EPOCS.  Some examples are provided.  The simplest is <code>app/custom/VisualizeSource.bat</code> which, by changing one parameter value, makes the BCI2000 continuous signal viewer visible (you may have to minimize the main EPOCS GUI window to see it).  Other examples might add states, add parameters, or manipulate the number of parameters to increase the number of signal channels that are stored.</p>
+</li>
+<li>
+<p><code>app/gui</code></p>
+<p>This directory contains the Python source code and launcher batch files for the <a href="EPOCSGUI.html">EPOCS GUI</a>, as well as a batch file and Python script for building the compiled standalone version in <code>app/gui-bin</code>.  Note that the GUI can be run directly from source without compiling, but that this requires a Python installation with a few third-party dependencies—see the <a href="EPOCSGUI.html">EPOCS GUI</a> page for details.  It is simpler to run the GUI from the ready-compiled binaries in <code>app/gui-bin</code>.</p>
+</li>
+<li>
+<p><code>app/gui-bin</code></p>
+<p>This directory is automatically deleted and re-generated when you run <code>app/gui/make_exe.bat</code> (see the <a href="EPOCSGUI.html">EPOCS GUI</a> page for details).  The result allows you to package up EPOCS so that your users can run the GUI from here, without themselves having to install Python or any third-party Python packages.</p>
+</li>
+<li>
+<p><code>app/parms</code></p>
+<p>This corresponds to the <code>parms</code> directory in a standard BCI2000 distribution.</p>
+<ul>
+<li>
+<p><code>app/parms/base-nidaqmx.prm</code></p>
+<p>This file is loaded automatically by <code>app/batch/run-nidaqmx.bat</code> (whether launched via the GUI or not) and it contains the baseline set of default parameters for running EPOCS. Note that the <a href="EPOCSGUI.html">EPOCS GUI</a> will overwrite many of these parameter values.</p>
+</li>
+</ul>
+</li>
+<li>
+<p><code>app/prog</code></p>
+<p>This directory corresponds to the <code>prog</code> directory of a standard BCI2000 distribution.  Nearly all the files here come from a standard BCI2000 build. As of 2014-07-31 these were made from revision r4528 of the bci2000.org subversion repository (for stability) with patches that add a small number of functions and bugfixes from the r4529-r4730 period (unfortunately, full-blown r4730 could not be used because BCI2000 core framework functionality is unstable in revisions from r4529 onwards, and this is not expected to be fixed until late 2014).  The only custom component is:</p>
+<ul>
+<li>
+<p><code>app/prog/ReflexConditioningSignalProcessing.exe</code></p>
+<p>This custom BCI2000 SignalProcessing Module does most of the work in EPOCS. The structure of this module is described on the <a href="SignalProcessingFilters.html">SignalProcessingFilters</a> page.</p>
+</li>
+</ul>
+</li>
+<li>
+<p><code>app/scraps</code></p>
+<p>This directory contains various temporary files, works-in-progress, and undocumented helper scripts that you probably will not need.</p>
+</li>
+<li>
+<p><code>app/src</code></p>
+<p>This directory corresponds to the <code>src</code> directory of a standard BCI2000 distribution. Note that it does not contain most of the BCI2000 source: this should be obtained from the bci2000.org subversion repository.  Here, we supply only the <code>src/custom</code> files required to add the <code>ReflexConditioningSignalProcessing</code> module to a BCI2000 build.</p>
+</li>
+<li>
+<p><code>app/tools</code></p>
+<p>This directory corresponds to the <code>tools</code> directory of a standard BCI2000 distribution, but it only contains:</p>
+<ul>
+<li>
+<p><code>app/tools/cmdline</code></p>
+<p>BCI2000's <a href="http://doc.bci2000.org/User_Reference%3ACommand_Line_Processing">command-line tools</a> allow exact offline recreation of the real-time processing performed by BCI2000 core modules. EPOCS only requires them for the GUI's <a href="OffineAnalysis.html">offline analysis</a> mode of operation.  As of 2014-07-31, only the following executables work properly, and so they are the only ones used:</p>
+<ul>
+<li><code>app/tools/cmdline/bci_dat2stream.exe</code></li>
+<li><code>app/tools/cmdline/IIRBandpass.exe</code></li>
+<li><code>app/tools/cmdline/bci_stream2mat.exe</code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><code>data</code></p>
+<p>Unlike standard BCI2000 distributions, data are stored outside the main BCI2000 directory structure.  The <code>data</code> directory contains a subdirectory for each distinct patient ID. Each patient subdirectory will in turn contain a subsubdirectory for each distinct session, and each of these session subsubdirectories will contain BCI2000 <code>.dat</code> files and a log file with the extension <code>.txt</code>.     Note: the <a href="EPOCSGUI.html">EPOCS GUI</a> leaves small text files in the patient subdirectories, with names ending in <code>-LastSettings.txt</code>: these are a convenience for the operator, allowing each session to start with the settings that were last used in the same subject's previous session. These files are not required for subsequent data analysis.</p>
+</li>
+<li>
+<p><code>system-logs</code></p>
+<p>This directory may contain two types of log files, for debugging:  <code>*-operator.txt</code> logs are log files from the BCI2000 Operator.  <code>*-python.txt</code> files are log files from the <a href="EPOCSGUI.html">GUI</a> in which the Python interpreter's standard-output and standard-error streams are captured (if empty, as should typically be the case, the latter type of log file will automatically be deleted when the GUI closes down).  The end-user can ignore files in this directory.</p>
+</li>
+</ul>
+  </body>
+</html>

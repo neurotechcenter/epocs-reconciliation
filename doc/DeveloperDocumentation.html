@@ -1,0 +1,40 @@
+
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML+RDFa 1.0//EN"
+    "http://www.w3.org/MarkUp/DTD/xhtml-rdfa-1.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en"
+      xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+      xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+      xmlns:dc="http://purl.org/dc/elements/1.1/"
+      xmlns:foaf="http://xmlns.com/foaf/0.1/">
+  <head>
+        <meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
+        <link rel="stylesheet" type="text/css" href="theme.css" />
+      <title>
+        Developer Documentation
+      </title>
+  </head>
+  <body>
+  <img src="logo.png" width="100%" />
+<h1>Developer Documentation</h1>
+<p>This section of the EPOCS documentation is for programmers who need to develop or maintain EPOCS. If you are not a programmer, you do not need to read this.</p>
+<p>The EPOCS architecture can be divided into two parts:</p>
+<ul>
+<li>a stripped-down <a href="http://bci2000.org">BCI2000</a> distribution, including the custom <code>ReflexConditioningSignalProcessing</code> module</li>
+<li>a graphical user interface (GUI)</li>
+</ul>
+<p>The essential functions of EPOCS are all performed by BCI2000.  The GUI is in fact optional, but without it the built-in BCI2000 configuration windows and visualizations form a much lower-level interface than we desired for the researchers and therapists who will run EPOCS sessions.</p>
+<p>This two-layer design means that you will first need to be familiar with BCI2000's overall architecture, and with BCI2000 programming in C++.  You will need to know what a "Module" is, and what a "Filter" is (they both mean something very specific in BCI2000 terminology, and "Filter" is used in an unorthodox way, so may not mean what you think it means).  You will need to know how to construct both a Filter and a Module in C++ (there is a <a href="http://doc.bci2000.org/Programming_Howto%3AQuickstart_Guide">tutorial</a> on this, for which you should use subversion revision r4528 of the BCI2000.org source code until BCI2000's 2013-2014 problems are fixed).</p>
+<p>Finally, if you are working on EPOCS' graphical front-end, you will need to know how to program in Python, and will need to become familiar with Tkinter GUI programming as well as the third-party graphing package <a href="http://matplotlib.org">matplotlib</a>.</p>
+<h2>The Basics</h2>
+<p>EPOCS currently supports National Instruments data acquisition boards provided the National Instruments NIDAQmx software (version 8.5 or greater) is installed.  EPOCS monitors two EMG channels.  According to the behaviour of the signal on these two channels, it may decide to trigger a trial.  EPOCS has both a trigger output channel and a trigger input channel.  When EPOCS decides to trigger a trial, it outputs an 80-msec 5 Volt square-wave pulse on its trigger output channel, which will be connected to some stimulation apparatus (an electrical stimulator, TMS machine, or mechanical apparatus for eliciting stretch reflexes).   Concurrently, EPOCS will detect and analyse epochs of EMG signal time-locked to rising edges that it detects on its trigger <em>input</em> channel. The simplest configuration, therefore, is to physically double the trigger output back into the trigger input:  in our tests of this configuration, we have found that the gap between the last sample of EMG that influences the triggering decision, and the first sample on which the trigger is actually detected, is 2–3 milliseconds, with a variance of less than 1 msec.  Other hardware configurations are possible—just remember that EPOCS' decisions to stimulate, and its recognition that a trial has occurred, are independent until the trigger output and trigger input are linked in some way.   By default, EPOCS triggering decisions are dependent on the EMG amplitude being held within a certain range for a specified period.  EPOCS can also be customized to make triggering contingent on additional variables.</p>
+<h2>The Details</h2>
+<p>The remainder of the developer documentation consists of the following topics:</p>
+<ul>
+<li><a href="DistributionLayout.html">Layout of the EPOCS distribution</a></li>
+<li><a href="SignalProcessingFilters.html">Filters in the ReflexConditioningSignalProcessing module</a></li>
+<li><a href="EPOCSGUI.html">EPOCS Graphical User Interface</a></li>
+<li><a href="Customization.html">Customization</a></li>
+</ul>
+  </body>
+</html>
