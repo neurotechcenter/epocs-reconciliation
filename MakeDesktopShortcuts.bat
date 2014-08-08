@@ -13,8 +13,14 @@
 @echo oLink.Save >> %SCRIPT%
 
 @cd ..\..\data
-@echo Set oLink = oWS.CreateShortcut("%USERPROFILE%\Desktop\EPOCS data.lnk") >> %SCRIPT%
+@echo Set oLink = oWS.CreateShortcut("%USERPROFILE%\Desktop\EPOCS Data.lnk") >> %SCRIPT%
 @echo oLink.TargetPath = "%CD%" >> %SCRIPT%
+@echo oLink.WorkingDirectory = "%CD%" >> %SCRIPT%
+@echo oLink.Save >> %SCRIPT%
+
+@cd ..\doc
+@echo Set oLink = oWS.CreateShortcut("%USERPROFILE%\Desktop\EPOCS Documentation.lnk") >> %SCRIPT%
+@echo oLink.TargetPath = "%CD%\Home.html" >> %SCRIPT%
 @echo oLink.WorkingDirectory = "%CD%" >> %SCRIPT%
 @echo oLink.Save >> %SCRIPT%
 

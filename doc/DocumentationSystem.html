@@ -21,21 +21,22 @@
 the hardware and programming sections have been written.</p>
 <p>The code is a mercurial (hg) repository located at
 <a href="http://bitbucket.org/jezhill/epocs">http://bitbucket.org/jezhill/epocs</a>
-The documentation is managed using the bitbucket wiki system, which links to the wiki pages
-from the main project page: this means that the documentation pages are instantiated as
+The documentation is managed using the bitbucket wiki system, which creates a wiki that is linked
+from the main project page. This means that the documentation pages are instantiated as
 <code>.md</code> files in a second mercurial repository at
 <a href="http://bitbucket.org/jezhill/epocs/wiki">http://bitbucket.org/jezhill/epocs/wiki</a>
-(you can browse and edit it by putting this URL into a browser, or you can use the
-same URL to clone the repo with mercurial).  Checking files into a local working copy,
-committing them and pushing them is the best way of adding images and other static files
-to the documentation.</p>
+You can browse and edit the docs by putting this URL into a browser, or you can use the
+same URL to clone the repository with mercurial, and edit the <code>.md</code> files with a text
+editor.  Checking files into a local working copy of this repository, committing them,
+and pushing them back to bitbucket.org, is the best way of adding images and other static
+files to the documentation.</p>
 <h2>Markdown cheat-sheets</h2>
 <ul>
 <li><a href="WikiIntro.html">Bitbucket Wiki intro page</a></li>
 <li><a href="https://bitbucket.org/tutorials/markdowndemo/overview">Bitbucket markdown reference</a></li>
 </ul>
 <h2>Making a static copy</h2>
-<p>The wiki repo also contains a Python script, <code>markdown2static.py</code>, which can be used to
+<p>The wiki repository also contains a Python script, <code>markdown2static.py</code>, which can be used to
 convert the <code>.md</code> pages of the wiki repo into <code>.html</code> files which go into the main
 EPOCS source repo, under the <code>doc</code> directory (from there, they will be bundled into
 the EPOCS installer next time you compile <code>app/Make-EPOCS-Installer.iss</code> with Inno Setup).</p>
@@ -44,6 +45,9 @@ the EPOCS installer next time you compile <code>app/Make-EPOCS-Installer.iss</co
 Full Monty distro by typing <code>easy_install markdown</code>.   Once this is installed, you can
 make the static documentation pages by saying:</p>
 <p><code>run markdown2static ../PATH/TO/EPOCS/doc</code></p>
-<p>where <code>../PATH/TO/EPOCS</code> is the relative path to your working copy of the main EPOCS repo.</p>
+<p>where <code>../PATH/TO/EPOCS</code> is the relative path to your working copy of the main EPOCS repo.
+Its <code>doc</code> subdirectory is designated as the place for static html documentation files.
+Don't forget to version-control them in the main EPOCS repository: add any new ones and
+commit any changes before creating a new installer.</p>
   </body>
 </html>
