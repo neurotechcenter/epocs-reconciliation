@@ -26,10 +26,10 @@ command-line arguments:
                the default "online" mode.
  
 --devel      : start in "development" mode:  use the BCI2000 FilePlayback module as source
-               instead of the live data acquisition module, and pre-load memory with some
-               example data so that the "Analysis" buttons can be pressed immediately
-               without having to wait to gather data. Internally, this causes the global
-               variable DEVEL to be set to True.   The application also starts in
+               instead of the live data acquisition module, and include a "Load Demo Data"
+               button in some modes so that the "Analysis" buttons can be pressed immediately
+               without having to wait to gather data. Internally, the --devel flag causes
+               the global variable DEVEL to be set to True.   The application also starts in
                development mode automatically if no interface to the acquisition hardware
                API can be found at the time of launch.
  
@@ -49,7 +49,6 @@ TODO
 	better ExampleData for all modes
 	
 	caveats and gotchas:
-		py2exe compiled version does not produce a system-logs/*-python.txt log, presumably because output is redirected via a different mechanism, to the log file inside gui-bin
 		BackgroundTriggerFilter.cpp issue: assuming background is in range, time between triggers actually seems to come out to MinTimeBetweenTriggers + 1 sample block
 	
 	nice-to-haves:
@@ -1488,8 +1487,8 @@ class TkMPL( object ):
 			           button = '#DDDDDD',
 			         disabled = '#777777',
 			         backpage = '#888888',
-			           header = '#CCCCCC',
-			           footer = '#DDDDDD',
+			         progress = '#CCCCCC',
+			         controls = '#DDDDDD',
 			             emg1 = '#0000FF',
 			             emg2 = '#FF0000',
 			             good = '#008800',
@@ -1708,7 +1707,7 @@ class GUI( tksuperclass, TkMPL ):
 		self.keepgoing = True
 		self.mode = None
 		
-		self.footer_location = 'top'
+		self.controls_location = 'top'
 		self.settings_location = 'left'
 
 		if operator == None: operator = Operator()
@@ -1768,7 +1767,7 @@ class GUI( tksuperclass, TkMPL ):
 		reminder = 'Configured for %s at %gHz' % ( chn, self.fs )
 		if DEVEL: reminder = 'PLAYBACK MODE\n' + reminder
 		if len( self.operator.params.TriggerExpression ): reminder += '\nExtra trigger condition: ' + self.operator.params.TriggerExpression
-		tkinter.Label( frame.master, text=reminder, bg=self.colors.footer ).place( in_=frame.master, relx=1.0, rely=1.0, anchor='se' )
+		tkinter.Label( frame.master, text=reminder, bg=self.colors.controls ).place( in_=frame.master, relx=1.0, rely=1.0, anchor='se' )
 		
 		# Add the "Voluntary Contraction" tab
 		frame = self.AddTab( 'vc', title=self.modenames.vc )
@@ -1935,7 +1934,7 @@ class GUI( tksuperclass, TkMPL ):
 		else: settings_tag = '_fakebutton_settings'
 		if analysis: analysis_tag = '_button_analysis'
 		else: analysis_tag = '_fakebutton_analysis'
-		parent = self.widgets[ code + '_frame_footer' ]
+		parent = self.widgets[ code + '_frame_controls' ]
 		frame = self.widgets[ code + '_frame_settings' ] = tkinter.Frame( parent, bg=parent[ 'bg' ] )
 		button = self.widgets[ code + analysis_tag ] = tkinter.Button( frame, text='Analysis', command = Curry( AnalysisWindow, parent=self, mode=code, geometry='parent' ) )
 		EnableWidget( button, False )
@@ -1944,18 +1943,19 @@ class GUI( tksuperclass, TkMPL ):
 		EnableWidget( button, settings )
 		button.pack( side='bottom', ipadx=20, padx=2, pady=2, fill='both' )
 		frame.pack( side=self.settings_location, fill='y', padx=5 )
+			
 		
 	def InfoFrame( self, code, name, title, value, size=14, labelsize=10, parent=None, color='#000000' ):
 		"""
 		Create and lay out a pair of text widgets for displaying a certain piece of
-		information in the "footer" (for example, title='Last Recording:', value'='R01').
+		information in the "control panel" (for example, title='Last Recording:', value'='R01').
 		<code>:  the two-letter code for the GUI tab (see the MODENAMES global variable)
 		<name>:  the suffix for the key in self.widgets (see the TkMPL class documentation)
 		         indicates to the program what this particular info frame is about
 		<title>: text indicating to the user what kind information is being displayed
 		<value>: text telling the user the information itself
 		"""
-		if parent == None: parent = self.widgets[ code + '_frame_footer' ]
+		if parent == None: parent = self.widgets[ code + '_frame_controls' ]
 		frame = self.widgets[ code + '_frame_info_' + name ] = tkinter.Frame( parent, bg=parent[ 'bg' ] )
 		tLabel = self.widgets[ code + '_label_title_' + name ] = tkinter.Label( frame, text=title, font=( 'Helvetica', labelsize ), bg=parent[ 'bg' ], fg=color )
 		vLabel = self.widgets[ code + '_label_value_' + name ] = tkinter.Label( frame, text=value, font=( 'Helvetica', size ),      bg=parent[ 'bg' ], fg=color )
@@ -1970,7 +1970,7 @@ class GUI( tksuperclass, TkMPL ):
 		"""
 		tabkey = code + '_tab'
 		tab = self.widgets[ code + '_tab' ]
-		frame = self.widgets[ code + '_frame_header' ] = tkinter.Frame( tab, bg=self.colors.header )
+		frame = self.widgets[ code + '_frame_progress' ] = tkinter.Frame( tab, bg=self.colors.progress )
 		if trials: self.InfoFrame( code, 'trial', 'Trials Completed:', '0', parent=frame, labelsize=20, size=70 ).place( relx=0.5, rely=0.1, anchor='n' )
 		bg = frame[ 'bg' ]
 		display = '----'
@@ -1980,7 +1980,12 @@ class GUI( tksuperclass, TkMPL ):
 		#frame.grid( row=1, column=2, sticky='nsew' )
 		frame.pack( side='right', fill='y' )
 		return frame
-		
+	
+	def LoadDemoData( self, code ):
+		import pickle
+		self.data[ code ] = pickle.load( open( 'ExampleData.pk', 'rb' ) )[ code ]
+		EnableWidget( self.MatchWidgets( code, 'button', 'analysis' ), len( self.data[ code ] ) > 0 )
+	
 	def ControlPanel( self, code, **kwargs ):
 		"""
 		Create and lay out, on the GUI tab indicated by the two-letter <code>, a frame
@@ -1989,19 +1994,22 @@ class GUI( tksuperclass, TkMPL ):
 		"""
 		tabkey = code + '_tab'
 		tab = self.widgets[ code + '_tab' ]
-		frame = self.widgets[ code + '_frame_footer' ] = tkinter.Frame( tab, bg=self.colors.footer )
+		frame = self.widgets[ code + '_frame_controls' ] = tkinter.Frame( tab, bg=self.colors.controls )
 		button = self.widgets[ code + '_button_start' ] = tkinter.Button( frame, text='Start', command = Curry( self.Start, mode=code ) )
 		button.pack( side='left', ipadx=20, ipady=20, padx=2, pady=2, fill='y' )
 		button = self.widgets[ code + '_button_stop'  ] = tkinter.Button( frame, text='Stop',  command = self.Stop, state='disabled' )
 		button.pack( side='left', ipadx=20, ipady=20, padx=2, pady=2, fill='y' )
 		self.SettingsFrame( code, **kwargs )
+		if DEVEL and code in [ 'vc', 'rc', 'ct', 'tt' ]:
+			button = self.widgets[ code + '_button_load' ] = tkinter.Button( frame, text='Load\nDemo Data', command=Curry( self.LoadDemoData, code=code ) )
+			button.pack( side='left', ipadx=20, padx=2, pady=2 )
 		self.InfoFrame( code, 'subject', 'Patient ID:', self.operator.params.SubjectName ).pack( side='left', fill='y', padx=5, pady=2, expand=1 )
 		self.InfoFrame( code, 'session', 'Session Started At:', self.operator.FriendlyDate() ).pack( side='left', fill='y', padx=5, pady=2, expand=1 )
 		lastRun = self.operator.LastRunNumber( mode=code )
 		if lastRun: lastRun = 'R%02d' % lastRun
 		else: lastRun = '---'
 		self.InfoFrame( code, 'run', 'Last Recording:', lastRun ).pack( side='left', fill='y', padx=5, pady=2, expand=1 )
-		frame.pack( side=self.footer_location, fill='x', padx=2, pady=2 )
+		frame.pack( side=self.controls_location, fill='x', padx=2, pady=2 )
 		#frame.grid( row=2, column=1, columnspan=2, sticky='nsew' )
 		return frame
 	
@@ -2031,7 +2039,7 @@ class GUI( tksuperclass, TkMPL ):
 		targetMin, targetMax = kwargs.pop( 'target', ( 0, 0 ) )
 		edgecolor = kwargs.pop( 'edgecolor', 'none' )
 		facecolor = kwargs.pop( 'facecolor', self.colors.good )
-		if self.footer_location == 'top': xlabel, title = title, xlabel
+		if self.controls_location == 'top': xlabel, title = title, xlabel
 		axes.set( ylim=ylim, xlim=( 0, 1 ), xlabel=xlabel, xticks=(), title=title )
 		axes.xaxis.label.set_size( axes.title.get_size() )
 		#axes.set_adjustable( 'box' ); axes.set_aspect( aspect ) # doesn't seem to work: change the y-axis data limits, and the physical axes shape still changes
@@ -3002,7 +3010,7 @@ class AnalysisWindow( Dialog, TkMPL ):
 		fighalfheight = figheight * 0.5 - 50
 		
 		if self.mode in [ 'vc' ]:
-			header = self.widgets.overlay_frame_header = tkinter.Frame( frame, bg=self.colors.header )
+			header = self.widgets.overlay_frame_header = tkinter.Frame( frame, bg=self.colors.progress )
 			w = self.widgets.mvc_button_log = tkinter.Button( header, text='Log Results', command=Curry( self.Log, type='mvc' ) ); w.pack( side='right' )
 			
 			figure, widget, container = self.NewFigure( parent=frame, prefix='an', suffix='main', width=figwidth, height=figheight )
@@ -3021,7 +3029,7 @@ class AnalysisWindow( Dialog, TkMPL ):
 			tabframe = self.AddTab( 'overlay', 'Timings', nbname='notebook_upper' )
 			tabframe.grid( row=1, column=1, sticky='nsew' ); tabframe.master.grid_rowconfigure( 1, weight=1 ); tabframe.master.grid_columnconfigure( 1, weight=1 )
 			
-			header = self.widgets.overlay_frame_header = tkinter.Frame( tabframe, bg=self.colors.header )
+			header = self.widgets.overlay_frame_header = tkinter.Frame( tabframe, bg=self.colors.progress )
 			switch = Switch( header, title='Rectification: ', offLabel='off', onLabel='on', initialValue=0, command=self.UpdateLines )
 			switch.pack( side='left', pady=3 )
 			tkinter.Frame( header, bg=header[ 'bg' ] ).pack( side='left', padx=25 )
@@ -3061,7 +3069,7 @@ class AnalysisWindow( Dialog, TkMPL ):
 			if self.mode in [ 'rc', 'ct', 'tt', 'offline', 'mixed' ]:
 				tabframe = self.AddTab( 'sequence', 'Sequence', nbname='notebook_lower' )
 				
-				header = self.widgets.sequence_frame_header = tkinter.Frame( tabframe, bg=self.colors.header )
+				header = self.widgets.sequence_frame_header = tkinter.Frame( tabframe, bg=self.colors.progress )
 				tkinter.Label( header, text='Trials to pool: ', bg=header[ 'bg' ] ).pack( side='left', padx=3, pady=3 )
 				vcmd = ( self.register( self.PoolingEntry ), '%s', '%P' )
 				entry = self.widgets.sequence_entry_pooling = tkinter.Entry( header, width=2, validate='key', validatecommand=vcmd, textvariable=tkinter.Variable( header, value='1' ), bg='#FFFFFF' )
@@ -3089,7 +3097,7 @@ class AnalysisWindow( Dialog, TkMPL ):
 			if self.mode in [ 'ct', 'tt', 'offline', 'mixed' ]:
 				tabframe = self.AddTab( 'distribution', 'Distribution', nbname='notebook_lower' )
 					
-				header = self.widgets.distribution_frame_header = tkinter.Frame( tabframe, bg=self.colors.header )
+				header = self.widgets.distribution_frame_header = tkinter.Frame( tabframe, bg=self.colors.progress )
 				w = self.widgets.distribution_button_log = tkinter.Button( header, text='Log Results', command=Curry( self.Log, type='distribution' ) ); w.pack( side='right' )
 				#conditioning = tkinter.Frame( self, bg=header[ 'bg' ] )
 				#w = self.widgets.distribution_button_upcondition = tkinter.Button( conditioning, text="Up-Condition", width=10, command=self.ok_up ); w.pack( side='top', pady=2, ipadx=16, fill='both', expand=1 )
@@ -3692,11 +3700,12 @@ class OfflineAnalysis( object ):
 	instance (for managing settings) and an AnalysisWindow() instance, which will call
 	methods of that Operator.
 	"""
-	def __init__( self, data='ExampleData.pk', mode='tt' ):  # TODO: axe ExampleData.pk
+	def __init__( self, data='ExampleData.pk', mode='tt' ):
 
 		if isinstance( data, basestring ) and data.lower().endswith( '.pk' ):
 			import pickle; self.data = Bunch( pickle.load( open( data, 'rb' ) ) )
 		else: self.data = { mode : data }
+
 		self.mode = mode
 		self.operator = Operator()
 		self.online_inifile  = os.path.join( GUIDIR, 'epocs.ini' );   self.operator.Set( **ReadDict( self.online_inifile  ) )
@@ -3954,10 +3963,6 @@ if __name__ == '__main__':
 	else:
 		self = GUI()
 		#self.operator.remote.WindowVisible = 1
-		if DEVEL:
-			try: import pickle; self.data = Bunch( pickle.load( open( 'ExampleData.pk', 'rb' ) ) ) # TODO
-			except: pass
-			else: [ EnableWidget( self.MatchWidgets( mode, 'button', 'analysis' ), len( self.data[ mode ] ) ) for mode in self.data ]
 		if self.ready: self.Loop()
 		
 	if log:
