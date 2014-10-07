@@ -30,11 +30,11 @@ Examples include:</p>
 <p>Sometimes, the operator may wish to keep an eye on the evoked responses without allowing the subject to be distracted by them.  One solution is to spend a couple of thousand dollars on, and sacrifice some bench space for, an oscilloscope.  Another is to use this custom script in conjunction with an app like <a href="http://getidisplay.com/">iDisplay</a> to display each epoch on a smartphone or tablet screen.</p>
 </li>
 <li>
-<p><code>--custom=treadmill.bat</code></p>
-<p>This illustrates how to add extra channels to the recording system. Note that the first two channels should still be the EMG agonist and antagonist, and should always be called EMG1 and EMG2.  It's also easiest if the trigger channel remains in the third position.</p>
+<p><code>--custom=../custom/treadmill.bat</code></p>
+<p>This illustrates how to add extra channels to the recording system. Note that the first two channels should still be the EMG agonist and antagonist, and should always be called EMG1 and EMG2.  It's also easiest if the trigger channel remains in the third position.  In our lab, the extra "FOOT" channel was used to record the data from a digital foot contact sensor. (In this configuration, incidentally, we generally triggered nerve stimulation by hand at a certain phase of the gait cycle: so the acquisition board's trigger input channel was configured to receive pulses <em>from</em> the stimulator, but the trigger output channel was not configured to send commands <em>to</em> the stimulator.)</p>
 </li>
 <li>
-<p><code>--custom=TriggerGateUDP.bat</code></p>
+<p><code>--custom=../custom/TriggerGateUDP.bat</code></p>
 <p>This illustrates how another computer running BCI2000 can use the App Connector to gate whether EPOCS delivers a trigger.  More generally, the <code>TriggerExpression</code> parameter allows any BCI2000 expression to be used to veto EPOCS decision to issue a trigger pulse.</p>
 </li>
 </ul>

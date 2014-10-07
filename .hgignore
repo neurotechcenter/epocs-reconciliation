@@ -3,12 +3,12 @@ syntax: glob
 *.psftp
 app/gui/epocs.ini
 app/gui/make_exe.log
-app/prog/epocs.mmap
 app/prog/Operator.ini
 system-logs
 scraps/make-icon/epocs_icon.*
 app/gui-bin
 unins000.dat
 unins000.exe
+app/prog/*.mmap
 syntax: regexp
 data/(?!sample)
