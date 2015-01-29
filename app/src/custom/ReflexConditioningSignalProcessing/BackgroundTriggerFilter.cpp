@@ -71,7 +71,7 @@ BackgroundTriggerFilter::Publish()
     "Background:Triggering%20Conditions float      MaxRandomExtraHoldDuration=           1s     1s   0 % // a random extra duration may be added to BackgroundHoldDuration on each trial, up to this amount",
     "Background:Triggering%20Conditions float      BackgroundSegmentDuration=          200ms  200ms  1 % // the duration of one background segment in sampleblocks (or in milliseconds if \"ms\" is appended)",
     "Background:Background%20Feedback   float      FeedbackTimeConstant=               200ms  200ms  0 % // length of time over which to average the feedback signal (will be rounded up to a whole number of segment lengths)",
-    "Background:Background%20Feedback   float      BackgroundFreezeTime=               200ms  200ms  0 % // after a trigger is triggered, the background bar's height and color will be frozen for this duration (expressed in sampleblocks, or milliseconds if \"ms\" is appended)",
+    "Background:Background%20Feedback   float      BackgroundFreezeTime=              1000ms 1000ms  0 % // after a trigger is triggered, the background bar's height and color will be frozen for this duration (expressed in sampleblocks, or milliseconds if \"ms\" is appended)",
 
        "Trigger:Triggering%20Conditions string     TriggerExpression=                    %      %    % % // optional BCI2000 Expression that must be satisfied for trigger to fire",
        "Trigger:Trigger%20Output        float      TriggerStateDuration=                 2      2    1 % // duration (whole number of sampleblocks) for which the EnableTrigger output state is kept high",

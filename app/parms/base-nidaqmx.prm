@@ -22,6 +22,7 @@ Filtering     int        Downsample=                       0                    
 
 Background    matrix     BackgroundChannels=         2 { Input%20Channel Subtract%20Mean? Norm Min%20Amplitude Max%20Amplitude Feedback%20Weight }                                                               EMG1              yes         1        5mV           18mV               1.0             EMG2              yes         1        0mV           15mV               0.0          // specification of signal channels used to monitor baseline compliance
 Background    float      FeedbackTimeConstant=           200ms                      // length of time over which to average the feedback signal (will be rounded up to a whole number of segment lengths)
+Background    float      BackgroundFreezeTime=          1000ms                      // after a trigger is triggered, the background bar's height and color will be frozen for this duration (expressed in sampleblocks, or milliseconds if "ms" is appended)
 Background    float      BackgroundHoldDuration=           2s                       // the duration for which consecutive time segments must comply with the target baseline activity ranges
 Background    float      MaxRandomExtraHoldDuration=       1s                       // a random extra duration may be added to BackgroundHoldDuration on each trial, up to this amount
 Background    float      BackgroundSegmentDuration=      200ms                      // the duration of one background segment (in sampleblocks, or in milliseconds if "ms" is appended)
