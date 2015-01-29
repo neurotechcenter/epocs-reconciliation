@@ -71,6 +71,7 @@ BackgroundTriggerFilter::Publish()
     "Background:Triggering%20Conditions float      MaxRandomExtraHoldDuration=           1s     1s   0 % // a random extra duration may be added to BackgroundHoldDuration on each trial, up to this amount",
     "Background:Triggering%20Conditions float      BackgroundSegmentDuration=          200ms  200ms  1 % // the duration of one background segment in sampleblocks (or in milliseconds if \"ms\" is appended)",
     "Background:Background%20Feedback   float      FeedbackTimeConstant=               200ms  200ms  0 % // length of time over which to average the feedback signal (will be rounded up to a whole number of segment lengths)",
+    "Background:Background%20Feedback   float      BackgroundFreezeTime=               200ms  200ms  0 % // after a trigger is triggered, the background bar's height and color will be frozen for this duration (expressed in sampleblocks, or milliseconds if \"ms\" is appended)",
 
        "Trigger:Triggering%20Conditions string     TriggerExpression=                    %      %    % % // optional BCI2000 Expression that must be satisfied for trigger to fire",
        "Trigger:Trigger%20Output        float      TriggerStateDuration=                 2      2    1 % // duration (whole number of sampleblocks) for which the EnableTrigger output state is kept high",
@@ -206,6 +207,10 @@ BackgroundTriggerFilter::Preflight( const SignalProperties& InputProperties, Sig
   if( blocks != ::ceil( blocks ) )
     bciwarn << "TriggerStateDuration will be rounded up to " << ::ceil( blocks ) << " whole sample-blocks (=" <<  ::ceil( blocks ) * msecPerBlock << "ms)"  << endl;
     
+  blocks = Parameter( "BackgroundFreezeTime" ).InSampleBlocks();
+  if( blocks != ::ceil( blocks ) )
+    bciwarn << "BackgroundFreezeTime will be rounded up to " << ::ceil( blocks ) << " whole sample-blocks (=" <<  ::ceil( blocks ) * msecPerBlock << "ms)"  << endl;
+    
   blocks = Parameter( "MinTimeBetweenTriggers" ).InSampleBlocks();
   if( blocks != ::ceil( blocks ) )
     bciwarn << "MinTimeBetweenTriggers will be rounded up to " << ::ceil( blocks ) << " whole sample-blocks (=" <<  ::ceil( blocks ) * msecPerBlock << "ms)"  << endl;
@@ -262,6 +267,7 @@ BackgroundTriggerFilter::Initialize( const SignalProperties& InputProperties, co
 
   mRefractoryBlocks = ( int )::ceil( Parameter( "MinTimeBetweenTriggers" ).InSampleBlocks() );
   mTriggerDurationBlocks = ( int )::ceil( Parameter( "TriggerStateDuration" ).InSampleBlocks() );
+  mBlocksToFreezeBackground = ( int )::ceil( Parameter( "BackgroundFreezeTime" ).InSampleBlocks() );
   
   int fbtSamples = ( int )( 0.5 + Parameter( "FeedbackTimeConstant" ).InSeconds() * samplesPerSecond );
   bufferProperties.SetElements( max( 1, fbtSamples ) );
@@ -380,13 +386,15 @@ BackgroundTriggerFilter::Process( const GenericSignal& InputSignal, GenericSigna
     combinedFeedbackValue += amp * mFeedbackChannelWeights[ bufferedChannel ];    
   } // end of bufferedChannel loop
 
-  State( "BackgroundGreen" ) = inTheGreen;
-  combinedFeedbackValue = ( combinedFeedbackValue - mMonitoringOffset ) * mMonitoringGain; // now expressed in Volts
-  combinedFeedbackValue *= 1e6; // now expressed in microVolts
-  double maxValue = ::pow( 2.0, State( "BackgroundFeedbackValue" )->Length() - 1.0 ) - 1.0;
-  State( "BackgroundFeedbackValue" ) = ( int )( 0.5 + ( combinedFeedbackValue < maxValue ? combinedFeedbackValue : maxValue ) );
-  // NB: luckily, since it is reasonable to express this in microvolts, an unsigned integer provides both plenty of resolution and enough range for practical purposes
-  
+  if( mBlocksSinceLastTrigger >= mBlocksToFreezeBackground )
+  {
+    State( "BackgroundGreen" ) = inTheGreen;
+    combinedFeedbackValue = ( combinedFeedbackValue - mMonitoringOffset ) * mMonitoringGain; // now expressed in Volts
+    combinedFeedbackValue *= 1e6; // now expressed in microVolts
+    double maxValue = ::pow( 2.0, State( "BackgroundFeedbackValue" )->Length() - 1.0 ) - 1.0;
+    State( "BackgroundFeedbackValue" ) = ( int )( 0.5 + ( combinedFeedbackValue < maxValue ? combinedFeedbackValue : maxValue ) );
+    // NB: luckily, since it is reasonable to express this in microvolts, an unsigned integer provides both plenty of resolution and enough range for practical purposes
+  }
   if( mUseTriggerExpression )
   {
     double val = mTriggerExpression.Evaluate( &InputSignal, InputSignal.Elements() - 1 ); 

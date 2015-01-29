@@ -68,6 +68,7 @@ class BackgroundTriggerFilter : public GenericFilter
   unsigned long mSamplesSeen;
   int mRefractoryBlocks;
   int mBlocksSinceLastTrigger;
+  int mBlocksToFreezeBackground;
   int mTriggerDurationBlocks;
   std::vector<int>    mChannelIndices;
   std::vector<bool>   mSubtractMeanFlags;
