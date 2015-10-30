@@ -324,6 +324,8 @@ class Operator( object ):
 			LookForward = '500ms',
 			LookBack = '100ms',
 			
+			_FeedbackChannel =       'EMG1',
+			_ResponseChannel =       'EMG1',
 			_EMGChannelNames =       [ 'EMG1', 'EMG2', ],  # "parameter" names beginning with '_' are not real BCI2000 parameters
 			_BackgroundMin =         [     5,      0,  ],  # and will not be sent to BCI2000 automatically. Rather, the appropriate
 			_BackgroundMax =         [    18,     15,  ],  # matrix parameters will be constructed from them in SendConditioningParameters()
@@ -600,9 +602,10 @@ class Operator( object ):
 		if self.params.ApplicationMode.lower() in [ 'vc' ]:
 			minV, maxV = [ '%' for x in minV ], [ '%' for x in maxV ]
 		
+		fbChannel = self.params._FeedbackChannel
 		cols =   'Input%20Channel   Subtract%20Mean?   Norm    Min%20Amplitude     Max%20Amplitude    Feedback%20Weight'
 		rows = [ '      %s                 yes           1          %s                  %s                   %g        '  %
-		         (     name,                                      minV[ i ],         maxV[ i ],            i == 0,     ) for i, name in enumerate( channelNames ) ]
+		         (     name,                                      minV[ i ],         maxV[ i ],       name == fbChannel ) for i, name in enumerate( channelNames ) ]
 		self.bci2000( 'set parameter Background matrix BackgroundChannels= ' + str( len( rows ) ) + ' { ' + cols + ' } ' + ' '.join( rows ) )
 		
 		start, end = self.params._ResponseStartMsec, self.params._ResponseEndMsec
@@ -636,17 +639,34 @@ class Operator( object ):
 		self.SendParameter( 'ResponseScaleLimit',    rLimit )
 		self.SendParameter( 'BaselineResponseLevel', rBaseline )
 
+	def GetBackgroundBarTarget( self ):
+		"""
+		TODO
+		"""
+		channelIndex = self.params._EMGChannelNames.index( self.params._FeedbackChannel )
+		lower, upper = self.params._BackgroundMin[ channelIndex ], self.params._BackgroundMax[ channelIndex ]
+		return lower, upper
+		
+	def GetResponseBarTarget( self ):
+		"""
+		TODO
+		"""
+		channelIndex = self.params._EMGChannelNames.index( self.params._ResponseChannel )
+		lower, upper = self.params._ResponseMin[ channelIndex ], self.params._ResponseMax[ channelIndex ]
+		return lower, upper
+		
 	def GetBackgroundBarLimit( self, mode ):
 		"""
 		Determine the upper y-axis limit on the graph in which the ongoing background
 		EMG level is displayed. VC mode has its own separate setting for this.  In
 		other modes, if both a minimum and maximum limit have been specified (i.e.
-		self.params._BackgroundMin[0] and self.params._BackgroundMax[0]) then ensure
-		that that range is centered vertically in the middle of the graph. If only
-		one limit has been set, ensure that that limit is centered.
+		self.params._BackgroundMin[i] and self.params._BackgroundMax[i], where i is the
+		channel being used for continuous feedback) then ensure that that range is
+		centered vertically in the middle of the graph. If only one limit has been set,
+		ensure that that limit is centered.
 		"""
 		mode = mode.lower()
-		lower, upper = self.params._BackgroundMin[ 0 ], self.params._BackgroundMax[ 0 ]
+		lower, upper = self.GetBackgroundBarTarget()
 		if lower == 0: lower = None
 		if mode in [ 'vc' ]: return self.params._VCBackgroundBarLimit
 		elif lower == None and upper == None: return self.params._VCBackgroundBarLimit
@@ -1910,7 +1930,7 @@ class GUI( tksuperclass, TkMPL ):
 				if val == None: val = -1
 				a.set_ydata( ( val, val ) )
 				self.NeedsUpdate( a.axes.figure )
-				
+					
 	def SetTargets( self, *modes ):
 		"""
 		This updates the positions of the shaded target regions of background-EMG and
@@ -1919,9 +1939,9 @@ class GUI( tksuperclass, TkMPL ):
 		"""
 		for mode in modes:
 			if mode in [ 'rc', 'ct', 'tt' ]:
-				min, max = self.operator.GetVolts( ( self.operator.params._BackgroundMin[ 0 ], self.operator.params._BackgroundMax[ 0 ] ) )
+				min, max = self.operator.GetVolts( self.operator.GetBackgroundBarTarget() )
 				self.UpdateTarget( min, max, mode, 'target', 'background' )
-				min, max = self.operator.GetVolts( ( self.operator.params._ResponseMin[ 0 ], self.operator.params._ResponseMax[ 0 ] ) )
+				min, max = self.operator.GetVolts( self.operator.GetResponseBarTarget()   )
 				self.UpdateTarget( min, max, mode, 'target', 'response' )
 
 	def SettingsFrame( self, code, settings=True, analysis=True ):
