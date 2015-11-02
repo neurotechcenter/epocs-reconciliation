@@ -49,7 +49,8 @@ TODO
 	better ExampleData for all modes
 	
 	caveats and gotchas:
-		BackgroundTriggerFilter.cpp issue: assuming background is in range, time between triggers actually seems to come out to MinTimeBetweenTriggers + 1 sample block
+		BackgroundTriggerFilter.cpp issue: assuming background is in range, time between triggers actually
+		seems to come out to MinTimeBetweenTriggers + 1 sample block
 	
 	nice-to-haves:
 		NIDAQmxADC: acquisition of floating-point raw data instead of integers
@@ -832,9 +833,138 @@ def EnableWidget( widget, enabled=True ):
 
 #### Helper classes for graphical rendering
 
-class Switch( tkinter.Frame ):
+def Descendants( widgets ):
 	"""
-	This Tkinter.Frame subclass is a compound widget that presents itself as
+	On input, <widget> is either a Tkinter widget, or a tuple/list of Tkinter widgets.
+	The return value is a list of widgets. It includes the input widgets, and all their
+	children, and all their children's children, and so on.
+	"""
+	if not isinstance( widgets, ( tuple, list ) ): widgets = [ widgets ]
+	widgets = list( widgets )
+	for widget in tuple( widgets ):
+		widgets += Descendants( widget.winfo_children() )
+	return widgets
+	
+
+class ConnectedWidget( tkinter.Frame ):
+	"""
+	A Tkinter widget (derived from Frame) with a few extra powers:
+		- .connect( resource, field, [indices...] ) allows the widget to .push() and .pull() its value
+		  to and from a particular resource (which could for example be a dict)
+		- .enable( True ) and .enable( False ) allow enabling/disabling of
+		  the widget and all its subwidgets, and .enabled() will query this state.
+		- .grid(), .pack() and .place() return self (cutting down on the number of lines you need to write)
+	"""
+	def __init__( self, parent, bg=None ):
+		"""
+		<parent>: the Tkinter master widget
+		<bg>: the background color
+		"""
+		if bg is None: bg = parent[ 'bg' ]
+		tkinter.Frame.__init__( self, parent, bg=bg )
+		self.resource = None
+		self.indices = []
+		self.field = None
+		self.variable = tkinter.StringVar()
+		self.__enabled = True
+	def get( self ):
+		"""
+		Return the value of the widget's underlying variable, as a string.
+		"""
+		return self.variable.get()
+	def set( self, value ):
+		"""
+		Set the value of the widget's underlying string variable.
+		"""
+		if value == None: value = ''
+		elif isinstance( value, float ): value = '%g' % value
+		else: value = str( value )
+		self.variable.set( value )
+		return self
+	def connect( self, resource, firstIndex, *moreIndices, **kwargs ):  # units is the only kwarg accepted
+		"""
+		Create an (optional) association between this widget and a place in memory,
+		<resource>, where the widget's value may be stored.
+		
+		Examples:
+			widget.connect( resource, fieldName ):
+				widget.pull()  will do   widget.set( resource[fieldName] )
+				widget.push()  will do   resource[fieldName] = widget.get()  plus or minus a few subtleties
+			widget.connect( resource, fieldName, i, j, k ):
+				widget.pull()  will do   widget.set( resource[fieldName][i][j][k] )
+				widget.push()  will do   resource[fieldName][i][j][k] = widget.get()  plus or minus a few subtleties
+				
+		One of the subtleties is that a <units> keyword may be specified when calling connect().
+		"""
+		self.units = kwargs.pop( 'units', None )
+		if len( kwargs ): raise TypeError( "connect() got an unexpected keyword argument '%s'" % kwargs.keys()[ 0 ] )
+		self.resource = resource
+		self.indices = [ firstIndex ] + list( moreIndices )
+		self.field = firstIndex
+		return self.pull()
+	def pull( self ):
+		"""
+		Assuming you have configured the widget with .connect(),  pull the value of the
+		widget from the configured resource.
+		"""
+		value = self.resource
+		for index in self.indices[ : -1 ]: value = value[ index ]
+		index = self.indices[ -1 ]
+		if index == '*': index = 0
+		elif not isinstance( index, basestring ) and hasattr( index, '__len__' ): index = index[ 0 ]
+		value = value[ index ]
+		if isinstance( value, basestring ) and self.units and value.rstrip().endswith( self.units ):
+			value = value.rstrip()[ -len( self.units ): ].rstrip()
+		return self.set( value )
+	def push( self, flags=None ):
+		"""
+		Assuming you have configured the widget with .connect(),  push the value of the
+		widget to the configured resource.  The optional argument <flags> may be a dict
+		or Bunch object.  If supplied, flags[x] is set to True or False to indicate
+		whether the value has changed since the last push(),  where <x> is the first
+		index (usually a field name) configured during connect().
+		"""
+		if flags == None: flags = {}
+		changed = False
+		if self.enabled():
+			newValue = self.get().strip()
+			if self.units: newValue += self.units
+			elif newValue in [ '' ]: newValue = None
+			else:
+				try: newValue = float( newValue )
+				except: pass
+			destination = self.resource
+			for index in self.indices[ :-1 ]: destination = destination[ index ]
+			finalIndices = self.indices[ -1 ]
+			if finalIndices == '*': finalIndices = range( len( destination ) )
+			elif isinstance( finalIndices, basestring ) or not hasattr( finalIndices, '__len__' ): finalIndices = [ finalIndices ]
+			for index in finalIndices:
+				oldValue = destination[ index ]
+				destination[ index ] = newValue
+				if newValue != oldValue: changed = True
+			if self.field not in flags: flags[ self.field ] = changed
+			elif changed: flags[ self.field ] = True
+		return self
+	def enable( self, state ):
+		"""
+		<state> is True or False
+		Enable or disable (gray out) the widget and its subwidgets.
+		"""
+		self.__enabled = state
+		if state == True: state = 'normal'
+		elif state == False: state = 'disabled'
+		for widget in Descendants( self ):
+			if 'state' in widget.config():
+				widget[ 'state' ] = state
+		return self
+	def enabled( self ): return self.__enabled
+	def grid( self, *pargs, **kwargs ): tkinter.Frame.grid( self, *pargs, **kwargs ); return self
+	def pack( self, *pargs, **kwargs ): tkinter.Frame.pack( self, *pargs, **kwargs ); return self
+	def place( self, *pargs, **kwargs ): tkinter.Frame.place( self, *pargs, **kwargs ); return self
+
+class Switch( ConnectedWidget ):
+	"""
+	This ConnectedWidget subclass is a compound widget that presents itself as
 	a sliding single-pole-double-throw switch. Its value, queried using get() or
 	changed programmatically using set(), can be either 0 or 1.
 	"""
@@ -847,7 +977,7 @@ class Switch( tkinter.Frame ):
 		depending on whether the switch has just been turned off or on.
 		"""
 		if bg == None: bg = parent[ 'bg' ]
-		tkinter.Frame.__init__( self, parent, bg=bg )
+		ConnectedWidget.__init__( self, parent, bg=bg )
 		self.title = tkinter.Label( self, text=title, justify='right', bg=bg )
 		self.title.pack( side='left', fill='y', expand=True )
 		self.offLabel = tkinter.Label( self, text=offLabel, justify='right', bg=bg )
@@ -861,8 +991,14 @@ class Switch( tkinter.Frame ):
 		self.command = command
 		self.values = values
 		self.set( initialValue )
-	def get( self ): return self.scale.get()
-	def set( self, value ): return self.scale.set( value )
+	def get( self, as_bool=False ):
+		value = self.scale.get()
+		if not as_bool: value = self.values[ value ]
+		return value
+	def set( self, value, as_bool=False ):
+		if not as_bool: value = self.values.index( value )
+		self.scale.set( value )
+		return self
 	def switched( self, arg=None ):
 		"""
 		Callback for internal use.  Calls whichever callback was set by the
@@ -870,10 +1006,12 @@ class Switch( tkinter.Frame ):
 		the appearance of the switch.
 		"""
 		colors = '#000000', '#888888'
-		state = self.scale.get()
+		state = self.get( as_bool=True )
 		if state: colors = colors[ ::-1 ]
 		self.offLabel[ 'fg' ], self.onLabel[ 'fg' ] = colors
-		if self.command: self.command( self.values[ state ] )
+		state = self.values[ state ]
+		self.variable.set( str( state ) )
+		if self.command: self.command( state )
 	
 class AxisController( object ):
 	"""
@@ -1921,10 +2059,20 @@ class GUI( tksuperclass, TkMPL ):
 		for mode in modes:
 			for a in self.MatchArtists( mode, 'axiscontroller', 'background' ):
 				a.ChangeAxis( start=( 0, self.operator.GetVolts( self.operator.GetBackgroundBarLimit( mode ) ) ) )
+				whichChannel = self.operator.params._FeedbackChannel
+				xlabel = 'Muscle Activity'
+				if whichChannel.lower() != 'emg1': xlabel += '\n(%s)' % whichChannel
+				a.axes.xaxis.label.set( color=self.colors[ whichChannel.lower() ], text=xlabel )
 				self.NeedsUpdate( a.axes.figure )
+				
 			for a in self.MatchArtists( mode, 'axiscontroller', 'response' ):
 				a.ChangeAxis( start=( 0, self.operator.GetVolts( self.operator.params._ResponseBarLimit ) ) )
+				whichChannel = self.operator.params._ResponseChannel
+				xlabel = 'Response'
+				if whichChannel.lower() != 'emg1': xlabel += '\n(%s)' % whichChannel
+				a.axes.xaxis.label.set( color=self.colors[ whichChannel.lower() ], text=xlabel )
 				self.NeedsUpdate( a.axes.figure )
+				
 			for a in self.MatchArtists( mode, 'line', 'baseline' ):
 				val = self.operator.GetVolts( self.operator.params._BaselineResponse ) 
 				if val == None: val = -1
@@ -3360,84 +3508,25 @@ def AxesPosition( axes, left=None, right=None, top=None, bottom=None, width=None
 	if height != None: p[ 3 ] = height
 	axes.set_position( p ) # geeeez, why'd yer have to make that so damn difficult?
 	return Bunch( left=p[ 0 ], bottom=p[ 1 ], width=p[ 2 ], height=p[ 3 ], right=p[ 0 ] + p[ 2 ], top=p[ 1 ] + p[ 3 ] )
-
-class LabelledEntry( tkinter.Frame ):
+		
+class LabelledEntry( ConnectedWidget ):
 	"""
-	A helper subclass used heavily by the SettingsWindow class.  It instantiates tkinter
-	widgets for a label adjacent to a text input field.  It also allows you to connect()
-	the value entered in the text field to a certain .resource  (which could be a dict or
-	Bunch - in fact we use the .params Bunch from an Operator class, where session
-	settings are stored).  Thereafter, the LabelledEntry can pull() its value from that
-	resource or push() it back.
+	A helper subclass, derived from ConnectedWidget, used heavily by the SettingsWindow class.
+	It instantiates tkinter widgets for a label adjacent to a text input field.  It also
+	allows you to connect() the value entered in the text field to a certain .resource
+	(which could be a dict or Bunch - in fact we use the .params Bunch from an Operator
+	class, where session settings are stored).  Thereafter, the LabelledEntry can pull()
+	its value from that resource or push() it back.
 	"""
 	def __init__( self, parent, label, value='', width=5, bg=None ):
-		if bg == None: bg = parent[ 'bg' ]
-		tkinter.Frame.__init__( self, parent, bg=bg )
+		ConnectedWidget.__init__( self, parent, bg=bg )
 		self.label = tkinter.Label( self, text=label, bg=bg, justify='right' )
-		self.variable = tkinter.StringVar()
 		self.entry = tkinter.Entry( self, width=width, textvariable=self.variable, bg='#FFFFFF' )
 		if len( label ):
 			self.label.pack( side='left', padx=3 )
 			self.entry.pack( side='left', padx=3 )
 		else:
 			self.entry.pack( padx=3 )
-		self.units = None
-		self.resource = None
-		self.indices = []
-		self.field = None
-	def get( self ): return self.variable.get()
-	def set( self, value ):
-		if value == None: value = ''
-		elif isinstance( value, float ): value = '%g' % value
-		else: value = str( value )
-		self.variable.set( value )
-		return self
-	def connect( self, resource, firstIndex, *moreIndices, **kwargs ):  # units is the only kwarg accepted
-		self.units = kwargs.pop( 'units', None )
-		if len( kwargs ): raise TypeError( "connect() got an unexpected keyword argument '%s'" % kwargs.keys()[ 0 ] )
-		self.resource = resource
-		self.indices = [ firstIndex ] + list( moreIndices )
-		self.field = firstIndex
-		return self.pull()
-	def pull( self ):
-		value = self.resource
-		for index in self.indices[ : -1 ]: value = value[ index ]
-		index = self.indices[ -1 ]
-		if index == '*': index = 0
-		elif not isinstance( index, basestring ) and hasattr( index, '__len__' ): index = index[ 0 ]
-		value = value[ index ]
-		if self.units and isinstance( value, basestring ): value = value.rstrip( self.units )
-		return self.set( value )
-	def push( self, flags=None ):
-		if flags == None: flags = {}
-		changed = False
-		if self.enabled:
-			newValue = self.get().strip()
-			if self.units: newValue += self.units
-			elif newValue in [ '' ]: newValue = None
-			else: newValue = float( newValue )
-			destination = self.resource
-			for index in self.indices[ :-1 ]: destination = destination[ index ]
-			finalIndices = self.indices[ -1 ]
-			if finalIndices == '*': finalIndices = range( len( destination ) )
-			elif isinstance( finalIndices, basestring ) or not hasattr( finalIndices, '__len__' ): finalIndices = [ finalIndices ]
-			for index in finalIndices:
-				oldValue = destination[ index ]
-				destination[ index ] = newValue
-				if newValue != oldValue: changed = True
-			if self.field not in flags: flags[ self.field ] = changed
-			elif changed: flags[ self.field ] = True
-		return self
-	def enable( self, state ):
-		if state == True: state = 'normal'
-		elif state == False: state = 'disabled'
-		self.label[ 'state' ] = state
-		self.entry[ 'state' ] = state
-		return self
-	def enabled( self ): return ( self.entry[ 'state' ] != 'disabled' )
-	def grid( self, *pargs, **kwargs ): tkinter.Frame.grid( self, *pargs, **kwargs ); return self
-	def pack( self, *pargs, **kwargs ): tkinter.Frame.pack( self, *pargs, **kwargs ); return self
-	def place( self, *pargs, **kwargs ): tkinter.Frame.place( self, *pargs, **kwargs ); return self
 	
 class SettingsWindow( Dialog, TkMPL ):
 	"""
@@ -3487,7 +3576,10 @@ class SettingsWindow( Dialog, TkMPL ):
 		self.widgets.entry_bgmax1 = LabelledEntry( subsection, '' ).connect( params, '_BackgroundMax', 0 ).enable( state ).grid( row=3, column=2, sticky='nsew', padx=2, pady=2 )
 		self.widgets.entry_bgmin2 = LabelledEntry( subsection, '' ).connect( params, '_BackgroundMin', 1 ).enable( state ).grid( row=2, column=3, sticky='nsew', padx=2, pady=2 )
 		self.widgets.entry_bgmax2 = LabelledEntry( subsection, '' ).connect( params, '_BackgroundMax', 1 ).enable( state ).grid( row=3, column=3, sticky='nsew', padx=2, pady=2 )
+
 		subsection.pack( fill='x', padx=10, pady=10 )
+		ch = params._EMGChannelNames
+		self.widgets.switch_fbchannel = Switch( section, title='Feedback from:    ', offLabel=ch[ 0 ], onLabel=ch[ 1 ], values=ch, initialValue=params._FeedbackChannel ).connect( params, '_FeedbackChannel' ).enable( state ).pack( side='left', padx=10, pady=10 )
 		self.widgets.entry_hold = LabelledEntry( section, 'Background hold\nduration (sec)' ).connect( params, '_BackgroundHoldSec' ).enable( state ).pack( padx=10, pady=10 )
 		section.pack( side='top', pady=10, padx=10, fill='both' )
 
@@ -3512,7 +3604,6 @@ class SettingsWindow( Dialog, TkMPL ):
 		section.pack( side='top', pady=10, padx=10, fill='both' )
 		self.resizable( False, False )
 		w = self.widgets.label_message = tkinter.Label( frame, text='', bg=bg ); w.pack( ipadx=10, ipady=10 )
-	
 	
 	def mark( self, widgets, good=False, msg=None, color='#FF6666' ):
 		if not isinstance( widgets, ( tuple, list ) ): widgets = [ widgets ]
@@ -3612,8 +3703,8 @@ class SettingsWindow( Dialog, TkMPL ):
 	def apply( self ):
 		changed = Bunch()
 		for key, widget in self.widgets.items():
-			if not key.startswith( 'entry_' ): continue
-			widget.push( changed )
+			if isinstance( widget, ConnectedWidget ):
+				widget.push( changed )
 		for k, v in sorted( changed.items() ):
 			if v: self.parent.Log( 'Changed setting %s to %s' % ( k.strip( '_' ), repr( self.parent.operator.params[ k ] ) ) )
 		if True in changed.values(): self.parent.operator.needSetConfig = True
