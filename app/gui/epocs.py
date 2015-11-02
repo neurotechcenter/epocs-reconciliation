@@ -74,7 +74,12 @@ import os, sys, time, math, re, threading, glob
 import mmap, struct
 import inspect
 import Tkinter as tkinter
+import FileDialog  # this is not used directly, but side-effects of this import seem to be necessary
+                   # to work around a bug that happens only with the py2exe-compiled version, only at runtime,
+                   # and only in certain versions of matplotlib (see http://stackoverflow.com/questions/25733467/pyinstaller-no-module-named )
+
 import matplotlib, matplotlib.pyplot   # this is the online GUI's only non-bundled third-party dependency besides Python itself (although implicitly, matplotlib in turn also requires numpy)
+
 
 tksuperclass = tkinter.Tk
 try: import ttk
