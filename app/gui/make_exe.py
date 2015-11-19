@@ -80,13 +80,13 @@ dependencies += [ x.strip().split( ' ', 2 )[ -1 ] for x in open( logfile, 'rt' )
 for x in tmpfiles: os.remove( x + '.py' ); os.remove( x + '.pyc' )
 	
 dependencies = sorted( set( dependencies ) )
-dependencies_sys = [ x for x in dependencies if x.startswith( os.environ[ 'SYSTEMROOT' ] ) ]
-dependencies = [ x for x in dependencies if x not in dependencies_sys ]
+dependencies_omitted = [ x for x in dependencies if x.startswith( os.environ[ 'SYSTEMROOT' ] ) or x.endswith( '.pyd' ) ]
+dependencies = [ x for x in dependencies if x not in dependencies_omitted ]
 
 print "copying random extra dependencies that weren't included for some stupid reason..."
 print '\n'.join( dependencies )
 print "\n...but omitting the following:"
-print '\n'.join( dependencies_sys )
+print '\n'.join( dependencies_omitted )
 print
 
 for x in dependencies:  shutil.copyfile( x, os.path.join( 'dist', os.path.split( x )[ 1 ] ) )

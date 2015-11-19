@@ -40,6 +40,7 @@ Name: "{group}\EPOCS"; Filename: "{app}\app\gui-bin\epocs.exe"
 Name: "{group}\EPOCS Offline Analysis"; Filename: "{app}\app\gui-bin\epocs-offline.exe"
 Name: "{group}\EPOCS Data Directory"; Filename: "{app}\data"
 Name: "{group}\EPOCS Documentation"; Filename: "{app}\doc\Home.html"
+Name: "{group}\EPOCS Automatic Update"; Filename: "{app}\UpdateEPOCS.bat"
 Name: "{commondesktop}\EPOCS"; Filename: "{app}\app\gui-bin\epocs.exe"; Tasks: desktopicon
 Name: "{commondesktop}\EPOCS Offline Analysis"; Filename: "{app}\app\gui-bin\epocs-offline.exe"; Tasks: desktopicon
 Name: "{commondesktop}\EPOCS Data Directory"; Filename: "{app}\data"; Tasks: desktopicon
