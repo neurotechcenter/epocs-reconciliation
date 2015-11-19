@@ -6,7 +6,8 @@ app/gui/make_exe.log
 app/prog/Operator.ini
 system-logs
 scraps/make-icon/epocs_icon.*
-app/gui-bin
+app/gui-bin/epocs.ini
+app/gui-bin/epocs.exe.log
 unins000.dat
 unins000.exe
 app/prog/*.mmap

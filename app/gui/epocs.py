@@ -2,7 +2,7 @@
 This is a graphical user interface (GUI) implementation for the evoked potential operant
 conditioning system (EPOCS). This Python 2.x code uses the built-in Tkinter toolkit for
 organizing and rendering GUI elements, and the third-party matplotlib package for rendering
-graphs and other custom graphics.   The EPOCS GUI calls BCI2000 binaries under the hood.
+graphs and other custom graphics.  Under the hood, the EPOCS GUI calls BCI2000 binaries.
 BCI2000 does most of the actual real-time processing and saves the data file, but this GUI
 replaces the BCI2000 Operator window and config dialog by propviding an interface for the
 therapist/researcher to configure, start and stop runs; it also replaces the BCI2000
@@ -47,6 +47,7 @@ command-line arguments:
 TODO
 
 	better ExampleData for all modes
+	offline analysis fails when installed in "Program Files" (because of spaces in binary names, or in data file, or both?)
 	
 	caveats and gotchas:
 		BackgroundTriggerFilter.cpp issue: assuming background is in range, time between triggers actually
@@ -2944,7 +2945,7 @@ class ResponseSequence( object ):
 		self.axes.grid( True )
 		xt = list( xh )
 		while len( xt ) > 15: xt = xt[ 1::2 ]
-		self.axes.set( xlim=( 0	, max( xh ) + 1 ), xticks=xt )
+		self.axes.set( xlim=( 0	, max( xh ) + 1 ), xticks=xt )#, title='Left-click to toggle highlighting; right-click to toggle removal' )
 		
 		self.panel.bg.set( bSum / max( bNum, 1.0 ) )
 		self.panel.mmax.set( mMax )
