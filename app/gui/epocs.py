@@ -957,8 +957,9 @@ class ConnectedWidget( tkinter.Frame ):
 		Enable or disable (gray out) the widget and its subwidgets.
 		"""
 		self.__enabled = state
-		if state == True: state = 'normal'
-		elif state == False: state = 'disabled'
+		if state and state != 'disabled': state = 'normal'
+		else: state = 'disabled'
+		
 		for widget in Descendants( self ):
 			if 'state' in widget.config():
 				widget[ 'state' ] = state
@@ -3570,7 +3571,8 @@ class SettingsWindow( Dialog, TkMPL ):
 		w.entry.configure( validatecommand=warningCommand, validate='key' )
 		section.pack( side='top', pady=10, padx=10, fill='both' )
 
-		state = { True : 'normal', False : 'disabled' }[ self.mode in [ 'rc', 'ct', 'tt' ] ]
+		state         = { True : 'normal', False : 'disabled' }[ self.mode in [       'rc', 'ct', 'tt' ] ]
+		fbswitchstate = { True : 'normal', False : 'disabled' }[ self.mode in [ 'vc', 'rc', 'ct', 'tt' ] ]
 		section = tkinter.LabelFrame( frame, text='Background EMG', bg=bg )
 		subsection = tkinter.Frame( section, bg=bg )
 		tkinter.Label( subsection, text='Background EMG', justify='right', state=state, bg=bg ).grid( row=1, column=1, sticky='nsw', padx=2, pady=2 )
@@ -3585,7 +3587,7 @@ class SettingsWindow( Dialog, TkMPL ):
 
 		subsection.pack( fill='x', padx=10, pady=10 )
 		ch = params._EMGChannelNames
-		self.widgets.switch_fbchannel = Switch( section, title='Feedback from:    ', offLabel=ch[ 0 ], onLabel=ch[ 1 ], values=ch, initialValue=params._FeedbackChannel ).connect( params, '_FeedbackChannel' ).enable( state ).pack( side='left', padx=10, pady=10 )
+		self.widgets.switch_fbchannel = Switch( section, title='Feedback from:    ', offLabel=ch[ 0 ], onLabel=ch[ 1 ], values=ch, initialValue=params._FeedbackChannel ).connect( params, '_FeedbackChannel' ).enable( fbswitchstate ).pack( side='left', padx=10, pady=10 )
 		self.widgets.entry_hold = LabelledEntry( section, 'Background hold\nduration (sec)' ).connect( params, '_BackgroundHoldSec' ).enable( state ).pack( padx=10, pady=10 )
 		section.pack( side='top', pady=10, padx=10, fill='both' )
 
