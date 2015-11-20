@@ -47,7 +47,7 @@ command-line arguments:
 TODO
 
 	better ExampleData for all modes
-	offline analysis fails when installed in "Program Files" (because of spaces in binary names, or in data file, or both?)
+	--offline plotting of a VC file seems to crash (perhaps only if there happened to be triggers in the file?)
 	
 	caveats and gotchas:
 		BackgroundTriggerFilter.cpp issue: assuming background is in range, time between triggers actually
@@ -2307,15 +2307,12 @@ class GUI( tksuperclass, TkMPL ):
 		"""
 		if self.mode != None: return
 		if getattr( self, 'areyousure', False ): return
-		class AreYouSure( Dialog ):
-			def body( self, frame ): tkinter.Label( frame, text='Are you sure you want to\nquit EPOCS?' ).pack( fill='both', expand=1, padx=10, pady=5 )
-			def apply( self ): self.result = True
 		w, h, propx, propy = 400, 150, 0.5, 0.5
 		pw, ph, px, py = [ float( x ) for x in self.geometry().replace( '+', 'x' ).split( 'x' ) ]
 		#pw, ph, px, py = self.winfo_screenwidth(), self.winfo_screenheight(), 0, 0
 		geometry = geometry='%dx%d+%d+%d' % ( w, h, ( pw - w ) * propx + px, ( ph - h ) * propy + py )
 		self.areyousure = True
-		sure = AreYouSure( self, geometry=geometry ).result
+		sure = Dialog( self, geometry=geometry, message='Are you sure you want to\nquit EPOCS?' ).result
 		self.areyousure = False
 		if sure: self.destroy()
 		
@@ -2533,8 +2530,8 @@ class GUI( tksuperclass, TkMPL ):
 		
 
 class Dialog( tkinter.Toplevel ):
-	""" Modal dialog box courtesy of Fredrik Lundh: http://effbot.org/tkinterbook/tkinter-dialog-windows.htm """
-	def __init__( self, parent, title=None, icon=None, geometry=None, blocking=True, modal=True ):
+	""" Modal dialog box adapted from that of Fredrik Lundh: http://effbot.org/tkinterbook/tkinter-dialog-windows.htm """
+	def __init__( self, parent, title=None, icon=None, geometry=None, blocking=True, modal=True, message='Hello World!', buttons=( 'OK', 'Cancel' ) ):
 		"""
 		Set modal=False to instantiate this as a normal window (with buttons to maximize,
 		minimize or close it).
@@ -2551,6 +2548,8 @@ class Dialog( tkinter.Toplevel ):
 		self.desired_geometry = geometry
 		self.parent = parent
 		self.result = None
+		self.buttons = buttons # used in default buttonbox() implementation, but not necessarily if that is overshadowed
+		self.message = message # used in default body() implementation, but not necessarily if that is overshadowed
 		body = tkinter.Frame( self )
 		self.initial_focus = self.body( body )
 		body.pack( side='top', fill='both', expand=True, padx=5, pady=5 )
@@ -2565,18 +2564,23 @@ class Dialog( tkinter.Toplevel ):
 
 	# construction hooks
 
-	def body( self, master ): pass  # create dialog body. return widget that should have initial focus. this method should be overridden
+	def body( self, master ):
+		tkinter.Label( master, text=self.message ).pack( fill='both', expand=1, padx=10, pady=5 )
+		# create dialog body. return widget that should have initial focus. this method should be overridden
 	
 	def buttonbox( self ):
 		# add standard button box. override if you don't want the
 		# standard buttons
+		if not self.buttons: return
 		self.footer = tkinter.Frame( self, bg=self[ 'bg' ] )
-		w = tkinter.Button( self.footer, text="OK", width=10, command=self.ok, default=tkinter.ACTIVE )
-		w.pack( side=tkinter.LEFT, padx=5, pady=5 )
-		w = tkinter.Button( self.footer, text="Cancel", width=10, command=self.cancel )
-		w.pack( side=tkinter.LEFT, padx=5, pady=5 )
-		self.bind( "<Return>", self.ok )
-		self.bind( "<Escape>", self.cancel )
+		default = tkinter.ACTIVE
+		for button in self.buttons:
+			command = { 'ok' : self.ok, 'cancel' : self.cancel }.get( button.lower(), None )
+			w = tkinter.Button( self.footer, text=button, width=10, command=command, default=default )
+			w.pack( side=tkinter.LEFT, padx=5, pady=5 )
+			if command == self.ok: self.bind( "<Return>", command )
+			if command == self.cancel: self.bind( "<Escape>", command )
+			default = None
 		self.footer.pack( side='bottom' )
 
 	# standard button semantics
@@ -2593,7 +2597,7 @@ class Dialog( tkinter.Toplevel ):
 
 	# command hooks
 	def validate(self): return True # override
-	def apply(self): pass # override
+	def apply(self): self.result = True # override
 		
 class ScrolledText( tkinter.Frame ):
 	"""
@@ -3036,7 +3040,9 @@ class ResponseDistribution( object ):
 		matplotlib.pyplot.figure( self.axes.figure.number ).sca( self.axes )
 		matplotlib.pyplot.cla()
 		#print 'calculated = ' + repr( r )
-		if len( r ): self.counts, self.binCenters, self.patches = matplotlib.pyplot.hist( r, bins=self.nbins, facecolor=self.overlay.lineprops[ 0 ].color, edgecolor='none' )
+		if len( r ) == 1: extra = dict( range=[ r[ 0 ] * 0.9, r[ 0 ] * 1.1 ] )
+		else: extra = {}
+		if len( r ): self.counts, self.binCenters, self.patches = matplotlib.pyplot.hist( r, bins=self.nbins, facecolor=self.overlay.lineprops[ 0 ].color, edgecolor='none', **extra )
 		else: self.counts, self.binCenters, self.patches = [], [], []
 		self.xController = AxisController( self.axes, 'x', units='V', fmt='%g', start=self.axes.get_xlim() )
 		self.xController.Home()
@@ -3970,9 +3976,13 @@ class OfflineAnalysis( object ):
 					joined = joined.strip()
 			# look how many lines of annoying difficult-to-debug crap you made me write.
 			filenames = sorted( filenames )
+		if not filenames: return
 		objs = [ self.ReadDatFile( filename, **kwargs ) for filename in filenames ]
-		objs = [ obj for obj in objs if len( obj.Epochs.Data ) ]
-		if len( objs ) == 0: return
+		objs = [ obj for obj in objs if len( obj.Epochs.Data ) ] # TODO: seems to exclude VC files
+		if len( objs ) == 0:
+			print '\nFound no trials.'
+			import tkMessageBox; tkMessageBox.showerror( "EPOCS Offline Analysis", '\n   '.join( [ "No trials found after scanning the following:" ] + filenames ) )
+			return
 
 		self.initialdir = os.path.split( filenames[ 0 ] )[ 0 ]
 		first = objs[ 0 ].ImportantParameters
@@ -3985,7 +3995,7 @@ class OfflineAnalysis( object ):
 			
 		if len( unique.ApplicationMode ) == 1:
 			self.mode = unique.ApplicationMode[ 0 ].lower()
-			if self.mode not in [ 'vc' ]: self.mode = 'offline'
+			if self.mode not in [ 'vc' ]: self.mode = 'offline' # TODO: and yet VC plotting mode seems to crash
 		else:
 			self.Log( 'WARNING: data are from mixed modes %s' % repr( unique.ApplicationMode ) )
 			self.mode = 'mixed'
@@ -3994,7 +4004,7 @@ class OfflineAnalysis( object ):
 			self.subject = unique.SubjectName[ 0 ]
 			self.SetSubject( self.subject )
 		else:
-			self.Log( 'WARNING: data are mixed across sessions %s' % repr( unique.SubjectName ) )
+			self.Log( 'WARNING: data are mixed across subjects %s' % repr( unique.SubjectName ) )
 			self.subject = None
 			
 		if len( unique.SessionStamp ) == 1:

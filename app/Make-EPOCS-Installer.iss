@@ -29,22 +29,23 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "..\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "..\*";             DestDir: "{app}";             Excludes:"\data,\system-logs,.ini,.log,.mmap,.pyc"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "..\data\sample\*"; DestDir: "{app}\data\sample";                                                     Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Dirs]
 Name: "{app}"; Permissions: users-modify
 
 [Icons]
-Name: "{group}\EPOCS"; Filename: "{app}\app\gui-bin\epocs.exe"
-Name: "{group}\EPOCS Offline Analysis"; Filename: "{app}\app\gui-bin\epocs-offline.exe"
-Name: "{group}\EPOCS Data Directory"; Filename: "{app}\data"
-Name: "{group}\EPOCS Documentation"; Filename: "{app}\doc\Home.html"
-Name: "{group}\EPOCS Automatic Update"; Filename: "{app}\UpdateEPOCS.bat"
-Name: "{commondesktop}\EPOCS"; Filename: "{app}\app\gui-bin\epocs.exe"; Tasks: desktopicon
+Name: "{group}\EPOCS";                          Filename: "{app}\app\gui-bin\epocs.exe"
+Name: "{group}\EPOCS Offline Analysis";         Filename: "{app}\app\gui-bin\epocs-offline.exe"
+Name: "{group}\EPOCS Data Directory";           Filename: "{app}\data"
+Name: "{group}\EPOCS Documentation";            Filename: "{app}\doc\Home.html"
+Name: "{group}\EPOCS Automatic Update";         Filename: "{app}\UpdateEPOCS.bat"
+Name: "{commondesktop}\EPOCS";                  Filename: "{app}\app\gui-bin\epocs.exe";         Tasks: desktopicon
 Name: "{commondesktop}\EPOCS Offline Analysis"; Filename: "{app}\app\gui-bin\epocs-offline.exe"; Tasks: desktopicon
-Name: "{commondesktop}\EPOCS Data Directory"; Filename: "{app}\data"; Tasks: desktopicon
-Name: "{commondesktop}\EPOCS Documentation"; Filename: "{app}\doc\Home.html"; Tasks: desktopicon
+Name: "{commondesktop}\EPOCS Data Directory";   Filename: "{app}\data";                          Tasks: desktopicon
+Name: "{commondesktop}\EPOCS Documentation";    Filename: "{app}\doc\Home.html";                 Tasks: desktopicon
 
 [UninstallDelete]
 Type: files; Name: "{app}\app\gui\epocs.ini"
