@@ -1,0 +1,3 @@
+Added text label in response sequence that lists the selected amplitudes.
+
+Also severl changes to the prog/ executables relating to a new build of BCI2000.

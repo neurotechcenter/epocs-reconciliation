@@ -1,0 +1,66 @@
+Source        int        SamplingRate=                  3200
+Source        int        SampleBlockSize=                128
+Source        int        SourceCh=                   3
+Source        floatlist  SourceChOffset=             3     0         0         0         0     
+Source        floatlist  SourceChGain=               3   162.07    162.07    162.07    162.07   // TODO: NB: this will have to be calibrated for each setup. Also calibration not yet verified for channels that go through the AMT-8 amp
+Source        list       ChannelNames=               3   EMG1      EMG2      TRIG      FOOT     // 
+Trigger       list       ChannelsToTrap=             2   EMG1      EMG2      TRIG      FOOT     // names or indices of the input channels to be trapped
+
+
+Filtering     float      HighPassCorner=                   0.5Hz
+Filtering     int        HighPassOrder=                    2
+
+Filtering     float      LowPassCorner=                  500Hz
+Filtering     int        LowPassOrder=                     0
+
+Filtering     float      NotchCenter=                     60Hz
+Filtering     int        NotchOrder=                       0
+
+Filtering     float      FilterGain=                       1.0                      // Overall filter gain
+Filtering     int        Downsample=                       0                        // Downsample to >= 4*LowPassCorner (boolean)
+
+
+Background    matrix     BackgroundChannels=         2 { Input%20Channel Subtract%20Mean? Norm Min%20Amplitude Max%20Amplitude Feedback%20Weight }                                                               EMG1              yes         1        5mV           18mV               1.0             EMG2              yes         1        0mV           15mV               0.0          // specification of signal channels used to monitor baseline compliance
+Background    float      FeedbackTimeConstant=           200ms                      // length of time over which to average the feedback signal (will be rounded up to a whole number of segment lengths)
+Background    float      BackgroundFreezeTime=          1000ms                      // after a trigger is triggered, the background bar's height and color will be frozen for this duration (expressed in sampleblocks, or milliseconds if "ms" is appended)
+Background    float      BackgroundHoldDuration=           2s                       // the duration for which consecutive time segments must comply with the target baseline activity ranges
+Background    float      MaxRandomExtraHoldDuration=       1s                       // a random extra duration may be added to BackgroundHoldDuration on each trial, up to this amount
+Background    float      BackgroundSegmentDuration=      200ms                      // the duration of one background segment (in sampleblocks, or in milliseconds if "ms" is appended)
+Trigger       string     TriggerExpression=                %                        // optional BCI2000 Expression that must be satisfied for trigger to fire
+Trigger       float      TriggerStateDuration=             2                        // duration (whole number of sampleblocks) for which the EnableTrigger output state is kept high
+Trigger       float      MinTimeBetweenTriggers=           5s                       // trigger refractory time (in sampleblocks, or in seconds if "s" is appended)
+
+Trigger       string     TriggerChannel=                 TRIG                       // name or index of the input channel used to monitor the trigger
+Trigger       float      TriggerThreshold=                 1.0V                     // voltage that the trigger must exceed to be counted as a rising edge
+Trigger       float      LookForward=                    500ms                      // length of signal segment to capture after each trigger
+Trigger       float      LookBack=                       100ms                      // length of signal segment to capture before each trigger
+
+Responses     matrix     ResponseDefinition=   2 { Input%20Channel Start End Subtract%20Mean? Norm Weight Response%20Name }          EMG1  15ms  30ms  no  1  1.0  EMG1  EMG1  5ms  15ms  no  1  1.0  EMG1a  // define the response signals:
+Responses     matrix     ResponseAssessment=   1 { Response%20Name Min%20Amplitude Max%20Amplitude Feedback%20Weight }   EMG1 5mV 15mV 1.0 // process the response signals:
+Responses     int        OutputMode=                       0                        // which signal to pass on, 0: pass through input unchanged, 1: output responses (enumeration)
+
+Filtering     float      PulseWidth=                        0.5ms                     // PulseWidth of the Analog Stimulii
+Filtering     float      InitialCurrent=                    1                       // Initial Current to Use for Stimulation mA
+Filtering     matrix     FilterExpression=                  1 { Output%20Type Device%20Name Port/Line	Expression/Current} Digital       Dev1       port0/Line7 EnableTrigger
+Filtering     int        EnableDS5ControlFilter=            0
+Filtering     int        AnalogOutput=                      0
+StimulationControl float DeltaCurrent=                      1                       //Delta Current to use in automation
+Stimulation   int        StimulationType=                   2                       //Biphasic=2, Monophasic = 1
+
+Visualize     float      BackgroundVisualizationUnit=      1mV                      // Unit for numerical representation of BackgroundTriggerFilter
+Visualize     int        VisualizeBackgroundAverages=      0                        // Visualize segment averages from BackgroundTriggerFilter (boolean)
+Visualize     int        VisualizeTrapFilter=              0                        // Visualize TrapFilter output (boolean)
+Visualize     int        VisualizeRangeIntegrator=         0                        // Visualize RangeIntegrator output (boolean)
+Visualize     int        VisualizeTiming=                  0
+Visualize     int        VisualizeSource=                  0
+
+Visualize     int        VisualizeSourceTime=              2s
+Visualize     int        VisualizeSourceDecimation=        1
+Visualize     int        VisualizeSourceBufferSize=      auto
+Visualize     int        SourceMin=                     -100mV
+Visualize     int        SourceMax=                      100mV
+
+
+
+Application string GaugesWindowBackgroundColor= 0xFFFFFF
+Application matrix Gauges= 2 { caption captionsize type xpos ypos width height  signal1                       min1 max1 vprecision showscale }                            Background     0.3      bar  0.1  0.2 0.3   0.8    BackgroundFeedbackValue/1000    0   30       5          1                            Response       0.3      bar  0.6  0.2 0.3   0.8    Response/1000                   0   70       6          1

@@ -1,0 +1,8 @@
+Filtering     matrix     FilterExpressions= 2 { Output%20Type Device%20Name Port/Line	Expression/Current} Digital       Dev2	port0/line7	EnableTrigger  Analog Dev2    ao0    CurrentAmplitude
+Source        int        SourceCh= 3
+Source        list       ChannelNames=               3 EMG1 EMG2 TRIG
+Source        int     BoardNumber= 2
+Source        floatlist  SourceChGain=               3 164.479	164.479	164.479	
+Source        floatlist  SourceChOffset=             3 -486	-486	-486	
+Filtering     int        EnableDS5ControlFilter=            1
+Filtering     int        AnalogOutput=                      1

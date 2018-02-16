@@ -1,0 +1,123 @@
+
+
+class CurrentControlWindow(tkinter.Toplevel,TkMPL):
+	"""
+	###AMIR
+    An M Wave Analysis Window is created when the "M-Wave Analysis" button is
+    pressed on the ct tab of the GUI().
+	"""
+	def __init__(self, parent,mode,operator):
+
+		tkinter.Toplevel.__init__(self)
+		self.wm_title('DS5 Current Stimulation Control')
+		self.wm_geometry('225x150')
+		self.wm_resizable(width=False,height=False)
+		self.wm_attributes("-topmost",1)
+		self.focus()
+		self.withdraw()
+		TkMPL.__init__(self)
+
+		self.operator = operator
+		self.parent = parent
+		self.mode = mode
+		self.protocol('WM_DELETE_WINDOW',self.close)
+		self.states = self.parent.states
+		self.CurrentAmplitude = 0
+
+		self.initUI()
+
+	def initUI(self):
+
+		fontLARGE = ('Helvetica', 24)
+		fontMED = ('Helvetica', 17)
+		fontSMALL = ('Helvetica', 12)
+
+		header = tkinter.Frame(self,bg='white')
+
+		frame = tkinter.LabelFrame(header,width=8,height=12,bg='white',padx=5,pady=5)
+
+		self.currentlabeltxt = tkinter.StringVar()
+		self.currentlabel = tkinter.Label(frame, font=fontLARGE, textvariable=self.currentlabeltxt,bg='white',fg='red',width=5)
+
+		Val = float(self.GetCurrent())
+		LabelTxt = str(Val)+'mA'
+		self.CurrentAmplitude = Val
+		self.currentlabeltxt.set(LabelTxt)
+		self.currentlabel.pack(expand=1) #grid(row=0, column=0, columnspan=2,rowspan=2, padx=10, pady=5, sticky='w')
+
+		s = tkinter.StringVar()
+		s.set('0.5')
+		self.incrementlabel = tkinter.Spinbox(header,font=fontSMALL,from_=0,increment=0.25,to=5,bg='white',format="%02.2f",textvariable=s,width=5)
+		self.incrementlabel.grid(row=2, column=0, columnspan=1, padx=10, pady=5, sticky='w')
+
+		self.label2 = tkinter.Label(header, font=fontSMALL, text='mA',bg='white',width=3)
+		self.label2.grid(row=2, column=1, padx=0, pady=5, sticky='w')
+
+
+		self.upButton = tkinter.Button(header, text='UP', command= lambda: self.Increment(val=1), font=fontMED,width=6)
+		self.downButton = tkinter.Button(header, text='DOWN', command= lambda: self.Increment(val=-1), font=fontMED,width=6)
+		self.upButton.grid(row=0, column=2, columnspan=1, padx=10, pady=5, sticky='e')
+		self.downButton.grid(row=1, column=2, columnspan=1, padx=10, pady=5, sticky='e')
+
+		frame.grid(row=0,column=0,columnspan=2,rowspan=2,padx=5,pady=5,sticky='e')
+		header.pack(side='top', fill='both', expand=1)
+
+	def GetCurrent(self):
+
+		#State CurrentAmplitude is a 16bit state that also requires knowledge of the Analog Output Range (default +/-5V)
+		#So The voltage we send out on the NIDAQ = AORange*Value(CurrentAmplitude)/(2^16 - 1)
+		#For the DS5 this is a 5V=50mA mapping
+
+		#Check if the system has started running or at least preflight
+		if self.parent.operator.started:
+			#Extract current amplitude from State CurrentAmplitude if we Running == 1
+			StateAmplitude = self.parent.operator.bci2000('Get State CurrentAmplitude')
+			self.AORange = self.parent.operator.bci2000('Get Parameter AORange')
+			CurrentAmplitudeV = self.AORange*StateAmplitude/65535 #V
+			CurrentAmplitudemA = CurrentAmplitudeV*10 #mA
+			return CurrentAmplitudemA
+		elif (self.parent.operator.needSetConfig):
+			StateAmplitude = self.parent.operator.bci2000('Get Parameter InitialCurrent')
+			return StateAmplitude
+			#Try to extract it from current states
+		else:
+			return self.CurrentAmplitude
+
+	def Increment(self,val):
+
+		#When first loaded, we have not done a preflight so adjusting the value will not have an effect yet
+
+		#Read Increment Value
+		IncrementValue = float(self.incrementlabel.get())
+		#Read Current Value
+		CurrentVal = float(self.CurrentAmplitude) #in mA
+
+		if (val == 1):
+			NewVal = CurrentVal+IncrementValue
+		else:
+			NewVal = CurrentVal - IncrementValue
+
+		if (NewVal < 0 ): NewVal = 0
+		if( NewVal > 50): NewVal = 50
+
+		self.SetNewCurrent(value=NewVal)
+		self.currentlabeltxt.set(str(NewVal)+'mA')
+		self.CurrentAmplitude = NewVal
+
+		return
+
+	def SetNewCurrent(self,value):
+		#value input as current
+		Value2set = (np.uint16)(65535*(value/50))
+
+		#If not started or it exists (as in running has been 1, then we change current amplitude
+		if (self.parent.operator.started) or (self.parent.operator.needSetConfig == False):
+			self.parent.operator.bci2000('Set State CurrentAmplitude ' + str(Value2set))
+			self.parent.operator.bci2000('Set State NeedsUpdating 1')
+		else: #Not started before
+			self.parent.operator.bci2000('Set Parameter InitialCurrent ' + str(value))
+
+	def close(self):
+		if self.parent.operator.started: return
+		else:
+			self.withdraw()

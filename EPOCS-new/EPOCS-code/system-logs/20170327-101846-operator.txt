@@ -1,0 +1,92 @@
+2017-03-27 10:18:49: BCI2000 Started
+2017-03-27 10:18:49: Started "NIDAQ_mx_Source"
+2017-03-27 10:18:50: Source: Waiting for configuration ...
+2017-03-27 10:18:50: Started "ReflexConditioningSignalProcessing"
+2017-03-27 10:18:50: Started "DummyApplication"
+2017-03-27 10:18:50: Added parameter to list: SessionStamp
+2017-03-27 10:18:50: Added parameter to list: ApplicationMode
+2017-03-27 10:18:50: Added parameter to list: BackgroundScaleLimit
+2017-03-27 10:18:50: Added parameter to list: ResponseScaleLimit
+2017-03-27 10:18:50: Added parameter to list: BaselineResponseLevel
+2017-03-27 10:18:50: Application: Waiting for configuration ...
+2017-03-27 10:18:51: SignalProcessing: Waiting for configuration ...
+2017-03-27 10:18:51: Loaded parameter file "C:\Program Files (x86)\EPOCS\app\prog\../parms/base-nidaqmx.prm"
+2017-03-27 10:18:51: Set parameter OutputMode to 0
+2017-03-27 10:18:51: Set parameter DataDirectory to ../../data
+2017-03-27 10:18:51: Set parameter SubjectRun to 01
+2017-03-27 10:18:51: Set parameter FileFormat to dat
+2017-03-27 10:18:51: Set parameter SessionStamp to 2017-03-27-08-58
+2017-03-27 10:18:51: Set parameter TriggerExpression to 
+2017-03-27 10:18:51: Set parameter SubjectName to TestSubject
+2017-03-27 10:18:51: Set parameter LookForward to 500ms
+2017-03-27 10:18:51: Set parameter DataFile to ${SubjectName}/${SubjectName}-${SessionStamp}/${SubjectName}-${SessionStamp}-R${SubjectRun}-${ApplicationMode}.${FileFormat}
+2017-03-27 10:18:51: Set parameter LookBack to 100ms
+2017-03-27 10:18:51: Set parameter BackgroundSegmentDuration to 200ms
+2017-03-27 10:18:51: Set parameter ApplicationMode to ST
+2017-03-27 10:18:51: Set parameter BackgroundChannels
+2017-03-27 10:18:51: Set parameter ResponseDefinition
+2017-03-27 10:18:51: Set parameter ResponseAssessment
+2017-03-27 10:18:51: Set parameter MinTimeBetweenTriggers to 3s
+2017-03-27 10:18:51: Set parameter BackgroundHoldDuration to 0
+2017-03-27 10:18:51: Set parameter MaxRandomExtraHoldDuration to 0
+2017-03-27 10:18:51: Set parameter TriggerExpression to 
+2017-03-27 10:18:51: Set parameter FeedbackTimeConstant to 200ms
+2017-03-27 10:18:51: Set parameter BackgroundScaleLimit to 23mV
+2017-03-27 10:18:51: Set parameter ResponseScaleLimit to 50mV
+2017-03-27 10:18:51: Set parameter BaselineResponseLevel to %
+2017-03-27 10:18:51: Set parameter SharedMemoryOutput to file://epocs.mmap
+2017-03-27 10:18:51: Set parameter OutputExpressions
+2017-03-27 10:18:55: Set parameter DataDirectory to ../../data
+2017-03-27 10:18:55: Set parameter SubjectRun to 01
+2017-03-27 10:18:55: Set parameter FileFormat to dat
+2017-03-27 10:18:55: Set parameter SessionStamp to 2017-03-27-08-58
+2017-03-27 10:18:55: Set parameter TriggerExpression to 
+2017-03-27 10:18:55: Set parameter SubjectName to TestSubject
+2017-03-27 10:18:55: Set parameter LookForward to 500ms
+2017-03-27 10:18:55: Set parameter DataFile to ${SubjectName}/${SubjectName}-${SessionStamp}/${SubjectName}-${SessionStamp}-R${SubjectRun}-${ApplicationMode}.${FileFormat}
+2017-03-27 10:18:55: Set parameter LookBack to 100ms
+2017-03-27 10:18:55: Set parameter BackgroundSegmentDuration to 200ms
+2017-03-27 10:18:55: Set parameter ApplicationMode to CT
+2017-03-27 10:18:55: Set parameter BackgroundChannels
+2017-03-27 10:18:55: Set parameter ResponseDefinition
+2017-03-27 10:18:55: Set parameter ResponseAssessment
+2017-03-27 10:18:55: Set parameter MinTimeBetweenTriggers to 5s
+2017-03-27 10:18:55: Set parameter BackgroundHoldDuration to 2s
+2017-03-27 10:18:55: Set parameter MaxRandomExtraHoldDuration to 0s
+2017-03-27 10:18:55: Set parameter TriggerExpression to 
+2017-03-27 10:18:55: Set parameter FeedbackTimeConstant to 200ms
+2017-03-27 10:18:55: Set parameter BackgroundScaleLimit to 23mV
+2017-03-27 10:18:55: Set parameter ResponseScaleLimit to 50mV
+2017-03-27 10:18:55: Set parameter BaselineResponseLevel to %
+2017-03-27 10:18:55: Set parameter SharedMemoryOutput to file://epocs.mmap
+2017-03-27 10:18:55: Set parameter OutputExpressions
+2017-03-27 10:18:56: Operator set configuration
+2017-03-27 10:18:56: Application: Initialized
+2017-03-27 10:18:56: SignalProcessing: Initialized
+2017-03-27 10:18:56: Error: [Source] DataIOFilter::Initialize: NIADC::Initialize: The specified device is not present or is not active in the system. The device may not be installed on this system, may have been unplugged, or may not be installed correctly.
+Device:  Dev1
+
+Status Code: -88705.
+2017-03-27 10:18:56: Error: [Source] DataIOFilter::Initialize: NIADC::Initialize: Device cannot be accessed.  Possible causes:
+
+Device is no longer present in the system.
+Device is not powered.
+Device is powered, but was temporarily without power.
+Device is damaged.
+
+Ensure the device is properly connected and powered.  Turn the computer off and on again.  If you suspect that the device is damaged, contact National Instruments at ni.com/support.
+Device Specified: Dev1
+
+Task Name: myTask
+
+Status Code: -201003.
+2017-03-27 10:18:56: Error: [Source] DataIOFilter::Initialize: NIADC::Initialize: Specified operation cannot be performed when there are no channels in the task.
+Task Name: myTask
+
+Status Code: -200478.
+2017-03-27 10:19:17: Operator set configuration
+2017-03-27 10:19:17: Error: [Source] DataIOFilter::Halt: NIADC::Halt: The specified device is not present or is not active in the system. The device may not be installed on this system, may have been unplugged, or may not be installed correctly.
+Device:  Dev1
+
+Status Code: -88705.
+2017-03-27 10:19:23: Operator shut down connections

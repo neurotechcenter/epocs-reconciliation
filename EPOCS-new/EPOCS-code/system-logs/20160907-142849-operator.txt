@@ -1,0 +1,8 @@
+2016-09-07 14:29:01: BCI2000 Started
+2016-09-07 14:29:01: Started "NIDAQ_mx_Source"
+2016-09-07 14:29:01: SignalSource: Waiting for configuration ...
+2016-09-07 14:29:01: Started "ReflexConditioningSignalProcessing"
+2016-09-07 14:29:01: Error: [SignalProcessing] NIDAQFilter::Constructor: Dev1 is not connected to the computer. Please check connections and try again.
+2016-09-07 14:29:01: Error: [SignalProcessing] Lost connection to SignalProcessing
+2016-09-07 14:29:01: Started "DummyApplication"
+2016-09-07 14:29:01: Application: Waiting for configuration ...

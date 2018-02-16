@@ -1,0 +1,12 @@
+Traceback (most recent call last):
+  File "epocs.py", line 4093, in <module>
+    self = GUI()
+  File "epocs.py", line 1896, in __init__
+    self.operator.Launch()
+  File "epocs.py", line 383, in Launch
+    self.Set( TriggerExpression=self.remote.GetParameter( 'TriggerExpression' ) )
+  File "C:\Program Files (x86)\EPOCS\app\prog\BCI2000Remote.py", line 212, in GetParameter
+    return self._get_string_result( self._lib.BCI2000Remote_GetParameter, ctypes.c_char_p( name ) )
+  File "C:\Program Files (x86)\EPOCS\app\prog\BCI2000Remote.py", line 270, in _get_string_result
+    raise self._object_error               
+RuntimeError: Could not get BCI2000 object
