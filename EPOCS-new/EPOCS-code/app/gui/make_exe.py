@@ -30,6 +30,7 @@ data_files = [
 	'ExampleData.pk',
 	'Interop.DS5Lib.dll',
 	'Python.Runtime.dll',
+	'epocs.ini',
 ]
 data_files += matplotlib.get_py2exe_datafiles()
 data_files += tclfiles
