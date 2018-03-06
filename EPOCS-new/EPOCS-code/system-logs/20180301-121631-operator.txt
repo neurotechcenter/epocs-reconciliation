@@ -1,0 +1,94 @@
+2018-03-01 12:16:36: BCI2000 Started
+2018-03-01 12:16:36: Started "NIDAQ_mx_Source"
+2018-03-01 12:16:36: SignalSource: Waiting for configuration ...
+2018-03-01 12:16:36: Started "aReflexConditioningSignalProcessing"
+2018-03-01 12:16:36: Started "DummyApplication"
+2018-03-01 12:16:36: Added parameter to list: SessionStamp
+2018-03-01 12:16:36: Added parameter to list: ApplicationMode
+2018-03-01 12:16:36: Added parameter to list: BackgroundScaleLimit
+2018-03-01 12:16:36: Added parameter to list: ResponseScaleLimit
+2018-03-01 12:16:36: Added parameter to list: BaselineResponseLevel
+2018-03-01 12:16:36: Application: Waiting for configuration ...
+2018-03-01 12:16:36: SignalProcessing: Waiting for configuration ...
+2018-03-01 12:16:37: Loaded parameter file "C:/Users/HR18163admin/PycharmProjects/aEPOCS_LabVersion_v4/app/parms/base-nidaqmx.prm"
+2018-03-01 12:16:37: Loaded parameter file "C:/Users/HR18163admin/PycharmProjects/aEPOCS_LabVersion_v4/app/parms/NIDigitalOutputPort.prm"
+2018-03-01 12:16:37: Set parameter OutputMode to 0
+2018-03-01 12:16:37: Set parameter SubjectRun to 04
+2018-03-01 12:16:37: Set parameter FileFormat to dat
+2018-03-01 12:16:37: Set parameter SessionStamp to 2018-03-01-10-59
+2018-03-01 12:16:37: Set parameter TriggerExpression to 
+2018-03-01 12:16:37: Set parameter SubjectName to test
+2018-03-01 12:16:37: Set parameter DataDirectory to ../../data
+2018-03-01 12:16:37: Set parameter DataFile to ${SubjectName}/${SubjectName}-${SessionStamp}/${SubjectName}-${SessionStamp}-R${SubjectRun}-${ApplicationMode}.${FileFormat}
+2018-03-01 12:16:37: Set parameter LookBack to 100ms
+2018-03-01 12:16:37: Set parameter BackgroundSegmentDuration to 200ms
+2018-03-01 12:16:37: Set parameter ApplicationMode to ST
+2018-03-01 12:16:37: Set parameter LookForward to 500ms
+2018-03-01 12:16:37: Set parameter BackgroundChannels
+2018-03-01 12:16:37: Set parameter ResponseDefinition
+2018-03-01 12:16:37: Set parameter ResponseAssessment
+2018-03-01 12:16:37: Set parameter ReferenceAssessment
+2018-03-01 12:16:37: Set parameter MinTimeBetweenTriggers to 3s
+2018-03-01 12:16:37: Set parameter BackgroundHoldDuration to 0
+2018-03-01 12:16:37: Set parameter MaxRandomExtraHoldDuration to 0
+2018-03-01 12:16:37: Set parameter TriggerExpression to 
+2018-03-01 12:16:37: Set parameter FeedbackTimeConstant to 200ms
+2018-03-01 12:16:37: Set parameter BackgroundScaleLimit to 800mV
+2018-03-01 12:16:37: Set parameter ResponseScaleLimit to 50mV
+2018-03-01 12:16:37: Set parameter BaselineResponseLevel to %
+2018-03-01 12:16:37: Set parameter SharedMemoryOutput to file://epocs.mmap
+2018-03-01 12:16:37: Set parameter OutputExpressions
+2018-03-01 12:16:37: Set parameter EnableDS5ControlFilter to 1
+2018-03-01 12:16:37: Set parameter AnalogOutput to 1
+2018-03-01 12:16:37: Set parameter EnableDS8ControlFilter to 0
+2018-03-01 12:16:49: Set parameter AnalysisType to 1
+2018-03-01 12:16:49: Set parameter InitialCurrent to 1.0
+2018-03-01 12:16:49: Set parameter SubjectRun to 04
+2018-03-01 12:16:49: Set parameter FileFormat to dat
+2018-03-01 12:16:49: Set parameter SessionStamp to 2018-03-01-10-59
+2018-03-01 12:16:49: Set parameter TriggerExpression to 
+2018-03-01 12:16:49: Set parameter SubjectName to test
+2018-03-01 12:16:49: Set parameter DataDirectory to ../../data
+2018-03-01 12:16:49: Set parameter DataFile to ${SubjectName}/${SubjectName}-${SessionStamp}/${SubjectName}-${SessionStamp}-R${SubjectRun}-${ApplicationMode}.${FileFormat}
+2018-03-01 12:16:49: Set parameter LookBack to 100ms
+2018-03-01 12:16:49: Set parameter BackgroundSegmentDuration to 200ms
+2018-03-01 12:16:49: Set parameter ApplicationMode to ST
+2018-03-01 12:16:49: Set parameter LookForward to 500ms
+2018-03-01 12:16:49: Set parameter BackgroundChannels
+2018-03-01 12:16:49: Set parameter ResponseDefinition
+2018-03-01 12:16:49: Set parameter ResponseAssessment
+2018-03-01 12:16:49: Set parameter ReferenceAssessment
+2018-03-01 12:16:49: Set parameter MinTimeBetweenTriggers to 3s
+2018-03-01 12:16:49: Set parameter BackgroundHoldDuration to 0
+2018-03-01 12:16:49: Set parameter MaxRandomExtraHoldDuration to 0
+2018-03-01 12:16:49: Set parameter TriggerExpression to 
+2018-03-01 12:16:49: Set parameter FeedbackTimeConstant to 200ms
+2018-03-01 12:16:49: Set parameter BackgroundScaleLimit to 800mV
+2018-03-01 12:16:49: Set parameter ResponseScaleLimit to 50mV
+2018-03-01 12:16:49: Set parameter BaselineResponseLevel to %
+2018-03-01 12:16:49: Set parameter SharedMemoryOutput to file://epocs.mmap
+2018-03-01 12:16:49: Set parameter OutputExpressions
+2018-03-01 12:16:49: Operator set configuration
+2018-03-01 12:16:50: Error: [SignalProcessing] NIDAQFilterAO::Preflight: FilterExpressions parameter must have at least 2 row(s)
+2018-03-01 12:16:52: Error: [SignalProcessing] NIDAQFilterAO::Preflight: No Analog settings set in the FilterExpressions parameter.
+2018-03-01 12:16:52: Error: [SignalProcessing] NIDAQFilterAO::Preflight: NIDAQ Error: Physical channel not specified.
+Task Name: Analog_Output
+
+Status Code: -200099.
+2018-03-01 12:16:52: Error: [SignalProcessing] NIDAQFilterAO::Preflight: Failed to create channel operating on the following lines: .
+2018-03-01 12:16:52: Error: [SignalProcessing] NIDAQFilterAO::Preflight: Sample Rate,100000, for AO has been set higher than the device limit, 0.
+2018-03-01 12:16:52: Error: [SignalProcessing] NIDAQFilterAO::Preflight: NIDAQ Error: Specified operation cannot be performed when there are no devices in the task.
+Task Name: Analog_Output
+
+Status Code: -200477.
+2018-03-01 12:16:52: Error: [SignalProcessing] NIDAQFilterAO::Preflight: Unable set Sampling Clock for "Analog_Output" .
+2018-03-01 12:16:52: Error: [SignalProcessing] NIDAQFilterAO::Preflight: NIDAQ Error: Specified operation cannot be performed when there are no devices in the task.
+Task Name: Analog_Output
+
+Status Code: -200477.
+2018-03-01 12:16:52: Error: [SignalProcessing] NIDAQFilterAO::Preflight: Unable to set Digital Edge Trigger for Analog Output.
+2018-03-01 12:16:52: Warning: [SignalProcessing] NIDAQFilterAO::Preflight: Unable set Analog Output to Retriggerable, not supported by you NI device. We will set this to restablish Digital Edge Trigger each time Stimulus is to be updated.
+2018-03-01 12:16:55: Set state CurrentAmplitude to 0
+2018-03-01 12:16:55: Set state NeedsUpdating to 1
+2018-03-01 12:16:55: SignalSource: NIDAQ_mx_Source initialized
+2018-03-01 12:16:58: Operator shut down connections

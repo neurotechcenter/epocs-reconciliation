@@ -1,0 +1,11 @@
+2016-09-22 15:49:30: BCI2000 Started
+2016-09-22 15:49:30: Started "FilePlayback"
+2016-09-22 15:49:30: Started "DummyApplication"
+2016-09-22 15:49:30: Added parameter to list: SessionStamp
+2016-09-22 15:49:30: Added parameter to list: ApplicationMode
+2016-09-22 15:49:30: Added parameter to list: BackgroundScaleLimit
+2016-09-22 15:49:30: Added parameter to list: ResponseScaleLimit
+2016-09-22 15:49:30: Added parameter to list: BaselineResponseLevel
+2016-09-22 15:49:30: Application: Waiting for configuration ...
+2016-09-22 15:49:32: SignalSource: Waiting for configuration ...
+2016-09-22 15:49:41: Operator shut down connections

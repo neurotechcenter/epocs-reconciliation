@@ -1,0 +1,44 @@
+2018-03-01 12:53:54: BCI2000 Started
+2018-03-01 12:53:54: Started "NIDAQ_mx_Source"
+2018-03-01 12:53:54: SignalSource: Waiting for configuration ...
+2018-03-01 12:53:54: Started "aReflexConditioningSignalProcessing"
+2018-03-01 12:53:54: Started "DummyApplication"
+2018-03-01 12:53:54: Added parameter to list: SessionStamp
+2018-03-01 12:53:54: Added parameter to list: ApplicationMode
+2018-03-01 12:53:54: Added parameter to list: BackgroundScaleLimit
+2018-03-01 12:53:54: Added parameter to list: ResponseScaleLimit
+2018-03-01 12:53:54: Added parameter to list: BaselineResponseLevel
+2018-03-01 12:53:54: Application: Waiting for configuration ...
+2018-03-01 12:53:54: SignalProcessing: Waiting for configuration ...
+2018-03-01 12:53:54: Loaded parameter file "C:/Users/HR18163admin/PycharmProjects/aEPOCS_LabVersion_v4/app/parms/base-nidaqmx.prm"
+2018-03-01 12:53:54: Loaded parameter file "C:/Users/HR18163admin/PycharmProjects/aEPOCS_LabVersion_v4/app/parms/NIDigitalOutputPort.prm"
+2018-03-01 12:53:54: Set parameter OutputMode to 0
+2018-03-01 12:53:54: Set parameter SubjectRun to 01
+2018-03-01 12:53:54: Set parameter FileFormat to dat
+2018-03-01 12:53:54: Set parameter SessionStamp to 2018-03-01-12-53
+2018-03-01 12:53:54: Set parameter TriggerExpression to 
+2018-03-01 12:53:54: Set parameter SubjectName to test
+2018-03-01 12:53:54: Set parameter DataDirectory to ../../data
+2018-03-01 12:53:54: Set parameter DataFile to ${SubjectName}/${SubjectName}-${SessionStamp}/${SubjectName}-${SessionStamp}-R${SubjectRun}-${ApplicationMode}.${FileFormat}
+2018-03-01 12:53:54: Set parameter LookBack to 100ms
+2018-03-01 12:53:54: Set parameter BackgroundSegmentDuration to 200ms
+2018-03-01 12:53:54: Set parameter ApplicationMode to ST
+2018-03-01 12:53:54: Set parameter LookForward to 500ms
+2018-03-01 12:53:54: Set parameter BackgroundChannels
+2018-03-01 12:53:54: Set parameter ResponseDefinition
+2018-03-01 12:53:54: Set parameter ResponseAssessment
+2018-03-01 12:53:54: Set parameter ReferenceAssessment
+2018-03-01 12:53:54: Set parameter MinTimeBetweenTriggers to 3s
+2018-03-01 12:53:54: Set parameter BackgroundHoldDuration to 0
+2018-03-01 12:53:54: Set parameter MaxRandomExtraHoldDuration to 0
+2018-03-01 12:53:54: Set parameter TriggerExpression to 
+2018-03-01 12:53:54: Set parameter FeedbackTimeConstant to 200ms
+2018-03-01 12:53:54: Set parameter BackgroundScaleLimit to 23mV
+2018-03-01 12:53:54: Set parameter ResponseScaleLimit to 50mV
+2018-03-01 12:53:54: Set parameter BaselineResponseLevel to %
+2018-03-01 12:53:54: Set parameter SharedMemoryOutput to file://epocs.mmap
+2018-03-01 12:53:54: Set parameter OutputExpressions
+2018-03-01 12:53:54: Set parameter EnableDS8ControlFilter to 1
+2018-03-01 12:53:54: Set parameter EnableDS5ControlFilter to 0
+2018-03-01 12:53:54: Set parameter AnalogOutput to 0
+2018-03-01 12:54:08: Operator shut down connections

@@ -1,0 +1,6 @@
+2016-09-22 16:02:54: BCI2000 Started
+2016-09-22 16:02:54: Started "FilePlayback"
+2016-09-22 16:02:54: Started "DummyApplication"
+2016-09-22 16:02:54: Application: Waiting for configuration ...
+2016-09-22 16:02:56: SignalSource: Waiting for configuration ...
+2016-09-22 16:03:34: Operator shut down connections

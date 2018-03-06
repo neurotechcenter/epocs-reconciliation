@@ -2,6 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="e1301dda-31c0-47c8-ace6-16211829c2af" name="Default" comment="">
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/NIDevicesAO.bat" afterPath="$PROJECT_DIR$/app/NIDevicesAO.bat" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/NIDevicesDO.bat" afterPath="$PROJECT_DIR$/app/NIDevicesDO.bat" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/gui/epocs.py" afterPath="$PROJECT_DIR$/app/gui/epocs.py" />
     </list>
     <ignored path="EPOCS_amir.iws" />
@@ -22,39 +24,27 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="epocs.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="epocs.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/gui/epocs.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="255">
-              <caret line="111" column="0" lean-forward="true" selection-start-line="111" selection-start-column="0" selection-end-line="111" selection-end-column="0" />
+            <state relative-caret-position="212">
+              <caret line="124" column="0" lean-forward="false" selection-start-line="124" selection-start-column="0" selection-end-line="125" selection-end-column="27" />
               <folding>
                 <element signature="e#4803#4828#0" expanded="true" />
-                <element signature="e#91178#94475#0" expanded="false" />
-                <element signature="e#94518#97581#0" expanded="false" />
-                <element signature="e#97631#101622#0" expanded="false" />
-                <element signature="e#101669#128319#0" expanded="false" />
-                <element signature="e#128366#149552#0" expanded="false" />
-                <element signature="e#149902#154489#0" expanded="false" />
+                <element signature="e#93721#97018#0" expanded="false" />
+                <element signature="e#97061#100124#0" expanded="false" />
+                <element signature="e#100174#104165#0" expanded="false" />
+                <element signature="e#153683#158270#0" expanded="false" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="CoreFunctions.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/gui/DependantClasses/CoreFunctions.py">
+      <file leaf-file-name="epocs.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/../aEPOCS_LabVersion_v4jen/app/gui/epocs.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="13">
-              <caret line="74" column="7" lean-forward="true" selection-start-line="74" selection-start-column="7" selection-end-line="74" selection-end-column="7" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="MwaveAnalysisClass.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/gui/DependantClasses/MwaveAnalysisClass.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="169">
-              <caret line="11" column="7" lean-forward="true" selection-start-line="11" selection-start-column="7" selection-end-line="11" selection-end-column="7" />
+            <state relative-caret-position="340">
+              <caret line="127" column="20" lean-forward="true" selection-start-line="127" selection-start-column="20" selection-end-line="127" selection-end-column="20" />
               <folding />
             </state>
           </provider>
@@ -71,7 +61,36 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>MwaveAnal</find>
+      <find>Stop(</find>
+      <find>DS8</find>
+      <find>dlg</find>
+      <find>dialog</find>
+      <find>operator.get</find>
+      <find>parameter</find>
+      <find>_Digitimer</find>
+      <find>DS5Lib</find>
+      <find>_DigitimerSelect</find>
+      <find>set parameter</find>
+      <find>bci2000('set</find>
+      <find>SettingsWindo</find>
+      <find>start(</find>
+      <find>GUI(</find>
+      <find>self.DS</find>
+      <find>Start(</find>
+      <find>self.DS5</find>
+      <find>Dialog</find>
+      <find>Dialog(</find>
+      <find>message</find>
+      <find>Stimulation</find>
+      <find>StimGui</find>
+      <find>LoadPackages</find>
+      <find>StimGUI</find>
+      <find>LoadPac</find>
+      <find>DS5LibClas</find>
+      <find>SetupDigitimer</find>
+      <find>log(</find>
+      <find>f.write</find>
+      <find>self.Log</find>
     </findStrings>
   </component>
   <component name="IdeDocumentHistory">
@@ -80,8 +99,6 @@
         <option value="$PROJECT_DIR$/app/gui/test" />
         <option value="$USER_HOME$/Desktop/aEPOCS - demo version/app/gui/epocs.py" />
         <option value="$PROJECT_DIR$/../aEPOCS/app/gui/epocs.py" />
-        <option value="$PROJECT_DIR$/app/batch/run-nidaqmx.bat" />
-        <option value="$PROJECT_DIR$/app/parms/NIDigitalOutputPort.prm" />
         <option value="$PROJECT_DIR$/app/parms/base-nidaqmx.prm" />
         <option value="$PROJECT_DIR$/app/gui/DigitimerControlWindow/CurrentControl.py" />
         <option value="$PROJECT_DIR$/app/gui/DependantClasses/tkMPL.py" />
@@ -92,13 +109,20 @@
         <option value="$PROJECT_DIR$/app/gui/DependantClasses/CoreGUIcomponents.py" />
         <option value="$PROJECT_DIR$/app/gui/DependantClasses/TK.py" />
         <option value="$PROJECT_DIR$/app/gui/DependantClasses/MwaveAnalysisClass.py" />
+        <option value="$PROJECT_DIR$/app/batch/run-nidaqmx.bat" />
+        <option value="$PROJECT_DIR$/app/gui/DependantClasses/CurrentControl.py" />
+        <option value="$PROJECT_DIR$/app/parms/NIDigitalOutputPort.prm" />
+        <option value="$PROJECT_DIR$/data/test/test-LastSettings.txt" />
+        <option value="$PROJECT_DIR$/app/gui/make_exe.py" />
+        <option value="$PROJECT_DIR$/app/gui/DependantClasses/DS5LibClass.py" />
         <option value="$PROJECT_DIR$/app/gui/epocs.py" />
+        <option value="$PROJECT_DIR$/../aEPOCS_LabVersion_v4jen/app/gui/epocs.py" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="505" />
-    <option name="width" value="1366" />
+    <option name="x" value="406" />
+    <option name="width" value="1515" />
     <option name="height" value="1040" />
   </component>
   <component name="ProjectView">
@@ -116,26 +140,41 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scratches" />
       <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
             <PATH_ELEMENT>
-              <option name="myItemId" value="aEPOCS_LabVersion_v3" />
+              <option name="myItemId" value="aEPOCS_LabVersion_v4" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="aEPOCS_LabVersion_v3" />
+              <option name="myItemId" value="aEPOCS_LabVersion_v4" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
           <PATH>
             <PATH_ELEMENT>
-              <option name="myItemId" value="aEPOCS_LabVersion_v3" />
+              <option name="myItemId" value="aEPOCS_LabVersion_v4" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="aEPOCS_LabVersion_v3" />
+              <option name="myItemId" value="aEPOCS_LabVersion_v4" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="data" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="aEPOCS_LabVersion_v4" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="aEPOCS_LabVersion_v4" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
@@ -145,11 +184,29 @@
           </PATH>
           <PATH>
             <PATH_ELEMENT>
-              <option name="myItemId" value="aEPOCS_LabVersion_v3" />
+              <option name="myItemId" value="aEPOCS_LabVersion_v4" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="aEPOCS_LabVersion_v3" />
+              <option name="myItemId" value="aEPOCS_LabVersion_v4" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="app" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="parms" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="aEPOCS_LabVersion_v4" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="aEPOCS_LabVersion_v4" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
@@ -163,11 +220,11 @@
           </PATH>
           <PATH>
             <PATH_ELEMENT>
-              <option name="myItemId" value="aEPOCS_LabVersion_v3" />
+              <option name="myItemId" value="aEPOCS_LabVersion_v4" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="aEPOCS_LabVersion_v3" />
+              <option name="myItemId" value="aEPOCS_LabVersion_v4" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
@@ -185,18 +242,19 @@
           </PATH>
         </subPane>
       </pane>
-      <pane id="Scratches" />
     </panes>
   </component>
   <component name="PropertiesComponent">
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
-    <property name="settings.editor.splitter.proportion" value="0.2" />
     <property name="last_opened_file_path" value="$USER_HOME$/Desktop/aEPOCS - demo version/app/gui/epocs.py" />
     <property name="two.files.diff.last.used.file" value="$USER_HOME$/Desktop/aEPOCS - demo version/app/gui/epocs.py" />
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\HR18163admin\PycharmProjects\aEPOCS_LabVersion_v3\app\gui\DependantClasses" />
+    </key>
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\HR18163admin\PycharmProjects\aEPOCS_LabVersion_v3\app\prog" />
     </key>
   </component>
   <component name="RunDashboard">
@@ -371,26 +429,26 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="505" y="0" width="1366" height="1040" extended-state="1" />
+    <frame x="406" y="0" width="1515" height="1040" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.21745789" sideWeight="0.4908377" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.21649484" sideWeight="0.49118942" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.21035242" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.2094818" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.24961714" sideWeight="0.4955947" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.1585903" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.21745789" sideWeight="0.5091623" order="2" side_tool="true" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.19162996" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.21745789" sideWeight="0.5088106" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Data View" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4332966" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
     </layout>
     <layout-to-restore>
@@ -434,46 +492,21 @@
           </properties>
         </breakpoint>
       </default-breakpoints>
-      <option name="time" value="223" />
+      <option name="time" value="247" />
     </breakpoint-manager>
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/app/gui/epocs.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="10778">
-          <caret line="638" column="49" lean-forward="false" selection-start-line="638" selection-start-column="49" selection-end-line="638" selection-end-column="49" />
-          <folding>
-            <element signature="e#4803#4828#0" expanded="true" />
-            <element signature="e#91178#94475#0" expanded="false" />
-            <element signature="e#94518#97581#0" expanded="false" />
-            <element signature="e#97631#101622#0" expanded="false" />
-            <element signature="e#101669#128319#0" expanded="false" />
-            <element signature="e#128366#149552#0" expanded="false" />
-            <element signature="e#149902#154489#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://C:/BCI2000/EPOCSv2/app/gui/epocs_new.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/gui/epocs.py">
-      <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="e#4803#4828#0" expanded="true" />
-            <element signature="e#91178#94475#0" expanded="false" />
-            <element signature="e#94518#97581#0" expanded="false" />
-            <element signature="e#97631#101622#0" expanded="false" />
-            <element signature="e#101669#128319#0" expanded="false" />
-            <element signature="e#128366#149552#0" expanded="false" />
-            <element signature="e#149902#154489#0" expanded="false" />
+            <element signature="e#93721#97018#0" expanded="false" />
+            <element signature="e#97061#100124#0" expanded="false" />
+            <element signature="e#100174#104165#0" expanded="false" />
+            <element signature="e#153683#158270#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -484,12 +517,10 @@
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="e#4803#4828#0" expanded="true" />
-            <element signature="e#91178#94475#0" expanded="false" />
-            <element signature="e#94518#97581#0" expanded="false" />
-            <element signature="e#97631#101622#0" expanded="false" />
-            <element signature="e#101669#128319#0" expanded="false" />
-            <element signature="e#128366#149552#0" expanded="false" />
-            <element signature="e#149902#154489#0" expanded="false" />
+            <element signature="e#93721#97018#0" expanded="false" />
+            <element signature="e#97061#100124#0" expanded="false" />
+            <element signature="e#100174#104165#0" expanded="false" />
+            <element signature="e#153683#158270#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -500,12 +531,10 @@
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="e#4803#4828#0" expanded="true" />
-            <element signature="e#91178#94475#0" expanded="false" />
-            <element signature="e#94518#97581#0" expanded="false" />
-            <element signature="e#97631#101622#0" expanded="false" />
-            <element signature="e#101669#128319#0" expanded="false" />
-            <element signature="e#128366#149552#0" expanded="false" />
-            <element signature="e#149902#154489#0" expanded="false" />
+            <element signature="e#93721#97018#0" expanded="false" />
+            <element signature="e#97061#100124#0" expanded="false" />
+            <element signature="e#100174#104165#0" expanded="false" />
+            <element signature="e#153683#158270#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -516,12 +545,10 @@
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="e#4803#4828#0" expanded="true" />
-            <element signature="e#91178#94475#0" expanded="false" />
-            <element signature="e#94518#97581#0" expanded="false" />
-            <element signature="e#97631#101622#0" expanded="false" />
-            <element signature="e#101669#128319#0" expanded="false" />
-            <element signature="e#128366#149552#0" expanded="false" />
-            <element signature="e#149902#154489#0" expanded="false" />
+            <element signature="e#93721#97018#0" expanded="false" />
+            <element signature="e#97061#100124#0" expanded="false" />
+            <element signature="e#100174#104165#0" expanded="false" />
+            <element signature="e#153683#158270#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -532,12 +559,10 @@
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="e#4803#4828#0" expanded="true" />
-            <element signature="e#91178#94475#0" expanded="false" />
-            <element signature="e#94518#97581#0" expanded="false" />
-            <element signature="e#97631#101622#0" expanded="false" />
-            <element signature="e#101669#128319#0" expanded="false" />
-            <element signature="e#128366#149552#0" expanded="false" />
-            <element signature="e#149902#154489#0" expanded="false" />
+            <element signature="e#93721#97018#0" expanded="false" />
+            <element signature="e#97061#100124#0" expanded="false" />
+            <element signature="e#100174#104165#0" expanded="false" />
+            <element signature="e#153683#158270#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -548,12 +573,10 @@
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="e#4803#4828#0" expanded="true" />
-            <element signature="e#91178#94475#0" expanded="false" />
-            <element signature="e#94518#97581#0" expanded="false" />
-            <element signature="e#97631#101622#0" expanded="false" />
-            <element signature="e#101669#128319#0" expanded="false" />
-            <element signature="e#128366#149552#0" expanded="false" />
-            <element signature="e#149902#154489#0" expanded="false" />
+            <element signature="e#93721#97018#0" expanded="false" />
+            <element signature="e#97061#100124#0" expanded="false" />
+            <element signature="e#100174#104165#0" expanded="false" />
+            <element signature="e#153683#158270#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -564,12 +587,10 @@
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="e#4803#4828#0" expanded="true" />
-            <element signature="e#91178#94475#0" expanded="false" />
-            <element signature="e#94518#97581#0" expanded="false" />
-            <element signature="e#97631#101622#0" expanded="false" />
-            <element signature="e#101669#128319#0" expanded="false" />
-            <element signature="e#128366#149552#0" expanded="false" />
-            <element signature="e#149902#154489#0" expanded="false" />
+            <element signature="e#93721#97018#0" expanded="false" />
+            <element signature="e#97061#100124#0" expanded="false" />
+            <element signature="e#100174#104165#0" expanded="false" />
+            <element signature="e#153683#158270#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -580,12 +601,10 @@
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="e#4803#4828#0" expanded="true" />
-            <element signature="e#91178#94475#0" expanded="false" />
-            <element signature="e#94518#97581#0" expanded="false" />
-            <element signature="e#97631#101622#0" expanded="false" />
-            <element signature="e#101669#128319#0" expanded="false" />
-            <element signature="e#128366#149552#0" expanded="false" />
-            <element signature="e#149902#154489#0" expanded="false" />
+            <element signature="e#93721#97018#0" expanded="false" />
+            <element signature="e#97061#100124#0" expanded="false" />
+            <element signature="e#100174#104165#0" expanded="false" />
+            <element signature="e#153683#158270#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -596,12 +615,10 @@
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="e#4803#4828#0" expanded="true" />
-            <element signature="e#91178#94475#0" expanded="false" />
-            <element signature="e#94518#97581#0" expanded="false" />
-            <element signature="e#97631#101622#0" expanded="false" />
-            <element signature="e#101669#128319#0" expanded="false" />
-            <element signature="e#128366#149552#0" expanded="false" />
-            <element signature="e#149902#154489#0" expanded="false" />
+            <element signature="e#93721#97018#0" expanded="false" />
+            <element signature="e#97061#100124#0" expanded="false" />
+            <element signature="e#100174#104165#0" expanded="false" />
+            <element signature="e#153683#158270#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -612,55 +629,15 @@
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="e#4803#4828#0" expanded="true" />
-            <element signature="e#91178#94475#0" expanded="false" />
-            <element signature="e#94518#97581#0" expanded="false" />
-            <element signature="e#97631#101622#0" expanded="false" />
-            <element signature="e#101669#128319#0" expanded="false" />
-            <element signature="e#128366#149552#0" expanded="false" />
-            <element signature="e#149902#154489#0" expanded="false" />
+            <element signature="e#93721#97018#0" expanded="false" />
+            <element signature="e#97061#100124#0" expanded="false" />
+            <element signature="e#100174#104165#0" expanded="false" />
+            <element signature="e#153683#158270#0" expanded="false" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/gui/epocs.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding>
-            <element signature="e#4803#4828#0" expanded="true" />
-            <element signature="e#91178#94475#0" expanded="false" />
-            <element signature="e#94518#97581#0" expanded="false" />
-            <element signature="e#97631#101622#0" expanded="false" />
-            <element signature="e#101669#128319#0" expanded="false" />
-            <element signature="e#128366#149552#0" expanded="false" />
-            <element signature="e#149902#154489#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/gui/epocs.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding>
-            <element signature="e#4803#4828#0" expanded="true" />
-            <element signature="e#91178#94475#0" expanded="false" />
-            <element signature="e#94518#97581#0" expanded="false" />
-            <element signature="e#97631#101622#0" expanded="false" />
-            <element signature="e#101669#128319#0" expanded="false" />
-            <element signature="e#128366#149552#0" expanded="false" />
-            <element signature="e#149902#154489#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/Google Drive/Current Work/Albany/BCI2000src/src/contrib/BCPy2000/framework/BCPy2000_setup.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-24">
-          <caret line="39" column="28" lean-forward="false" selection-start-line="39" selection-start-column="28" selection-end-line="39" selection-end-column="28" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$USER_HOME$/Google Drive/Current Work/Albany/BCI2000src/src/contrib/BCPy2000/framework/BCPy2000_setup.py" />
     <entry file="file://C:/BCI2000/EPOCSv2/app/gui/epocs.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="299">
@@ -675,13 +652,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/gui/test">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="122" selection-end-column="27" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/app/gui/test" />
     <entry file="file://$PROJECT_DIR$/app/prog/BCI2000Remote.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="3485">
@@ -741,21 +712,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/batch/run-nidaqmx.bat">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="119">
-          <caret line="46" column="35" lean-forward="false" selection-start-line="46" selection-start-column="35" selection-end-line="46" selection-end-column="35" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/parms/NIDigitalOutputPort.prm" />
-    <entry file="file://$PROJECT_DIR$/../aEPOCS/app/gui/StimulusControl/ControlFunctions.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="136">
-          <caret line="10" column="8" lean-forward="false" selection-start-line="10" selection-start-column="8" selection-end-line="10" selection-end-column="8" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://C:/FullMonty275/App/Lib/collections.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="235">
@@ -770,13 +726,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/parms/base-nidaqmx.prm">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="672">
-          <caret line="44" column="61" lean-forward="false" selection-start-line="44" selection-start-column="61" selection-end-line="44" selection-end-column="61" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/../aEPOCS_LabVersion_v1/app/gui/epocs.py" />
     <entry file="file://$PROJECT_DIR$/../aEPOCS_LabVersion_v2/app/gui/epocs.py" />
     <entry file="file://$USER_HOME$/.PyCharm2016.2/system/python_stubs/739806999/sys.py">
@@ -788,20 +737,6 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/app/gui/DependantClasses/TkMPL.py" />
     <entry file="file://$PROJECT_DIR$/app/gui/__init.py" />
-    <entry file="file://$PROJECT_DIR$/app/gui/DependantClasses/TK.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-3824">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="273" selection-end-column="20" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/gui/DependantClasses/CoreGUIcomponents.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="3" selection-end-column="20" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/data/sample/W04-2014-12-18-16-43-R03-RC.dat">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="159">
@@ -823,37 +758,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/gui/DependantClasses/CurrentControl.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3485">
-          <caret line="207" column="33" lean-forward="false" selection-start-line="207" selection-start-column="33" selection-end-line="207" selection-end-column="33" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/gui/make_exe.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="918">
-          <caret line="54" column="34" lean-forward="true" selection-start-line="54" selection-start-column="34" selection-end-line="54" selection-end-column="35" />
-          <folding>
-            <element signature="e#0#22#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/gui/DependantClasses/CoreFunctions.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="13">
-          <caret line="74" column="7" lean-forward="true" selection-start-line="74" selection-start-column="7" selection-end-line="74" selection-end-column="7" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/app/gui/DependantClasses/MwaveAnalysisClass.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="169">
-          <caret line="11" column="7" lean-forward="true" selection-start-line="11" selection-start-column="7" selection-end-line="11" selection-end-column="7" />
-          <folding />
+        <state relative-caret-position="170">
+          <caret line="11" column="7" lean-forward="false" selection-start-line="11" selection-start-column="7" selection-end-line="11" selection-end-column="7" />
         </state>
       </provider>
     </entry>
@@ -861,23 +769,105 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="308">
           <caret line="1590" column="0" lean-forward="false" selection-start-line="1590" selection-start-column="0" selection-end-line="1590" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/parms/base-nidaqmx.prm">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="187">
+          <caret line="32" column="30" lean-forward="false" selection-start-line="32" selection-start-column="30" selection-end-line="32" selection-end-column="30" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/batch/run-nidaqmx.bat">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="255">
+          <caret line="15" column="42" lean-forward="false" selection-start-line="15" selection-start-column="42" selection-end-line="15" selection-end-column="42" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/gui/DependantClasses/CurrentControl.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3570">
+          <caret line="212" column="12" lean-forward="false" selection-start-line="212" selection-start-column="12" selection-end-line="212" selection-end-column="12" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/gui/DependantClasses/CoreFunctions.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="4760">
+          <caret line="280" column="0" lean-forward="false" selection-start-line="280" selection-start-column="0" selection-end-line="280" selection-end-column="0" />
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/gui/DependantClasses/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/data/test/test-LastSettings.txt" />
+    <entry file="file://$PROJECT_DIR$/app/gui/DependantClasses/CoreGUIcomponents.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="185">
+          <caret line="1358" column="24" lean-forward="false" selection-start-line="1358" selection-start-column="24" selection-end-line="1358" selection-end-column="24" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/gui/DependantClasses/TK.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="194">
+          <caret line="93" column="16" lean-forward="true" selection-start-line="93" selection-start-column="16" selection-end-line="93" selection-end-column="16" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/parms/NIDigitalOutputPort.prm" />
+    <entry file="file://$PROJECT_DIR$/../aEPOCS/app/gui/StimulusControl/ControlFunctions.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="11237">
+          <caret line="663" column="20" lean-forward="false" selection-start-line="663" selection-start-column="13" selection-end-line="663" selection-end-column="20" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/gui/make_exe.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="934">
+          <caret line="65" column="20" lean-forward="true" selection-start-line="65" selection-start-column="20" selection-end-line="65" selection-end-column="20" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/gui/DependantClasses/DS5LibClass.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="697">
+          <caret line="43" column="0" lean-forward="false" selection-start-line="43" selection-start-column="0" selection-end-line="43" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#15#0" expanded="false" />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/app/gui/epocs.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="255">
-          <caret line="111" column="0" lean-forward="true" selection-start-line="111" selection-start-column="0" selection-end-line="111" selection-end-column="0" />
+        <state relative-caret-position="212">
+          <caret line="124" column="0" lean-forward="false" selection-start-line="124" selection-start-column="0" selection-end-line="125" selection-end-column="27" />
           <folding>
             <element signature="e#4803#4828#0" expanded="true" />
-            <element signature="e#91178#94475#0" expanded="false" />
-            <element signature="e#94518#97581#0" expanded="false" />
-            <element signature="e#97631#101622#0" expanded="false" />
-            <element signature="e#101669#128319#0" expanded="false" />
-            <element signature="e#128366#149552#0" expanded="false" />
-            <element signature="e#149902#154489#0" expanded="false" />
+            <element signature="e#93721#97018#0" expanded="false" />
+            <element signature="e#97061#100124#0" expanded="false" />
+            <element signature="e#100174#104165#0" expanded="false" />
+            <element signature="e#153683#158270#0" expanded="false" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../aEPOCS_LabVersion_v4jen/app/gui/epocs.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="340">
+          <caret line="127" column="20" lean-forward="true" selection-start-line="127" selection-start-column="20" selection-end-line="127" selection-end-column="20" />
+          <folding />
         </state>
       </provider>
     </entry>

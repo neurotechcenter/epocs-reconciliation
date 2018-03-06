@@ -1,0 +1,38 @@
+2016-05-23 10:52:54: BCI2000 Started
+2016-05-23 10:52:55: Started "FilePlayback"
+2016-05-23 10:52:55: Started "ReflexConditioningSignalProcessing"
+2016-05-23 10:52:55: Started "DummyApplication"
+2016-05-23 10:52:55: Added parameter to list: SessionStamp
+2016-05-23 10:52:55: Added parameter to list: ApplicationMode
+2016-05-23 10:52:55: Added parameter to list: BackgroundScaleLimit
+2016-05-23 10:52:55: Added parameter to list: ResponseScaleLimit
+2016-05-23 10:52:55: Added parameter to list: BaselineResponseLevel
+2016-05-23 10:52:56: SignalProcessing: Waiting for configuration ...
+2016-05-23 10:52:56: Application: Waiting for configuration ...
+2016-05-23 10:52:57: Source: Waiting for configuration ...
+2016-05-23 10:52:57: Set parameter OutputMode to 0
+2016-05-23 10:52:57: Set parameter DataDirectory to ../../data
+2016-05-23 10:52:57: Set parameter SubjectRun to 01
+2016-05-23 10:52:57: Set parameter FileFormat to dat
+2016-05-23 10:52:57: Set parameter SessionStamp to 2016-05-23-10-52
+2016-05-23 10:52:57: Set parameter TriggerExpression to 
+2016-05-23 10:52:57: Set parameter SubjectName to axe
+2016-05-23 10:52:57: Set parameter LookForward to 500ms
+2016-05-23 10:52:57: Set parameter DataFile to ${SubjectName}/${SubjectName}-${SessionStamp}/${SubjectName}-${SessionStamp}-R${SubjectRun}-${ApplicationMode}.${FileFormat}
+2016-05-23 10:52:57: Set parameter LookBack to 100ms
+2016-05-23 10:52:57: Set parameter BackgroundSegmentDuration to 200ms
+2016-05-23 10:52:57: Set parameter ApplicationMode to ST
+2016-05-23 10:52:57: Set parameter BackgroundChannels
+2016-05-23 10:52:57: Set parameter ResponseDefinition
+2016-05-23 10:52:57: Set parameter ResponseAssessment
+2016-05-23 10:52:57: Set parameter MinTimeBetweenTriggers to 3s
+2016-05-23 10:52:57: Set parameter BackgroundHoldDuration to 0
+2016-05-23 10:52:57: Set parameter MaxRandomExtraHoldDuration to 0
+2016-05-23 10:52:57: Set parameter TriggerExpression to 
+2016-05-23 10:52:57: Set parameter FeedbackTimeConstant to 200ms
+2016-05-23 10:52:57: Set parameter BackgroundScaleLimit to 23mV
+2016-05-23 10:52:57: Set parameter ResponseScaleLimit to 50mV
+2016-05-23 10:52:57: Set parameter BaselineResponseLevel to %
+2016-05-23 10:52:57: Set parameter SharedMemoryOutput to file://epocs.mmap
+2016-05-23 10:52:57: Set parameter OutputExpressions
+2016-05-23 10:53:32: Operator shut down connections

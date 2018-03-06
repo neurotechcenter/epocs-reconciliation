@@ -7,3 +7,6 @@ Modules:
 
 DS5 Stimulus Control
 M-Wave Analysis Window
+
+3/1/18 - DS5 control not working from BCI2000 so this version now includes a DS5 class communication thorugh pythonnet .NET COM interface
+	 aReflexConditioningSignalProcessing only now includes DS8 Control 

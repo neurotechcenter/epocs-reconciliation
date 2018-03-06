@@ -1,0 +1,86 @@
+2016-09-07 15:43:53: BCI2000 Started
+2016-09-07 15:43:53: Started "NIDAQ_mx_Source"
+2016-09-07 15:43:53: SignalSource: Waiting for configuration ...
+2016-09-07 15:43:53: Started "aReflexConditioningSignalProcessing"
+2016-09-07 15:43:53: SignalProcessing: Waiting for configuration ...
+2016-09-07 15:43:53: Started "DummyApplication"
+2016-09-07 15:43:53: Added parameter to list: SessionStamp
+2016-09-07 15:43:53: Added parameter to list: ApplicationMode
+2016-09-07 15:43:53: Added parameter to list: BackgroundScaleLimit
+2016-09-07 15:43:53: Added parameter to list: ResponseScaleLimit
+2016-09-07 15:43:53: Added parameter to list: BaselineResponseLevel
+2016-09-07 15:43:53: Set parameter BoardNumber to 2
+2016-09-07 15:43:53: Application: Waiting for configuration ...
+2016-09-07 15:43:53: Loaded parameter file "C:\Users\HR18163admin\PycharmProjects\aEPOCS\app\prog\../parms/base-nidaqmx.prm"
+2016-09-07 15:43:53: Set parameter OutputMode to 0
+2016-09-07 15:43:53: Set parameter SubjectRun to 01
+2016-09-07 15:43:53: Set parameter FileFormat to dat
+2016-09-07 15:43:53: Set parameter SessionStamp to 2016-09-07-15-43
+2016-09-07 15:43:53: Set parameter TriggerExpression to 
+2016-09-07 15:43:53: Set parameter SubjectName to test
+2016-09-07 15:43:53: Set parameter DataDirectory to ../../data
+2016-09-07 15:43:53: Set parameter DataFile to ${SubjectName}/${SubjectName}-${SessionStamp}/${SubjectName}-${SessionStamp}-R${SubjectRun}-${ApplicationMode}.${FileFormat}
+2016-09-07 15:43:53: Set parameter LookBack to 100ms
+2016-09-07 15:43:53: Set parameter BackgroundSegmentDuration to 200ms
+2016-09-07 15:43:53: Set parameter ApplicationMode to ST
+2016-09-07 15:43:53: Set parameter LookForward to 500ms
+2016-09-07 15:43:53: Set parameter BackgroundChannels
+2016-09-07 15:43:53: Set parameter ResponseDefinition
+2016-09-07 15:43:53: Set parameter ResponseAssessment
+2016-09-07 15:43:53: Set parameter MinTimeBetweenTriggers to 3s
+2016-09-07 15:43:53: Set parameter BackgroundHoldDuration to 0
+2016-09-07 15:43:53: Set parameter MaxRandomExtraHoldDuration to 0
+2016-09-07 15:43:53: Set parameter TriggerExpression to 
+2016-09-07 15:43:53: Set parameter FeedbackTimeConstant to 200ms
+2016-09-07 15:43:53: Set parameter BackgroundScaleLimit to 2000mV
+2016-09-07 15:43:53: Set parameter ResponseScaleLimit to 50mV
+2016-09-07 15:43:53: Set parameter BaselineResponseLevel to %
+2016-09-07 15:43:53: Set parameter SharedMemoryOutput to file://epocs.mmap
+2016-09-07 15:43:53: Set parameter OutputExpressions
+2016-09-07 15:43:58: Set parameter SubjectRun to 01
+2016-09-07 15:43:58: Set parameter FileFormat to dat
+2016-09-07 15:43:58: Set parameter SessionStamp to 2016-09-07-15-43
+2016-09-07 15:43:58: Set parameter TriggerExpression to 
+2016-09-07 15:43:58: Set parameter SubjectName to test
+2016-09-07 15:43:58: Set parameter DataDirectory to ../../data
+2016-09-07 15:43:58: Set parameter DataFile to ${SubjectName}/${SubjectName}-${SessionStamp}/${SubjectName}-${SessionStamp}-R${SubjectRun}-${ApplicationMode}.${FileFormat}
+2016-09-07 15:43:58: Set parameter LookBack to 100ms
+2016-09-07 15:43:58: Set parameter BackgroundSegmentDuration to 200ms
+2016-09-07 15:43:58: Set parameter ApplicationMode to RC
+2016-09-07 15:43:58: Set parameter LookForward to 500ms
+2016-09-07 15:43:58: Set parameter BackgroundChannels
+2016-09-07 15:43:58: Set parameter ResponseDefinition
+2016-09-07 15:43:58: Set parameter ResponseAssessment
+2016-09-07 15:43:58: Set parameter MinTimeBetweenTriggers to 5s
+2016-09-07 15:43:58: Set parameter BackgroundHoldDuration to 2s
+2016-09-07 15:43:58: Set parameter MaxRandomExtraHoldDuration to 0s
+2016-09-07 15:43:58: Set parameter TriggerExpression to 
+2016-09-07 15:43:58: Set parameter FeedbackTimeConstant to 200ms
+2016-09-07 15:43:58: Set parameter BackgroundScaleLimit to 2000mV
+2016-09-07 15:43:58: Set parameter ResponseScaleLimit to 50mV
+2016-09-07 15:43:58: Set parameter BaselineResponseLevel to %
+2016-09-07 15:43:58: Set parameter SharedMemoryOutput to file://epocs.mmap
+2016-09-07 15:43:58: Set parameter OutputExpressions
+2016-09-07 15:43:58: Operator set configuration
+2016-09-07 15:43:59: Error: [SignalProcessing] Parameter "Responses->ResponseDefinition": Value at index (1, 1) is 0, exceeds lower range (6)
+2016-09-07 15:43:59: Error: [SignalProcessing] Parameter "Responses->ResponseDefinition": Value at index (1, 4) is 0, exceeds lower range (6)
+2016-09-07 15:43:59: Error: [SignalProcessing] Parameter "Responses->ResponseDefinition": Value at index (1, 5) is 1, exceeds lower range (6)
+2016-09-07 15:43:59: Error: [SignalProcessing] Parameter "Responses->ResponseDefinition": Value at index (1, 6) is 1, exceeds lower range (6)
+2016-09-07 15:43:59: Error: [SignalProcessing] Parameter "Responses->ResponseDefinition": Value at index (1, 7) is 0, exceeds lower range (6)
+2016-09-07 15:43:59: Error: [SignalProcessing] Parameter "Responses->ResponseDefinition": Value at index (2, 1) is 0, exceeds lower range (6)
+2016-09-07 15:43:59: Error: [SignalProcessing] Parameter "Responses->ResponseDefinition": Value at index (2, 4) is 0, exceeds lower range (6)
+2016-09-07 15:43:59: Error: [SignalProcessing] Parameter "Responses->ResponseDefinition": Value at index (2, 5) is 1, exceeds lower range (6)
+2016-09-07 15:43:59: Error: [SignalProcessing] Parameter "Responses->ResponseDefinition": Value at index (2, 6) is 1, exceeds lower range (6)
+2016-09-07 15:43:59: Error: [SignalProcessing] Parameter "Responses->ResponseDefinition": Value at index (2, 7) is 0, exceeds lower range (6)
+2016-09-07 15:43:59: Error: [SignalProcessing] Parameter "Responses->ResponseDefinition": Value at index (3, 1) is 0, exceeds lower range (6)
+2016-09-07 15:43:59: Error: [SignalProcessing] Parameter "Responses->ResponseDefinition": Value at index (3, 4) is 0, exceeds lower range (6)
+2016-09-07 15:43:59: Error: [SignalProcessing] Parameter "Responses->ResponseDefinition": Value at index (3, 5) is 1, exceeds lower range (6)
+2016-09-07 15:43:59: Error: [SignalProcessing] Parameter "Responses->ResponseDefinition": Value at index (3, 6) is 1, exceeds lower range (6)
+2016-09-07 15:43:59: Error: [SignalProcessing] Parameter "Responses->ResponseDefinition": Value at index (3, 7) is 0, exceeds lower range (6)
+2016-09-07 15:43:59: Error: [SignalProcessing] Parameter "Responses->ResponseDefinition": Value at index (1, 2) is 38, exceeds high range (22)
+2016-09-07 15:43:59: Error: [SignalProcessing] Parameter "Responses->ResponseDefinition": Value at index (1, 3) is 45, exceeds high range (22)
+2016-09-07 15:43:59: Error: [SignalProcessing] Parameter "Responses->ResponseDefinition": Value at index (2, 2) is 38, exceeds high range (22)
+2016-09-07 15:43:59: Error: [SignalProcessing] Parameter "Responses->ResponseDefinition": Value at index (2, 3) is 45, exceeds high range (22)
+2016-09-07 15:43:59: Error: [SignalProcessing] Parameter "Responses->ResponseDefinition": Value at index (3, 3) is 23, exceeds high range (22)
+2016-09-07 15:44:00: SignalSource: NIDAQ_mx_Source initialized
+2016-09-07 15:44:59: Operator shut down connections

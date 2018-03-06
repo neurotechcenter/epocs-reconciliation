@@ -1,0 +1,57 @@
+2018-02-26 10:11:30: BCI2000 Started
+2018-02-26 10:11:30: Started "NIDAQ_mx_Source"
+2018-02-26 10:11:30: SignalSource: Waiting for configuration ...
+2018-02-26 10:11:30: Started "aReflexConditioningSignalProcessing"
+2018-02-26 10:11:30: Started "DummyApplication"
+2018-02-26 10:11:30: Added parameter to list: SessionStamp
+2018-02-26 10:11:30: Added parameter to list: ApplicationMode
+2018-02-26 10:11:30: Added parameter to list: BackgroundScaleLimit
+2018-02-26 10:11:30: Added parameter to list: ResponseScaleLimit
+2018-02-26 10:11:30: Added parameter to list: BaselineResponseLevel
+2018-02-26 10:11:30: Application: Waiting for configuration ...
+2018-02-26 10:11:30: SignalProcessing: Waiting for configuration ...
+2018-02-26 10:11:30: Loaded parameter file "C:/Users/HR18163admin/PycharmProjects/aEPOCS_LabVersion_v3/app/parms/base-nidaqmx.prm"
+2018-02-26 10:11:30: Loaded parameter file "C:/Users/HR18163admin/PycharmProjects/aEPOCS_LabVersion_v3/app/parms/NIDigitalOutputPort.prm"
+2018-02-26 10:11:30: Set parameter OutputMode to 0
+2018-02-26 10:11:30: Set parameter SubjectRun to 02
+2018-02-26 10:11:30: Set parameter FileFormat to dat
+2018-02-26 10:11:30: Set parameter SessionStamp to 2018-02-26-10-10
+2018-02-26 10:11:30: Set parameter TriggerExpression to 
+2018-02-26 10:11:30: Set parameter SubjectName to test
+2018-02-26 10:11:30: Set parameter DataDirectory to ../../data
+2018-02-26 10:11:30: Set parameter DataFile to ${SubjectName}/${SubjectName}-${SessionStamp}/${SubjectName}-${SessionStamp}-R${SubjectRun}-${ApplicationMode}.${FileFormat}
+2018-02-26 10:11:30: Set parameter LookBack to 100ms
+2018-02-26 10:11:30: Set parameter BackgroundSegmentDuration to 200ms
+2018-02-26 10:11:30: Set parameter ApplicationMode to ST
+2018-02-26 10:11:30: Set parameter LookForward to 500ms
+2018-02-26 10:11:30: Set parameter BackgroundChannels
+2018-02-26 10:11:30: Set parameter ResponseDefinition
+2018-02-26 10:11:30: Set parameter ResponseAssessment
+2018-02-26 10:11:30: Set parameter ReferenceAssessment
+2018-02-26 10:11:30: Set parameter MinTimeBetweenTriggers to 3s
+2018-02-26 10:11:30: Set parameter BackgroundHoldDuration to 0
+2018-02-26 10:11:30: Set parameter MaxRandomExtraHoldDuration to 0
+2018-02-26 10:11:30: Set parameter TriggerExpression to 
+2018-02-26 10:11:30: Set parameter FeedbackTimeConstant to 200ms
+2018-02-26 10:11:30: Set parameter BackgroundScaleLimit to 800mV
+2018-02-26 10:11:30: Set parameter ResponseScaleLimit to 50mV
+2018-02-26 10:11:30: Set parameter BaselineResponseLevel to %
+2018-02-26 10:11:30: Set parameter SharedMemoryOutput to file://epocs.mmap
+2018-02-26 10:11:30: Set parameter OutputExpressions
+2018-02-26 10:11:38: Operator set configuration
+2018-02-26 10:11:40: Application: DummyApplication initialized
+2018-02-26 10:11:41: [SignalProcessing] NIDAQFilterAO::Initialize: nDigital: 1.
+2018-02-26 10:11:41: Error: [SignalProcessing] NIDAQFilterAO::Initialize: NIDAQ Error: NI-DAQmx is unable to communicate with the device. Make sure the device is present in and accessible to the system, is not currently being reset, and is not reserved by another driver such as Traditional NI-DAQ (Legacy).
+Task Name: Digital_Output0
+
+Status Code: -200324.
+2018-02-26 10:11:41: Error: [SignalProcessing] NIDAQFilterAO::Initialize: Failed to start task "Digital_Output" .
+2018-02-26 10:11:41: Error: [SignalProcessing] NIDAQFilterAO::Initialize: NIDAQ Error: NI-DAQmx is unable to communicate with the device. Make sure the device is present in and accessible to the system, is not currently being reset, and is not reserved by another driver such as Traditional NI-DAQ (Legacy).
+Task Name: Digital_Output0
+
+Status Code: -200324.
+2018-02-26 10:11:41: Error: [SignalProcessing] NIDAQFilterAO::Initialize: Failed to write to task "Digital_Output"
+2018-02-26 10:11:44: SignalSource: NIDAQ_mx_Source initialized
+2018-02-26 10:12:30: Error: [SignalSource] DataIOFilter::Resting: NIADC::Process: Time out.
+2018-02-26 10:12:35: Error: [SignalSource] Lost connection to SignalSource
+2018-02-26 10:12:42: Operator shut down connections

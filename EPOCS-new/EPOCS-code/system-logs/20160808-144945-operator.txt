@@ -1,0 +1,84 @@
+2016-08-08 14:49:57: BCI2000 Started
+2016-08-08 14:49:57: Started "FilePlayback"
+2016-08-08 14:49:57: Started "ReflexConditioningSignalProcessing"
+2016-08-08 14:49:57: Started "DummyApplication"
+2016-08-08 14:49:57: Added parameter to list: SessionStamp
+2016-08-08 14:49:57: Added parameter to list: ApplicationMode
+2016-08-08 14:49:57: Added parameter to list: BackgroundScaleLimit
+2016-08-08 14:49:57: Added parameter to list: ResponseScaleLimit
+2016-08-08 14:49:57: Added parameter to list: BaselineResponseLevel
+2016-08-08 14:49:58: SignalProcessing: Waiting for configuration ...
+2016-08-08 14:49:58: Application: Waiting for configuration ...
+2016-08-08 14:49:59: Source: Waiting for configuration ...
+2016-08-08 14:49:59: Set parameter OutputMode to 0
+2016-08-08 14:49:59: Set parameter SubjectRun to 01
+2016-08-08 14:49:59: Set parameter FileFormat to dat
+2016-08-08 14:49:59: Set parameter SessionStamp to 2016-08-08-14-49
+2016-08-08 14:49:59: Set parameter TriggerExpression to 
+2016-08-08 14:49:59: Set parameter SubjectName to KAG
+2016-08-08 14:49:59: Set parameter DataDirectory to ../../data
+2016-08-08 14:49:59: Set parameter DataFile to ${SubjectName}/${SubjectName}-${SessionStamp}/${SubjectName}-${SessionStamp}-R${SubjectRun}-${ApplicationMode}.${FileFormat}
+2016-08-08 14:49:59: Set parameter LookBack to 100ms
+2016-08-08 14:49:59: Set parameter BackgroundSegmentDuration to 200ms
+2016-08-08 14:49:59: Set parameter ApplicationMode to ST
+2016-08-08 14:49:59: Set parameter LookForward to 500ms
+2016-08-08 14:49:59: Set parameter BackgroundChannels
+2016-08-08 14:49:59: Set parameter ResponseDefinition
+2016-08-08 14:49:59: Set parameter ResponseAssessment
+2016-08-08 14:49:59: Set parameter MinTimeBetweenTriggers to 3s
+2016-08-08 14:49:59: Set parameter BackgroundHoldDuration to 0
+2016-08-08 14:49:59: Set parameter MaxRandomExtraHoldDuration to 0
+2016-08-08 14:49:59: Set parameter TriggerExpression to 
+2016-08-08 14:49:59: Set parameter FeedbackTimeConstant to 200ms
+2016-08-08 14:49:59: Set parameter BackgroundScaleLimit to 20mV
+2016-08-08 14:49:59: Set parameter ResponseScaleLimit to 50mV
+2016-08-08 14:49:59: Set parameter BaselineResponseLevel to %
+2016-08-08 14:49:59: Set parameter SharedMemoryOutput to file://epocs.mmap
+2016-08-08 14:49:59: Set parameter OutputExpressions
+2016-08-08 14:50:04: Set parameter SubjectRun to 01
+2016-08-08 14:50:04: Set parameter FileFormat to dat
+2016-08-08 14:50:04: Set parameter SessionStamp to 2016-08-08-14-49
+2016-08-08 14:50:04: Set parameter TriggerExpression to 
+2016-08-08 14:50:04: Set parameter SubjectName to KAG
+2016-08-08 14:50:04: Set parameter DataDirectory to ../../data
+2016-08-08 14:50:04: Set parameter DataFile to ${SubjectName}/${SubjectName}-${SessionStamp}/${SubjectName}-${SessionStamp}-R${SubjectRun}-${ApplicationMode}.${FileFormat}
+2016-08-08 14:50:04: Set parameter LookBack to 100ms
+2016-08-08 14:50:04: Set parameter BackgroundSegmentDuration to 200ms
+2016-08-08 14:50:04: Set parameter ApplicationMode to CT
+2016-08-08 14:50:04: Set parameter LookForward to 500ms
+2016-08-08 14:50:04: Set parameter BackgroundChannels
+2016-08-08 14:50:04: Set parameter ResponseDefinition
+2016-08-08 14:50:04: Set parameter ResponseAssessment
+2016-08-08 14:50:04: Set parameter MinTimeBetweenTriggers to 5s
+2016-08-08 14:50:04: Set parameter BackgroundHoldDuration to 2s
+2016-08-08 14:50:04: Set parameter MaxRandomExtraHoldDuration to 0s
+2016-08-08 14:50:04: Set parameter TriggerExpression to 
+2016-08-08 14:50:04: Set parameter FeedbackTimeConstant to 200ms
+2016-08-08 14:50:04: Set parameter BackgroundScaleLimit to 20mV
+2016-08-08 14:50:04: Set parameter ResponseScaleLimit to 50mV
+2016-08-08 14:50:04: Set parameter BaselineResponseLevel to %
+2016-08-08 14:50:04: Set parameter SharedMemoryOutput to file://epocs.mmap
+2016-08-08 14:50:04: Set parameter OutputExpressions
+2016-08-08 14:50:04: Operator set configuration
+2016-08-08 14:50:04: Warning: [Source] DataIOFilter::Preflight: The EvaluateTiming parameter is false, so realtime operation will not be enforced.
+2016-08-08 14:50:04: Source: SignalSource initialized
+2016-08-08 14:50:04: Application: Initialized
+2016-08-08 14:50:04: SignalProcessing: Initialized
+2016-08-08 14:50:16: [Source] DataIOFilter::Resting: FilePlaybackADC::Process: Wrapping data around.
+2016-08-08 14:50:29: [Source] DataIOFilter::Resting: FilePlaybackADC::Process: Wrapping data around.
+2016-08-08 14:50:41: [Source] DataIOFilter::Resting: FilePlaybackADC::Process: Wrapping data around.
+2016-08-08 14:50:54: [Source] DataIOFilter::Resting: FilePlaybackADC::Process: Wrapping data around.
+2016-08-08 14:51:06: [Source] DataIOFilter::Resting: FilePlaybackADC::Process: Wrapping data around.
+2016-08-08 14:51:18: [Source] DataIOFilter::Resting: FilePlaybackADC::Process: Wrapping data around.
+2016-08-08 14:51:31: [Source] DataIOFilter::Resting: FilePlaybackADC::Process: Wrapping data around.
+2016-08-08 14:51:43: [Source] DataIOFilter::Resting: FilePlaybackADC::Process: Wrapping data around.
+2016-08-08 14:51:56: [Source] DataIOFilter::Resting: FilePlaybackADC::Process: Wrapping data around.
+2016-08-08 14:52:08: [Source] DataIOFilter::Resting: FilePlaybackADC::Process: Wrapping data around.
+2016-08-08 14:52:20: [Source] DataIOFilter::Resting: FilePlaybackADC::Process: Wrapping data around.
+2016-08-08 14:52:33: [Source] DataIOFilter::Resting: FilePlaybackADC::Process: Wrapping data around.
+2016-08-08 14:52:45: [Source] DataIOFilter::Resting: FilePlaybackADC::Process: Wrapping data around.
+2016-08-08 14:52:58: [Source] DataIOFilter::Resting: FilePlaybackADC::Process: Wrapping data around.
+2016-08-08 14:53:10: [Source] DataIOFilter::Resting: FilePlaybackADC::Process: Wrapping data around.
+2016-08-08 14:53:22: [Source] DataIOFilter::Resting: FilePlaybackADC::Process: Wrapping data around.
+2016-08-08 14:53:35: [Source] DataIOFilter::Resting: FilePlaybackADC::Process: Wrapping data around.
+2016-08-08 14:53:47: [Source] DataIOFilter::Resting: FilePlaybackADC::Process: Wrapping data around.

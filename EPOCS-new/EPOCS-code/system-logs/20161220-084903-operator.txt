@@ -1,0 +1,211 @@
+2016-12-20 08:49:06: BCI2000 Started
+2016-12-20 08:49:06: Started "NIDAQ_mx_Source"
+2016-12-20 08:49:06: SignalSource: Waiting for configuration ...
+2016-12-20 08:49:07: Started "aReflexConditioningSignalProcessing"
+2016-12-20 08:49:07: SignalProcessing: Waiting for configuration ...
+2016-12-20 08:49:07: Started "DummyApplication"
+2016-12-20 08:49:07: Set parameter BoardNumber to 1
+2016-12-20 08:49:07: Added parameter to list: SessionStamp
+2016-12-20 08:49:07: Added parameter to list: ApplicationMode
+2016-12-20 08:49:07: Added parameter to list: BackgroundScaleLimit
+2016-12-20 08:49:07: Added parameter to list: ResponseScaleLimit
+2016-12-20 08:49:07: Added parameter to list: BaselineResponseLevel
+2016-12-20 08:49:07: Application: Waiting for configuration ...
+2016-12-20 08:49:07: Loaded parameter file "C:\Users\HR18163admin\PycharmProjects\aEPOCS_LabVersion_v2\app\prog\../parms/base-nidaqmx.prm"
+2016-12-20 08:49:07: Loaded parameter file "C:\Users\HR18163admin\PycharmProjects\aEPOCS_LabVersion_v2\app\prog\../parms/NIDigitalOutputPort.prm"
+2016-12-20 08:49:07: Set parameter OutputMode to 0
+2016-12-20 08:49:07: Set parameter VisualizeSource to 1
+2016-12-20 08:49:07: Set parameter SubjectRun to 02
+2016-12-20 08:49:07: Set parameter FileFormat to dat
+2016-12-20 08:49:07: Set parameter SessionStamp to 2016-12-20-08-48
+2016-12-20 08:49:07: Set parameter TriggerExpression to 
+2016-12-20 08:49:07: Set parameter SubjectName to test
+2016-12-20 08:49:07: Set parameter DataDirectory to ../../data
+2016-12-20 08:49:07: Set parameter DataFile to ${SubjectName}/${SubjectName}-${SessionStamp}/${SubjectName}-${SessionStamp}-R${SubjectRun}-${ApplicationMode}.${FileFormat}
+2016-12-20 08:49:07: Set parameter LookBack to 100ms
+2016-12-20 08:49:07: Set parameter BackgroundSegmentDuration to 200ms
+2016-12-20 08:49:07: Set parameter ApplicationMode to ST
+2016-12-20 08:49:07: Set parameter LookForward to 500ms
+2016-12-20 08:49:07: Set parameter BackgroundChannels
+2016-12-20 08:49:07: Set parameter ResponseDefinition
+2016-12-20 08:49:07: Set parameter ResponseAssessment
+2016-12-20 08:49:07: Set parameter ReferenceAssessment
+2016-12-20 08:49:07: Set parameter MinTimeBetweenTriggers to 3s
+2016-12-20 08:49:07: Set parameter BackgroundHoldDuration to 0
+2016-12-20 08:49:07: Set parameter MaxRandomExtraHoldDuration to 0
+2016-12-20 08:49:07: Set parameter TriggerExpression to 
+2016-12-20 08:49:07: Set parameter FeedbackTimeConstant to 200ms
+2016-12-20 08:49:07: Set parameter BackgroundScaleLimit to 200mV
+2016-12-20 08:49:07: Set parameter ResponseScaleLimit to 50mV
+2016-12-20 08:49:07: Set parameter BaselineResponseLevel to %
+2016-12-20 08:49:07: Set parameter SharedMemoryOutput to file://epocs.mmap
+2016-12-20 08:49:07: Set parameter OutputExpressions
+2016-12-20 08:49:15: Set parameter AnalysisType to 1
+2016-12-20 08:49:15: Set parameter EnableCurrentControl to 0
+2016-12-20 08:49:15: Set parameter InitialCurrent to 1.0
+2016-12-20 08:49:15: Set parameter SubjectRun to 02
+2016-12-20 08:49:15: Set parameter FileFormat to dat
+2016-12-20 08:49:15: Set parameter SessionStamp to 2016-12-20-08-48
+2016-12-20 08:49:15: Set parameter TriggerExpression to 
+2016-12-20 08:49:15: Set parameter SubjectName to test
+2016-12-20 08:49:15: Set parameter DataDirectory to ../../data
+2016-12-20 08:49:15: Set parameter DataFile to ${SubjectName}/${SubjectName}-${SessionStamp}/${SubjectName}-${SessionStamp}-R${SubjectRun}-${ApplicationMode}.${FileFormat}
+2016-12-20 08:49:15: Set parameter LookBack to 100ms
+2016-12-20 08:49:15: Set parameter BackgroundSegmentDuration to 200ms
+2016-12-20 08:49:15: Set parameter ApplicationMode to ST
+2016-12-20 08:49:15: Set parameter LookForward to 500ms
+2016-12-20 08:49:15: Set parameter BackgroundChannels
+2016-12-20 08:49:15: Set parameter ResponseDefinition
+2016-12-20 08:49:15: Set parameter ResponseAssessment
+2016-12-20 08:49:15: Set parameter ReferenceAssessment
+2016-12-20 08:49:15: Set parameter MinTimeBetweenTriggers to 3s
+2016-12-20 08:49:15: Set parameter BackgroundHoldDuration to 0
+2016-12-20 08:49:15: Set parameter MaxRandomExtraHoldDuration to 0
+2016-12-20 08:49:15: Set parameter TriggerExpression to 
+2016-12-20 08:49:15: Set parameter FeedbackTimeConstant to 200ms
+2016-12-20 08:49:15: Set parameter BackgroundScaleLimit to 200mV
+2016-12-20 08:49:15: Set parameter ResponseScaleLimit to 50mV
+2016-12-20 08:49:15: Set parameter BaselineResponseLevel to %
+2016-12-20 08:49:15: Set parameter SharedMemoryOutput to file://epocs.mmap
+2016-12-20 08:49:15: Set parameter OutputExpressions
+2016-12-20 08:49:15: Operator set configuration
+2016-12-20 08:49:16: SignalSource: NIDAQ_mx_Source initialized
+2016-12-20 08:49:17: Warning: [SignalProcessing] NIDAQFilterAO::Preflight: Unable set Analog Output to Retriggerable, not supported by you NI device. We will set this to restablish Digital Edge Trigger each time Stimulus is to be updated.
+2016-12-20 08:49:17: [SignalProcessing] NIDAQFilterAO::Initialize: SampleRate set to: 200000.
+2016-12-20 08:49:17: [SignalProcessing] NIDAQFilterAO::Initialize: NumberofSamples set to: 103, with 2 steps.
+2016-12-20 08:49:17: SignalProcessing: AReflexConditioningSignalProcessing initialized
+2016-12-20 08:49:17: Application: DummyApplication initialized
+2016-12-20 08:49:17: Operator started operation
+2016-12-20 08:49:17: Set state Running to 1
+2016-12-20 08:49:17: SignalSource: NIDAQ_mx_Source running
+2016-12-20 08:49:17: SignalProcessing: AReflexConditioningSignalProcessing running
+2016-12-20 08:49:18: Warning: [SignalProcessing] NIDAQFilterAO: NIDAQFilterAO::Process: Execution required more than a sample block duration.
+2016-12-20 08:49:18: Application: DummyApplication running
+2016-12-20 08:49:18: Warning: [SignalProcessing] NIDAQFilterAO: NIDAQFilterAO::Process: Execution required more than a sample block duration. (4 times)
+2016-12-20 08:49:18: [SignalProcessing] TrapFilter::Process: Trigger detected on sample 1461.
+2016-12-20 08:49:20: [SignalProcessing] BackgroundTriggerFilter::Process: Trigger enabled after evaluating sample 9728.
+2016-12-20 08:49:21: [SignalProcessing] TrapFilter::Process: Trigger detected on sample 10019.
+2016-12-20 08:49:22: Warning: [SignalProcessing] NIDAQFilterAO: NIDAQFilterAO::Process: Execution required more than a sample block duration.
+2016-12-20 08:49:24: Warning: [SignalProcessing] NIDAQFilterAO: NIDAQFilterAO::Process: Execution required more than a sample block duration.
+2016-12-20 08:49:24: [SignalProcessing] BackgroundTriggerFilter::Process: Trigger enabled after evaluating sample 19456.
+2016-12-20 08:49:24: [SignalProcessing] TrapFilter::Process: Trigger detected on sample 19811.
+2016-12-20 08:49:25: Operation suspended
+2016-12-20 08:49:25: Set state Running to 0
+2016-12-20 08:49:25: SignalSource: NIDAQ_mx_Source suspended
+2016-12-20 08:49:25: Application: DummyApplication suspended
+2016-12-20 08:49:25: SignalProcessing: AReflexConditioningSignalProcessing suspended
+2016-12-20 08:49:33: Set parameter AnalysisType to 1
+2016-12-20 08:49:33: Set parameter EnableCurrentControl to 0
+2016-12-20 08:49:33: Set parameter InitialCurrent to 1.0
+2016-12-20 08:49:33: Set parameter SubjectRun to 03
+2016-12-20 08:49:33: Set parameter FileFormat to dat
+2016-12-20 08:49:33: Set parameter SessionStamp to 2016-12-20-08-48
+2016-12-20 08:49:33: Set parameter TriggerExpression to 
+2016-12-20 08:49:33: Set parameter SubjectName to test
+2016-12-20 08:49:33: Set parameter DataDirectory to ../../data
+2016-12-20 08:49:33: Set parameter DataFile to ${SubjectName}/${SubjectName}-${SessionStamp}/${SubjectName}-${SessionStamp}-R${SubjectRun}-${ApplicationMode}.${FileFormat}
+2016-12-20 08:49:33: Set parameter LookBack to 100ms
+2016-12-20 08:49:33: Set parameter BackgroundSegmentDuration to 200ms
+2016-12-20 08:49:33: Set parameter ApplicationMode to RC
+2016-12-20 08:49:33: Set parameter LookForward to 500ms
+2016-12-20 08:49:33: Set parameter BackgroundChannels
+2016-12-20 08:49:33: Set parameter ResponseDefinition
+2016-12-20 08:49:33: Set parameter ResponseAssessment
+2016-12-20 08:49:33: Set parameter ReferenceAssessment
+2016-12-20 08:49:33: Set parameter MinTimeBetweenTriggers to 5s
+2016-12-20 08:49:33: Set parameter BackgroundHoldDuration to 2s
+2016-12-20 08:49:33: Set parameter MaxRandomExtraHoldDuration to 0s
+2016-12-20 08:49:33: Set parameter TriggerExpression to 
+2016-12-20 08:49:33: Set parameter FeedbackTimeConstant to 200ms
+2016-12-20 08:49:33: Set parameter BackgroundScaleLimit to 200mV
+2016-12-20 08:49:33: Set parameter ResponseScaleLimit to 50mV
+2016-12-20 08:49:33: Set parameter BaselineResponseLevel to %
+2016-12-20 08:49:33: Set parameter SharedMemoryOutput to file://epocs.mmap
+2016-12-20 08:49:33: Set parameter OutputExpressions
+2016-12-20 08:49:33: Operator set configuration
+2016-12-20 08:49:33: Warning: [SignalProcessing] NIDAQFilterAO::Preflight: Unable set Analog Output to Retriggerable, not supported by you NI device. We will set this to restablish Digital Edge Trigger each time Stimulus is to be updated.
+2016-12-20 08:49:33: [SignalProcessing] NIDAQFilterAO::Initialize: SampleRate set to: 200000.
+2016-12-20 08:49:33: [SignalProcessing] NIDAQFilterAO::Initialize: NumberofSamples set to: 103, with 2 steps.
+2016-12-20 08:49:33: Application: DummyApplication initialized
+2016-12-20 08:49:33: SignalSource: NIDAQ_mx_Source initialized
+2016-12-20 08:49:33: SignalProcessing: AReflexConditioningSignalProcessing initialized
+2016-12-20 08:49:33: Operator started operation
+2016-12-20 08:49:33: Set state Running to 1
+2016-12-20 08:49:33: SignalSource: NIDAQ_mx_Source running
+2016-12-20 08:49:33: SignalProcessing: AReflexConditioningSignalProcessing running
+2016-12-20 08:49:33: Application: DummyApplication running
+2016-12-20 08:49:33: Warning: [SignalProcessing] NIDAQFilterAO: NIDAQFilterAO::Process: Execution required more than a sample block duration.
+2016-12-20 08:49:34: Warning: [SignalProcessing] NIDAQFilterAO: NIDAQFilterAO::Process: Execution required more than a sample block duration. (5 times)
+2016-12-20 08:49:34: Warning: [SignalProcessing] NIDAQFilterAO: NIDAQFilterAO::Process: Execution required more than a sample block duration.
+2016-12-20 08:49:34: [SignalProcessing] TrapFilter::Process: Trigger detected on sample 1461.
+2016-12-20 08:49:38: Warning: [SignalProcessing] NIDAQFilterAO: NIDAQFilterAO::Process: Execution required more than a sample block duration. (7 times)
+2016-12-20 08:49:38: [SignalProcessing] BackgroundTriggerFilter::Process: Trigger enabled after evaluating sample 16128.
+2016-12-20 08:49:38: [SignalProcessing] TrapFilter::Process: Trigger detected on sample 16830.
+2016-12-20 08:49:39: Warning: [SignalProcessing] NIDAQFilterAO: NIDAQFilterAO::Process: Execution required more than a sample block duration.
+2016-12-20 08:49:43: [SignalProcessing] BackgroundTriggerFilter::Process: Trigger enabled after evaluating sample 32256.
+2016-12-20 08:49:43: [SignalProcessing] TrapFilter::Process: Trigger detected on sample 32959.
+2016-12-20 08:49:48: [SignalProcessing] BackgroundTriggerFilter::Process: Trigger enabled after evaluating sample 48384.
+2016-12-20 08:49:49: [SignalProcessing] TrapFilter::Process: Trigger detected on sample 49086.
+2016-12-20 08:49:50: Operation suspended
+2016-12-20 08:49:50: Set state Running to 0
+2016-12-20 08:49:50: SignalSource: NIDAQ_mx_Source suspended
+2016-12-20 08:49:50: Application: DummyApplication suspended
+2016-12-20 08:49:50: Warning: [SignalProcessing] NIDAQFilterAO: NIDAQFilterAO::Process: Execution required more than a sample block duration.
+2016-12-20 08:49:50: SignalProcessing: AReflexConditioningSignalProcessing suspended
+2016-12-20 08:49:59: Set parameter AnalysisType to 0
+2016-12-20 08:49:59: Set parameter EnableCurrentControl to 0
+2016-12-20 08:49:59: Set parameter InitialCurrent to 1.0
+2016-12-20 08:49:59: Set parameter SubjectRun to 04
+2016-12-20 08:49:59: Set parameter FileFormat to dat
+2016-12-20 08:49:59: Set parameter SessionStamp to 2016-12-20-08-48
+2016-12-20 08:49:59: Set parameter TriggerExpression to 
+2016-12-20 08:49:59: Set parameter SubjectName to test
+2016-12-20 08:49:59: Set parameter DataDirectory to ../../data
+2016-12-20 08:49:59: Set parameter DataFile to ${SubjectName}/${SubjectName}-${SessionStamp}/${SubjectName}-${SessionStamp}-R${SubjectRun}-${ApplicationMode}.${FileFormat}
+2016-12-20 08:49:59: Set parameter LookBack to 100ms
+2016-12-20 08:49:59: Set parameter BackgroundSegmentDuration to 200ms
+2016-12-20 08:49:59: Set parameter ApplicationMode to CT
+2016-12-20 08:49:59: Set parameter LookForward to 500ms
+2016-12-20 08:49:59: Set parameter BackgroundChannels
+2016-12-20 08:49:59: Set parameter ResponseDefinition
+2016-12-20 08:49:59: Set parameter ResponseAssessment
+2016-12-20 08:49:59: Set parameter ReferenceAssessment
+2016-12-20 08:49:59: Set parameter MinTimeBetweenTriggers to 5s
+2016-12-20 08:49:59: Set parameter BackgroundHoldDuration to 2s
+2016-12-20 08:49:59: Set parameter MaxRandomExtraHoldDuration to 0s
+2016-12-20 08:49:59: Set parameter TriggerExpression to 
+2016-12-20 08:49:59: Set parameter FeedbackTimeConstant to 200ms
+2016-12-20 08:49:59: Set parameter BackgroundScaleLimit to 200mV
+2016-12-20 08:49:59: Set parameter ResponseScaleLimit to 50mV
+2016-12-20 08:49:59: Set parameter BaselineResponseLevel to %
+2016-12-20 08:49:59: Set parameter SharedMemoryOutput to file://epocs.mmap
+2016-12-20 08:49:59: Set parameter OutputExpressions
+2016-12-20 08:49:59: Operator set configuration
+2016-12-20 08:49:59: Warning: [SignalProcessing] NIDAQFilterAO::Preflight: Unable set Analog Output to Retriggerable, not supported by you NI device. We will set this to restablish Digital Edge Trigger each time Stimulus is to be updated.
+2016-12-20 08:49:59: [SignalProcessing] NIDAQFilterAO::Initialize: SampleRate set to: 200000.
+2016-12-20 08:49:59: [SignalProcessing] NIDAQFilterAO::Initialize: NumberofSamples set to: 103, with 2 steps.
+2016-12-20 08:49:59: Application: DummyApplication initialized
+2016-12-20 08:49:59: SignalSource: NIDAQ_mx_Source initialized
+2016-12-20 08:49:59: SignalProcessing: AReflexConditioningSignalProcessing initialized
+2016-12-20 08:49:59: Operator started operation
+2016-12-20 08:49:59: Set state Running to 1
+2016-12-20 08:49:59: SignalSource: NIDAQ_mx_Source running
+2016-12-20 08:49:59: SignalProcessing: AReflexConditioningSignalProcessing running
+2016-12-20 08:49:59: Application: DummyApplication running
+2016-12-20 08:50:00: Warning: [SignalProcessing] NIDAQFilterAO: NIDAQFilterAO::Process: Execution required more than a sample block duration.
+2016-12-20 08:50:00: Warning: [SignalProcessing] NIDAQFilterAO: NIDAQFilterAO::Process: Execution required more than a sample block duration. (7 times)
+2016-12-20 08:50:00: [SignalProcessing] TrapFilter::Process: Trigger detected on sample 1461.
+2016-12-20 08:50:01: Warning: [SignalProcessing] NIDAQFilterAO: NIDAQFilterAO::Process: Execution required more than a sample block duration. (10 times)
+2016-12-20 08:50:05: Warning: [SignalProcessing] NIDAQFilterAO: NIDAQFilterAO::Process: Execution required more than a sample block duration. (3 times)
+2016-12-20 08:50:05: [SignalProcessing] BackgroundTriggerFilter::Process: Trigger enabled after evaluating sample 16128.
+2016-12-20 08:50:05: [SignalProcessing] TrapFilter::Process: Trigger detected on sample 16992.
+2016-12-20 08:50:10: [SignalProcessing] BackgroundTriggerFilter::Process: Trigger enabled after evaluating sample 32256.
+2016-12-20 08:50:10: Warning: [SignalProcessing] NIDAQFilterAO: NIDAQFilterAO::Process: Execution required more than a sample block duration. (twice)
+2016-12-20 08:50:10: [SignalProcessing] TrapFilter::Process: Trigger detected on sample 33087.
+2016-12-20 08:50:12: Operation suspended
+2016-12-20 08:50:12: Set state Running to 0
+2016-12-20 08:50:12: SignalSource: NIDAQ_mx_Source suspended
+2016-12-20 08:50:12: Application: DummyApplication suspended
+2016-12-20 08:50:12: Warning: [SignalProcessing] NIDAQFilterAO: NIDAQFilterAO::Process: Execution required more than a sample block duration.
+2016-12-20 08:50:12: SignalProcessing: AReflexConditioningSignalProcessing suspended
+2016-12-20 08:51:49: Operator shut down connections

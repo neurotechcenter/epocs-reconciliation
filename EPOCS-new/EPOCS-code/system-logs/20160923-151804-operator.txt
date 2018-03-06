@@ -1,0 +1,85 @@
+2016-09-23 15:18:08: BCI2000 Started
+2016-09-23 15:18:08: Started "FilePlayback"
+2016-09-23 15:18:08: Started "aReflexConditioningSignalProcessing"
+2016-09-23 15:18:08: SignalProcessing: Waiting for configuration ...
+2016-09-23 15:18:08: Started "DummyApplication"
+2016-09-23 15:18:08: Added parameter to list: SessionStamp
+2016-09-23 15:18:08: Added parameter to list: ApplicationMode
+2016-09-23 15:18:08: Added parameter to list: BackgroundScaleLimit
+2016-09-23 15:18:08: Added parameter to list: ResponseScaleLimit
+2016-09-23 15:18:08: Added parameter to list: BaselineResponseLevel
+2016-09-23 15:18:08: Application: Waiting for configuration ...
+2016-09-23 15:18:10: SignalSource: Waiting for configuration ...
+2016-09-23 15:18:10: Set parameter OutputMode to 0
+2016-09-23 15:18:10: Set parameter DigitalOuput to 0
+2016-09-23 15:18:10: Set parameter AnalogOutput to 0
+2016-09-23 15:18:10: Set parameter SubjectRun to 06
+2016-09-23 15:18:10: Set parameter FileFormat to dat
+2016-09-23 15:18:10: Set parameter SessionStamp to 2016-09-23-14-31
+2016-09-23 15:18:10: Set parameter TriggerExpression to 
+2016-09-23 15:18:10: Set parameter SubjectName to test
+2016-09-23 15:18:10: Set parameter DataDirectory to ../../data
+2016-09-23 15:18:10: Set parameter DataFile to ${SubjectName}/${SubjectName}-${SessionStamp}/${SubjectName}-${SessionStamp}-R${SubjectRun}-${ApplicationMode}.${FileFormat}
+2016-09-23 15:18:10: Set parameter LookBack to 100ms
+2016-09-23 15:18:10: Set parameter BackgroundSegmentDuration to 200ms
+2016-09-23 15:18:10: Set parameter ApplicationMode to ST
+2016-09-23 15:18:10: Set parameter LookForward to 500ms
+2016-09-23 15:18:10: Set parameter BackgroundChannels
+2016-09-23 15:18:10: Set parameter ResponseDefinition
+2016-09-23 15:18:10: Set parameter ResponseAssessment
+2016-09-23 15:18:10: Set parameter ReferenceAssessment
+2016-09-23 15:18:10: Set parameter MinTimeBetweenTriggers to 3s
+2016-09-23 15:18:10: Set parameter BackgroundHoldDuration to 0
+2016-09-23 15:18:10: Set parameter MaxRandomExtraHoldDuration to 0
+2016-09-23 15:18:10: Set parameter TriggerExpression to 
+2016-09-23 15:18:10: Set parameter FeedbackTimeConstant to 200ms
+2016-09-23 15:18:10: Set parameter BackgroundScaleLimit to 23mV
+2016-09-23 15:18:10: Set parameter ResponseScaleLimit to 50mV
+2016-09-23 15:18:10: Set parameter BaselineResponseLevel to %
+2016-09-23 15:18:10: Set parameter SharedMemoryOutput to file://epocs.mmap
+2016-09-23 15:18:10: Set parameter OutputExpressions
+2016-09-23 15:18:24: Set parameter Criteria to 2
+2016-09-23 15:18:24: Set parameter AnalysisType to 0
+2016-09-23 15:18:24: Set parameter EnableCurrentControl to 0
+2016-09-23 15:18:24: Set parameter InitialCurrent to 3.0
+2016-09-23 15:18:24: Set parameter SubjectRun to 06
+2016-09-23 15:18:24: Set parameter FileFormat to dat
+2016-09-23 15:18:24: Set parameter SessionStamp to 2016-09-23-14-31
+2016-09-23 15:18:24: Set parameter TriggerExpression to 
+2016-09-23 15:18:24: Set parameter SubjectName to test
+2016-09-23 15:18:24: Set parameter DataDirectory to ../../data
+2016-09-23 15:18:24: Set parameter DataFile to ${SubjectName}/${SubjectName}-${SessionStamp}/${SubjectName}-${SessionStamp}-R${SubjectRun}-${ApplicationMode}.${FileFormat}
+2016-09-23 15:18:24: Set parameter LookBack to 100ms
+2016-09-23 15:18:24: Set parameter BackgroundSegmentDuration to 200ms
+2016-09-23 15:18:24: Set parameter ApplicationMode to CT
+2016-09-23 15:18:24: Set parameter LookForward to 500ms
+2016-09-23 15:18:24: Set parameter BackgroundChannels
+2016-09-23 15:18:24: Set parameter ResponseDefinition
+2016-09-23 15:18:24: Set parameter ResponseAssessment
+2016-09-23 15:18:24: Set parameter ReferenceAssessment
+2016-09-23 15:18:24: Set parameter MinTimeBetweenTriggers to 5s
+2016-09-23 15:18:24: Set parameter BackgroundHoldDuration to 2s
+2016-09-23 15:18:24: Set parameter MaxRandomExtraHoldDuration to 0s
+2016-09-23 15:18:24: Set parameter TriggerExpression to 
+2016-09-23 15:18:24: Set parameter FeedbackTimeConstant to 200ms
+2016-09-23 15:18:24: Set parameter BackgroundScaleLimit to 23mV
+2016-09-23 15:18:24: Set parameter ResponseScaleLimit to 50mV
+2016-09-23 15:18:24: Set parameter BaselineResponseLevel to %
+2016-09-23 15:18:24: Set parameter SharedMemoryOutput to file://epocs.mmap
+2016-09-23 15:18:24: Set parameter OutputExpressions
+2016-09-23 15:18:24: Operator set configuration
+2016-09-23 15:18:24: Warning: [SignalSource] DataIOFilter::Preflight: The EvaluateTiming parameter is false, so realtime operation will not be enforced.
+2016-09-23 15:18:24: SignalProcessing: AReflexConditioningSignalProcessing initialized
+2016-09-23 15:18:24: Application: DummyApplication initialized
+2016-09-23 15:18:24: SignalSource: FilePlayback initialized
+2016-09-23 15:18:24: Operator started operation
+2016-09-23 15:18:24: Set state Running to 1
+2016-09-23 15:18:24: SignalSource: FilePlayback running
+2016-09-23 15:18:24: SignalProcessing: AReflexConditioningSignalProcessing running
+2016-09-23 15:18:24: Application: DummyApplication running
+2016-09-23 15:18:29: Operation suspended
+2016-09-23 15:18:29: Set state Running to 0
+2016-09-23 15:18:29: SignalSource: FilePlayback suspended
+2016-09-23 15:18:29: SignalProcessing: AReflexConditioningSignalProcessing suspended
+2016-09-23 15:18:29: Application: DummyApplication suspended
+2016-09-23 15:18:31: Operator shut down connections

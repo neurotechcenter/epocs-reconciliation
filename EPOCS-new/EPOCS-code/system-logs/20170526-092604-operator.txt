@@ -1,0 +1,44 @@
+2017-05-26 09:26:04: BCI2000 Started
+2017-05-26 09:26:05: Started "NIDAQ_mx_Source"
+2017-05-26 09:26:05: SignalSource: Waiting for configuration ...
+2017-05-26 09:26:05: Started "aReflexConditioningSignalProcessing"
+2017-05-26 09:26:05: SignalProcessing: Waiting for configuration ...
+2017-05-26 09:26:05: Started "DummyApplication"
+2017-05-26 09:26:05: Added parameter to list: SessionStamp
+2017-05-26 09:26:05: Added parameter to list: ApplicationMode
+2017-05-26 09:26:05: Added parameter to list: BackgroundScaleLimit
+2017-05-26 09:26:05: Added parameter to list: ResponseScaleLimit
+2017-05-26 09:26:05: Added parameter to list: BaselineResponseLevel
+2017-05-26 09:26:05: Application: Waiting for configuration ...
+2017-05-26 09:26:05: Loaded parameter file "C:\Users\HR18163admin\PycharmProjects\aEPOCS_LabVersion_v3\app\prog\../parms/base-nidaqmx.prm"
+2017-05-26 09:26:05: Loaded parameter file "C:\Users\HR18163admin\PycharmProjects\aEPOCS_LabVersion_v3\app\prog\../parms/NIDigitalOutputPort.prm"
+2017-05-26 09:26:05: Set parameter VisualizeTiming to 1
+2017-05-26 09:26:05: Set parameter VisualizeSource to 1
+2017-05-26 09:26:05: Set parameter VisualizeBackgroundAverages to 1
+2017-05-26 09:26:05: Set parameter VisualizeTrapFilter to 1
+2017-05-26 09:26:05: Set parameter VisualizeRangeIntegrator to 1
+2017-05-26 09:26:05: Operator set configuration
+2017-05-26 09:26:06: SignalSource: NIDAQ_mx_Source initialized
+2017-05-26 09:26:07: Error: [SignalProcessing] NIDAQFilterAO::Preflight: Specified Analog Output Channeldev2/ao0 cannot be found on this device.
+2017-05-26 09:26:07: Error: [SignalProcessing] NIDAQFilterAO::Preflight: NIDAQ Error: Physical channel specified does not exist on this device.
+
+Refer to the documentation for channels available on this device.
+Device: Dev2
+Physical Channel Name: dev2/ao0
+
+Task Name: Analog_Output
+
+Status Code: -200170.
+2017-05-26 09:26:07: Error: [SignalProcessing] NIDAQFilterAO::Preflight: Failed to create channel operating on the following lines: Dev2/dev2/ao0.
+2017-05-26 09:26:07: Error: [SignalProcessing] NIDAQFilterAO::Preflight: NIDAQ Error: Specified operation cannot be performed when there are no devices in the task.
+Task Name: Analog_Output
+
+Status Code: -200477.
+2017-05-26 09:26:07: Error: [SignalProcessing] NIDAQFilterAO::Preflight: Unable set Sampling Clock for "Analog_Output" .
+2017-05-26 09:26:07: Error: [SignalProcessing] NIDAQFilterAO::Preflight: NIDAQ Error: Specified operation cannot be performed when there are no devices in the task.
+Task Name: Analog_Output
+
+Status Code: -200477.
+2017-05-26 09:26:07: Error: [SignalProcessing] NIDAQFilterAO::Preflight: Unable to set Digital Edge Trigger for Analog Output.
+2017-05-26 09:26:07: Warning: [SignalProcessing] NIDAQFilterAO::Preflight: Unable set Analog Output to Retriggerable, not supported by you NI device. We will set this to restablish Digital Edge Trigger each time Stimulus is to be updated.
+2017-05-26 09:26:39: Operator shut down connections

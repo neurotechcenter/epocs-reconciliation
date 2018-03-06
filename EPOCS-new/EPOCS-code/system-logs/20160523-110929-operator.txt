@@ -1,0 +1,82 @@
+2016-05-23 11:09:32: BCI2000 Started
+2016-05-23 11:09:33: Started "NIDAQ_mx_Source"
+2016-05-23 11:09:33: Source: Waiting for configuration ...
+2016-05-23 11:09:33: Started "ReflexConditioningSignalProcessing"
+2016-05-23 11:09:33: Started "DummyApplication"
+2016-05-23 11:09:33: Added parameter to list: SessionStamp
+2016-05-23 11:09:33: Added parameter to list: ApplicationMode
+2016-05-23 11:09:33: Added parameter to list: BackgroundScaleLimit
+2016-05-23 11:09:33: Added parameter to list: ResponseScaleLimit
+2016-05-23 11:09:33: Added parameter to list: BaselineResponseLevel
+2016-05-23 11:09:34: Application: Waiting for configuration ...
+2016-05-23 11:09:34: SignalProcessing: Waiting for configuration ...
+2016-05-23 11:09:34: Loaded parameter file "C:\Users\HR18163admin\PycharmProjects\EPOCS_amir\app\prog\../parms/base-nidaqmx.prm"
+2016-05-23 11:09:34: Set parameter OutputMode to 0
+2016-05-23 11:09:34: Set parameter DataDirectory to ../../data
+2016-05-23 11:09:34: Set parameter SubjectRun to 01
+2016-05-23 11:09:34: Set parameter FileFormat to dat
+2016-05-23 11:09:34: Set parameter SessionStamp to 2016-05-23-11-09
+2016-05-23 11:09:34: Set parameter TriggerExpression to 
+2016-05-23 11:09:34: Set parameter SubjectName to axe
+2016-05-23 11:09:34: Set parameter LookForward to 500ms
+2016-05-23 11:09:34: Set parameter DataFile to ${SubjectName}/${SubjectName}-${SessionStamp}/${SubjectName}-${SessionStamp}-R${SubjectRun}-${ApplicationMode}.${FileFormat}
+2016-05-23 11:09:34: Set parameter LookBack to 100ms
+2016-05-23 11:09:34: Set parameter BackgroundSegmentDuration to 200ms
+2016-05-23 11:09:34: Set parameter ApplicationMode to ST
+2016-05-23 11:09:34: Set parameter BackgroundChannels
+2016-05-23 11:09:34: Set parameter ResponseDefinition
+2016-05-23 11:09:34: Set parameter ResponseAssessment
+2016-05-23 11:09:34: Set parameter MinTimeBetweenTriggers to 3s
+2016-05-23 11:09:34: Set parameter BackgroundHoldDuration to 0
+2016-05-23 11:09:34: Set parameter MaxRandomExtraHoldDuration to 0
+2016-05-23 11:09:34: Set parameter TriggerExpression to 
+2016-05-23 11:09:34: Set parameter FeedbackTimeConstant to 200ms
+2016-05-23 11:09:34: Set parameter BackgroundScaleLimit to 23mV
+2016-05-23 11:09:34: Set parameter ResponseScaleLimit to 50mV
+2016-05-23 11:09:34: Set parameter BaselineResponseLevel to %
+2016-05-23 11:09:34: Set parameter SharedMemoryOutput to file://epocs.mmap
+2016-05-23 11:09:34: Set parameter OutputExpressions
+2016-05-23 11:28:59: Executed "taskkill /F /FI "IMAGENAME eq NIDAQ_mx_Source.exe""
+2016-05-23 11:29:00: Executed "taskkill /F /FI "IMAGENAME eq FilePlayback.exe""
+2016-05-23 11:29:00: Executed "taskkill /F /FI "IMAGENAME eq ReflexConditioningSignalProcessing.exe""
+2016-05-23 11:29:00: Operator shut down connections
+2016-05-23 11:29:00: Executed "taskkill /F /FI "IMAGENAME eq DummyApplication.exe""
+2016-05-23 11:29:00: BCI2000 Started
+2016-05-23 11:29:00: Started "NIDAQ_mx_Source"
+2016-05-23 11:29:01: Source: Waiting for configuration ...
+2016-05-23 11:29:01: Started "ReflexConditioningSignalProcessing"
+2016-05-23 11:29:01: Started "DummyApplication"
+2016-05-23 11:29:01: Added parameter to list: SessionStamp
+2016-05-23 11:29:01: Added parameter to list: ApplicationMode
+2016-05-23 11:29:01: Added parameter to list: BackgroundScaleLimit
+2016-05-23 11:29:01: Added parameter to list: ResponseScaleLimit
+2016-05-23 11:29:01: Added parameter to list: BaselineResponseLevel
+2016-05-23 11:29:01: Application: Waiting for configuration ...
+2016-05-23 11:29:01: SignalProcessing: Waiting for configuration ...
+2016-05-23 11:29:01: Loaded parameter file "C:\Users\HR18163admin\PycharmProjects\EPOCS_amir\app\prog\../parms/base-nidaqmx.prm"
+2016-05-23 11:29:01: Set parameter OutputMode to 0
+2016-05-23 11:29:01: Set parameter DataDirectory to ../../data
+2016-05-23 11:29:01: Set parameter SubjectRun to 01
+2016-05-23 11:29:01: Set parameter FileFormat to dat
+2016-05-23 11:29:01: Set parameter SessionStamp to 2016-05-23-11-28
+2016-05-23 11:29:01: Set parameter TriggerExpression to 
+2016-05-23 11:29:01: Set parameter SubjectName to axe
+2016-05-23 11:29:01: Set parameter LookForward to 500ms
+2016-05-23 11:29:01: Set parameter DataFile to ${SubjectName}/${SubjectName}-${SessionStamp}/${SubjectName}-${SessionStamp}-R${SubjectRun}-${ApplicationMode}.${FileFormat}
+2016-05-23 11:29:01: Set parameter LookBack to 100ms
+2016-05-23 11:29:01: Set parameter BackgroundSegmentDuration to 200ms
+2016-05-23 11:29:01: Set parameter ApplicationMode to ST
+2016-05-23 11:29:01: Set parameter BackgroundChannels
+2016-05-23 11:29:01: Set parameter ResponseDefinition
+2016-05-23 11:29:01: Set parameter ResponseAssessment
+2016-05-23 11:29:01: Set parameter MinTimeBetweenTriggers to 3s
+2016-05-23 11:29:01: Set parameter BackgroundHoldDuration to 0
+2016-05-23 11:29:01: Set parameter MaxRandomExtraHoldDuration to 0
+2016-05-23 11:29:01: Set parameter TriggerExpression to 
+2016-05-23 11:29:01: Set parameter FeedbackTimeConstant to 200ms
+2016-05-23 11:29:01: Set parameter BackgroundScaleLimit to 23mV
+2016-05-23 11:29:01: Set parameter ResponseScaleLimit to 50mV
+2016-05-23 11:29:01: Set parameter BaselineResponseLevel to %
+2016-05-23 11:29:01: Set parameter SharedMemoryOutput to file://epocs.mmap
+2016-05-23 11:29:01: Set parameter OutputExpressions
+2016-05-23 11:29:10: Operator shut down connections

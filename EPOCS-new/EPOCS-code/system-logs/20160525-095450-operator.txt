@@ -1,0 +1,66 @@
+2016-05-25 09:54:53: BCI2000 Started
+2016-05-25 09:54:54: Started "NIDAQ_mx_Source"
+2016-05-25 09:54:55: Source: Waiting for configuration ...
+2016-05-25 09:54:55: Started "ReflexConditioningSignalProcessing"
+2016-05-25 09:54:55: Started "DummyApplication"
+2016-05-25 09:54:55: Added parameter to list: SessionStamp
+2016-05-25 09:54:55: Added parameter to list: ApplicationMode
+2016-05-25 09:54:55: Added parameter to list: BackgroundScaleLimit
+2016-05-25 09:54:55: Added parameter to list: ResponseScaleLimit
+2016-05-25 09:54:55: Added parameter to list: BaselineResponseLevel
+2016-05-25 09:54:55: SignalProcessing: Waiting for configuration ...
+2016-05-25 09:54:55: Application: Waiting for configuration ...
+2016-05-25 09:54:55: Loaded parameter file "C:\Users\HR18163admin\PycharmProjects\EPOCS_amir\app\prog\../parms/base-nidaqmx.prm"
+2016-05-25 09:54:55: Set parameter OutputMode to 0
+2016-05-25 09:54:55: Set parameter DataDirectory to ../../data
+2016-05-25 09:54:55: Set parameter SubjectRun to 01
+2016-05-25 09:54:55: Set parameter FileFormat to dat
+2016-05-25 09:54:55: Set parameter SessionStamp to 2016-05-25-09-54
+2016-05-25 09:54:55: Set parameter TriggerExpression to 
+2016-05-25 09:54:55: Set parameter SubjectName to axe
+2016-05-25 09:54:55: Set parameter LookForward to 500ms
+2016-05-25 09:54:55: Set parameter DataFile to ${SubjectName}/${SubjectName}-${SessionStamp}/${SubjectName}-${SessionStamp}-R${SubjectRun}-${ApplicationMode}.${FileFormat}
+2016-05-25 09:54:55: Set parameter LookBack to 100ms
+2016-05-25 09:54:55: Set parameter BackgroundSegmentDuration to 200ms
+2016-05-25 09:54:55: Set parameter ApplicationMode to ST
+2016-05-25 09:54:55: Set parameter BackgroundChannels
+2016-05-25 09:54:55: Set parameter ResponseDefinition
+2016-05-25 09:54:55: Set parameter ResponseAssessment
+2016-05-25 09:54:55: Set parameter MinTimeBetweenTriggers to 3s
+2016-05-25 09:54:55: Set parameter BackgroundHoldDuration to 0
+2016-05-25 09:54:55: Set parameter MaxRandomExtraHoldDuration to 0
+2016-05-25 09:54:55: Set parameter TriggerExpression to 
+2016-05-25 09:54:55: Set parameter FeedbackTimeConstant to 200ms
+2016-05-25 09:54:55: Set parameter BackgroundScaleLimit to 23mV
+2016-05-25 09:54:55: Set parameter ResponseScaleLimit to 50mV
+2016-05-25 09:54:55: Set parameter BaselineResponseLevel to %
+2016-05-25 09:54:55: Set parameter SharedMemoryOutput to file://epocs.mmap
+2016-05-25 09:54:55: Set parameter OutputExpressions
+2016-05-25 09:55:06: Set parameter DataDirectory to ../../data
+2016-05-25 09:55:06: Set parameter SubjectRun to 01
+2016-05-25 09:55:06: Set parameter FileFormat to dat
+2016-05-25 09:55:06: Set parameter SessionStamp to 2016-05-25-09-54
+2016-05-25 09:55:06: Set parameter TriggerExpression to 
+2016-05-25 09:55:06: Set parameter SubjectName to axe
+2016-05-25 09:55:06: Set parameter LookForward to 500ms
+2016-05-25 09:55:06: Set parameter DataFile to ${SubjectName}/${SubjectName}-${SessionStamp}/${SubjectName}-${SessionStamp}-R${SubjectRun}-${ApplicationMode}.${FileFormat}
+2016-05-25 09:55:06: Set parameter LookBack to 100ms
+2016-05-25 09:55:06: Set parameter BackgroundSegmentDuration to 200ms
+2016-05-25 09:55:06: Set parameter ApplicationMode to CT
+2016-05-25 09:55:06: Set parameter BackgroundChannels
+2016-05-25 09:55:06: Set parameter ResponseDefinition
+2016-05-25 09:55:06: Set parameter ResponseAssessment
+2016-05-25 09:55:06: Set parameter MinTimeBetweenTriggers to 5s
+2016-05-25 09:55:06: Set parameter BackgroundHoldDuration to 2s
+2016-05-25 09:55:06: Set parameter MaxRandomExtraHoldDuration to 0s
+2016-05-25 09:55:06: Set parameter TriggerExpression to 
+2016-05-25 09:55:06: Set parameter FeedbackTimeConstant to 200ms
+2016-05-25 09:55:06: Set parameter BackgroundScaleLimit to 23mV
+2016-05-25 09:55:06: Set parameter ResponseScaleLimit to 50mV
+2016-05-25 09:55:06: Set parameter BaselineResponseLevel to %
+2016-05-25 09:55:06: Set parameter SharedMemoryOutput to file://epocs.mmap
+2016-05-25 09:55:06: Set parameter OutputExpressions
+2016-05-25 09:55:06: Operator set configuration
+2016-05-25 09:55:06: Error: [Source] DataIOFilter::Preflight: NIADC::Preflight: Board number 1 not present.
+2016-05-25 09:55:06: Error: [Source] DataIOFilter::Preflight: NIADC::Preflight: or does not support DAQmx driver ver 8.0.
+2016-05-25 09:55:18: Operator shut down connections

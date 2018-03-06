@@ -1,0 +1,105 @@
+2017-12-11 09:28:31: BCI2000 Started
+2017-12-11 09:28:31: Started "NIDAQ_mx_Source"
+2017-12-11 09:28:31: SignalSource: Waiting for configuration ...
+2017-12-11 09:28:32: Started "aReflexConditioningSignalProcessing"
+2017-12-11 09:28:32: Started "DummyApplication"
+2017-12-11 09:28:32: Added parameter to list: SessionStamp
+2017-12-11 09:28:32: Added parameter to list: ApplicationMode
+2017-12-11 09:28:32: Added parameter to list: BackgroundScaleLimit
+2017-12-11 09:28:32: Added parameter to list: ResponseScaleLimit
+2017-12-11 09:28:32: Added parameter to list: BaselineResponseLevel
+2017-12-11 09:28:32: Application: Waiting for configuration ...
+2017-12-11 09:28:32: SignalProcessing: Waiting for configuration ...
+2017-12-11 09:28:32: Loaded parameter file "C:/Users/HR18163admin/PycharmProjects/aEPOCS_LabVersion_v3/app/parms/base-nidaqmx.prm"
+2017-12-11 09:28:32: Loaded parameter file "C:/Users/HR18163admin/PycharmProjects/aEPOCS_LabVersion_v3/app/parms/NIDigitalOutputPort.prm"
+2017-12-11 09:28:32: Set parameter OutputMode to 0
+2017-12-11 09:28:32: Set parameter SubjectRun to 02
+2017-12-11 09:28:32: Set parameter FileFormat to dat
+2017-12-11 09:28:32: Set parameter SessionStamp to 2017-12-11-09-27
+2017-12-11 09:28:32: Set parameter TriggerExpression to 
+2017-12-11 09:28:32: Set parameter SubjectName to test
+2017-12-11 09:28:32: Set parameter DataDirectory to ../../data
+2017-12-11 09:28:32: Set parameter DataFile to ${SubjectName}/${SubjectName}-${SessionStamp}/${SubjectName}-${SessionStamp}-R${SubjectRun}-${ApplicationMode}.${FileFormat}
+2017-12-11 09:28:32: Set parameter LookBack to 100ms
+2017-12-11 09:28:32: Set parameter BackgroundSegmentDuration to 200ms
+2017-12-11 09:28:32: Set parameter ApplicationMode to ST
+2017-12-11 09:28:32: Set parameter LookForward to 500ms
+2017-12-11 09:28:32: Set parameter BackgroundChannels
+2017-12-11 09:28:32: Set parameter ResponseDefinition
+2017-12-11 09:28:32: Set parameter ResponseAssessment
+2017-12-11 09:28:32: Set parameter ReferenceAssessment
+2017-12-11 09:28:32: Set parameter MinTimeBetweenTriggers to 3s
+2017-12-11 09:28:32: Set parameter BackgroundHoldDuration to 0
+2017-12-11 09:28:32: Set parameter MaxRandomExtraHoldDuration to 0
+2017-12-11 09:28:32: Set parameter TriggerExpression to 
+2017-12-11 09:28:32: Set parameter FeedbackTimeConstant to 200ms
+2017-12-11 09:28:32: Set parameter BackgroundScaleLimit to 23mV
+2017-12-11 09:28:32: Set parameter ResponseScaleLimit to 50mV
+2017-12-11 09:28:32: Set parameter BaselineResponseLevel to %
+2017-12-11 09:28:32: Set parameter SharedMemoryOutput to file://epocs.mmap
+2017-12-11 09:28:32: Set parameter OutputExpressions
+2017-12-11 09:28:36: Set parameter AnalysisType to 1
+2017-12-11 09:28:36: Set parameter InitialCurrent to 1.0
+2017-12-11 09:28:36: Set parameter SubjectRun to 02
+2017-12-11 09:28:36: Set parameter FileFormat to dat
+2017-12-11 09:28:36: Set parameter SessionStamp to 2017-12-11-09-27
+2017-12-11 09:28:36: Set parameter TriggerExpression to 
+2017-12-11 09:28:36: Set parameter SubjectName to test
+2017-12-11 09:28:36: Set parameter DataDirectory to ../../data
+2017-12-11 09:28:36: Set parameter DataFile to ${SubjectName}/${SubjectName}-${SessionStamp}/${SubjectName}-${SessionStamp}-R${SubjectRun}-${ApplicationMode}.${FileFormat}
+2017-12-11 09:28:36: Set parameter LookBack to 100ms
+2017-12-11 09:28:36: Set parameter BackgroundSegmentDuration to 200ms
+2017-12-11 09:28:36: Set parameter ApplicationMode to ST
+2017-12-11 09:28:36: Set parameter LookForward to 500ms
+2017-12-11 09:28:36: Set parameter BackgroundChannels
+2017-12-11 09:28:36: Set parameter ResponseDefinition
+2017-12-11 09:28:36: Set parameter ResponseAssessment
+2017-12-11 09:28:36: Set parameter ReferenceAssessment
+2017-12-11 09:28:36: Set parameter MinTimeBetweenTriggers to 3s
+2017-12-11 09:28:36: Set parameter BackgroundHoldDuration to 0
+2017-12-11 09:28:36: Set parameter MaxRandomExtraHoldDuration to 0
+2017-12-11 09:28:36: Set parameter TriggerExpression to 
+2017-12-11 09:28:36: Set parameter FeedbackTimeConstant to 200ms
+2017-12-11 09:28:36: Set parameter BackgroundScaleLimit to 23mV
+2017-12-11 09:28:36: Set parameter ResponseScaleLimit to 50mV
+2017-12-11 09:28:36: Set parameter BaselineResponseLevel to %
+2017-12-11 09:28:36: Set parameter SharedMemoryOutput to file://epocs.mmap
+2017-12-11 09:28:36: Set parameter OutputExpressions
+2017-12-11 09:28:36: Operator set configuration
+2017-12-11 09:28:38: SignalSource: NIDAQ_mx_Source initialized
+2017-12-11 09:28:39: Application: DummyApplication initialized
+2017-12-11 09:28:39: [SignalProcessing] NIDAQFilterAO::Initialize: nDigital: 1.
+2017-12-11 09:28:39: SignalProcessing: AReflexConditioningSignalProcessing initialized
+2017-12-11 09:28:39: Operator started operation
+2017-12-11 09:28:39: Set state Running to 1
+2017-12-11 09:28:39: SignalSource: NIDAQ_mx_Source running
+2017-12-11 09:28:39: SignalProcessing: AReflexConditioningSignalProcessing running
+2017-12-11 09:28:39: Application: DummyApplication running
+2017-12-11 09:28:42: [SignalProcessing] BackgroundTriggerFilter::Process: Trigger enabled after evaluating sample 9728.
+2017-12-11 09:28:43: [SignalProcessing] TrapFilter::Process: Trigger detected on sample 9734.
+2017-12-11 09:28:46: [SignalProcessing] BackgroundTriggerFilter::Process: Trigger enabled after evaluating sample 19456.
+2017-12-11 09:28:46: [SignalProcessing] TrapFilter::Process: Trigger detected on sample 19463.
+2017-12-11 09:28:47: Set state CurrentAmplitude to 1500
+2017-12-11 09:28:47: Set state NeedsUpdating to 1
+2017-12-11 09:28:47: Warning: [SignalProcessing] DS5ControlFilter::Process: Current15.
+2017-12-11 09:28:47: Set state CurrentAmplitude to 2000
+2017-12-11 09:28:47: Set state NeedsUpdating to 1
+2017-12-11 09:28:47: Warning: [SignalProcessing] DS5ControlFilter::Process: Current15. (20 times)
+2017-12-11 09:28:47: Warning: [SignalProcessing] DS5ControlFilter::Process: Current20.
+2017-12-11 09:28:48: Warning: [SignalProcessing] DS5ControlFilter::Process: Current20. (twice)
+2017-12-11 09:28:48: Set state CurrentAmplitude to 2500
+2017-12-11 09:28:48: Set state NeedsUpdating to 1
+2017-12-11 09:28:48: Warning: [SignalProcessing] DS5ControlFilter::Process: Current20. (14 times)
+2017-12-11 09:28:48: Warning: [SignalProcessing] DS5ControlFilter::Process: Current25.
+2017-12-11 09:28:49: Warning: [SignalProcessing] DS5ControlFilter::Process: Current25. (10 times)
+2017-12-11 09:28:49: [SignalProcessing] BackgroundTriggerFilter::Process: Trigger enabled after evaluating sample 29184.
+2017-12-11 09:28:49: Warning: [SignalProcessing] DS5ControlFilter::Process: Current25. (twice)
+2017-12-11 09:28:49: [SignalProcessing] TrapFilter::Process: Trigger detected on sample 29195.
+2017-12-11 09:28:49: Operation suspended
+2017-12-11 09:28:49: Set state Running to 0
+2017-12-11 09:28:49: Set parameter InitialCurrent to 0
+2017-12-11 09:28:49: Application: DummyApplication suspended
+2017-12-11 09:28:49: SignalSource: NIDAQ_mx_Source suspended
+2017-12-11 09:28:49: Warning: [SignalProcessing] DS5ControlFilter::Process: Current25. (17 times)
+2017-12-11 09:28:49: SignalProcessing: AReflexConditioningSignalProcessing suspended
+2017-12-11 09:28:52: Operator shut down connections

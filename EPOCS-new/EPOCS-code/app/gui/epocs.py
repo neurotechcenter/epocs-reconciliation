@@ -115,39 +115,39 @@ try:
 except:
     pass
 
+from DependantClasses.DS5LibClass import DS5LibClass as DS5LibClass
+
+try:
+    from DependantClasses import CurrentControl as CurrentControl
+except:
+    pass
+
+EPOCSVERSION = 1.1
+EPOCSVERSIONDATE = "3-6-18"
+
 #del spam, spam_info
 #This calls CoreFunctions so no need to do import it
 from DependantClasses.CoreGUIcomponents import *
+#
+# def LoadPackages(parent):
+#
+#     import tkMessageBox
+#
+#     # Load StimGUI if package installed
+#     try:
+#         spam_info = imp.find_module('DependantClasses')
+#         spam = imp.load_module('DependantClasses',*spam_info)
+#         imp.find_module('CurrentControl',spam.__path__)
+#         del spam, spam_info
+#         found = True
+#     except:
+#         found = False
+#         tkMessageBox.showinfo('Packages','Packages not found!')
+#
+#     if found:
+#         from DependantClasses import CurrentControl as CurrentControl
+#         parent.stimGUI = CurrentControl.CurrentControlWindow(parent=parent)
 
-def LoadPackages(parent):
-
-    # Load StimGUI if package installed
-    try:
-        spam_info = imp.find_module('DependantClasses')
-        spam = imp.load_module('DependantClasses',*spam_info)
-        imp.find_module('CurrentControl',spam.__path__)
-        del spam, spam_info
-        found = True
-    except:
-        found = False
-
-    if found:
-        from DependantClasses import CurrentControl as CurrentControl
-        parent.stimGUI = CurrentControl.CurrentControlWindow(parent=parent)
-
-    # try:
-    #     spam_info = imp.find_module('DependantClasses')
-    #     spam = imp.load_module('DependantClasses', *spam_info)
-    #     imp.find_module('MwaveAnalysisClass', spam.__path__)
-    #     found = True
-    # except:
-    #     found = False
-    #
-    # if found:
-    #
-    #     self.mwaveGUI = MWaveAnalysisWindow(parent=self, mode=code, operator=self.operator)
-
-#### Operator class
 
 class Operator( object ):
     """
@@ -232,6 +232,8 @@ class Operator( object ):
             _IncrementStart = 0.5,
             _IncrementIncrement=0.25,
             _CurrentLimit=50,
+            _DigitimerEnable='on',
+            _DigitimerSelect='DS8',
         )
         self.remote = None
 
@@ -402,7 +404,9 @@ class Operator( object ):
         logfile = os.path.join( self.DataDirectory(), '%s-%s-log.txt' % ( self.params.SubjectName, self.params.SessionStamp ) )
         if autoCreate and not os.path.isfile( logfile ):
             f = open( MakeWayFor( logfile ), 'at' )
-            f.write( 'Patient Code: %s\nSession Code: %s\n\n' % ( self.params.SubjectName, self.params.SessionStamp ) )
+            # Add EPOCS version number here
+            f.write('EPOCS version: %s (date: %s)\n' % (str(EPOCSVERSION), str(EPOCSVERSIONDATE)))
+            f.write( 'Patient Code: %s\nSession Code: %s\n' % ( self.params.SubjectName, self.params.SessionStamp ) )
             f.close()
         return logfile
 
@@ -784,9 +788,14 @@ class GUI( tksuperclass, TkMPL ):
         self.operator.Launch()
         self.operator.SetConfig( work_around_bci2000_bug=True )
         self.GetSignalParameters()
+        self.SetupDigitimer()
 
         # Load Modules/Packages
-        LoadPackages(parent=self)
+        #LoadPackages(parent=self)
+        try:
+            self.stimGUI = CurrentControl.CurrentControlWindow(parent=self)
+        except:
+            pass
 
         # From here on: configure the GUI
         self.MakeNotebook().pack( expand=1, fill='both', padx=5, pady=5 ,side='top' )
@@ -927,6 +936,13 @@ class GUI( tksuperclass, TkMPL ):
         One run = one BCI2000 .dat file.
         """
         self.SetAutomatedParameters(mode=mode)
+        if hasattr(self,'DS5') and (self.DigitimerEnabled == 'on') and (self.DigitimerSelection == 'DS5'):
+            self.DS5.CheckDS5Connected()
+            if self.DS5.DS5init:
+                self.DS5.AutoZero()
+                self.DS5.ToggleOutput(OnOff=True)
+            else:
+                return
 
         self.run = 'R%02d' % self.operator.NextRunNumber() # must query this *before* starting the run
         self.operator.Start( mode.upper() )
@@ -968,6 +984,15 @@ class GUI( tksuperclass, TkMPL ):
         """
         Stop the current run, if any, closing the associated BCI2000 .dat file.
         """
+
+        if hasattr(self, 'DS5') and (self.DigitimerEnabled == 'on') and (self.DigitimerSelection == 'DS5'):
+            self.DS5.ToggleOutput(OnOff=False)
+
+        if (mode in 'st') and hasattr(self,'stimGUI'):
+            self.stimGUI.SetNewCurrent(value=0)
+            self.stimGUI.currentlabeltxt.set('0.0mA')
+            self.stimGUI.CurrentAmplitude = 0
+
         self.mode = mode
         self.operator.Stop()
         self.EnableTab( 'all' )
@@ -982,10 +1007,7 @@ class GUI( tksuperclass, TkMPL ):
         self.mode = None
         self.run = None
         self.MwaveMagMean = 0; self.HwaveMagMean = 0; self.MwaveMag = []; self.HwaveMag = []; self.SignalAvg = []
-        if (mode in 'st') and hasattr(self,'stimGUI'):
-            self.stimGUI.SetNewCurrent(value=0)
-            self.stimGUI.currentlabeltxt.set('0.0mA')
-            self.stimGUI.CurrentAmplitude = 0
+
 
     def UpdateMwaveGUI(self, mode):
 
@@ -1115,6 +1137,33 @@ class GUI( tksuperclass, TkMPL ):
             self.stimGUI.incrementlabel['increment'] = str(self.operator.params._IncrementIncrement)
             self.stimGUI.CurrentLimit = self.operator.params._CurrentLimit
 
+    def SetupDigitimer(self):
+        import tkMessageBox
+        #DS5 = bool(self.operator.remote.GetParameter('EnableDS5ControlFilter'))
+        #DS8 = bool(self.operator.remote.GetParameter('EnableDS8ControlFilter'))
+
+        self.DigitimerEnabled = self.operator.params._DigitimerEnable
+        self.DigitimerSelection = self.operator.params._DigitimerSelect
+
+        if self.DigitimerEnabled == 'on':
+            # Also check if the user has run NIAnalogOutput
+            DigitimerSetup = os.path.isfile('../parms/NIDigitalOutputPort.prm')
+            #TODO: Check that the parameter file first line actually contains a valid digital and anlog setting.
+            if not DigitimerSetup:
+                tkMessageBox.showinfo('DS5/DS8', 'You have not run app\NIDevicesAO.bat. If using DS5 please also run NIDevicesAO.')
+            if self.DigitimerSelection == 'DS5':
+                self.operator.bci2000('set parameter EnableDS5ControlFilter 1')
+                self.operator.bci2000('set parameter AnalogOutput 1')
+                self.operator.bci2000('set parameter EnableDS8ControlFilter 0')
+                self.DS5 = DS5LibClass(DS5_BCI2000_parameter=True)
+            if self.DigitimerSelection == 'DS8':
+                self.operator.bci2000('set parameter EnableDS8ControlFilter 1')
+                self.operator.bci2000('set parameter EnableDS5ControlFilter 0')
+                self.operator.bci2000('set parameter AnalogOutput 0')
+        else:
+            self.operator.bci2000('set parameter EnableDS5ControlFilter 0')
+            self.operator.bci2000('set parameter AnalogOutput 0')
+            self.operator.bci2000('set parameter EnableDS8ControlFilter 0')
 
     def SettingsFrame( self, code, settings=True, analysis=True ):
         """
@@ -1172,7 +1221,8 @@ class GUI( tksuperclass, TkMPL ):
             Cbutton.pack(side='left', ipadx=20, padx=2, pady=2)
 
             DS5 = int(self.operator.remote.GetParameter('EnableDS5ControlFilter'))
-            if DS5 == 0:
+            DS8 = int(self.operator.remote.GetParameter('EnableDS8ControlFilter'))
+            if (DS5 == 0) and (DS8 == 0):
                 Cbutton.config(state='disabled')
 
         if DEVEL and code in [ 'vc', 'rc', 'ct', 'tt' ]:
@@ -2348,6 +2398,7 @@ class SettingsWindow( Dialog, TkMPL ):
     """
     def __init__( self, parent, mode ):
         self.mode = mode
+        self.parent = parent
         TkMPL.__init__( self )
         Dialog.__init__( self, parent=parent, title='Settings', icon=os.path.join( GUIDIR, 'epocs.ico' ) )
 
@@ -2491,9 +2542,24 @@ class SettingsWindow( Dialog, TkMPL ):
         section = tkinter.LabelFrame(Stimframe, text='Stimulation Current Step Control', bg=bg)
         subsection = tkinter.Frame(section, bg=bg)
         state = {True: 'normal', False: 'disabled'}[int(self.parent.operator.remote.GetParameter('EnableDS5ControlFilter'))==1 and hasattr(self.parent,'stimGUI')]
-        self.widgets.entry_IncrementStart = LabelledEntry(subsection, 'Step Start: ').connect(params,'_IncrementStart').enable(state).pack(side='left', padx=3)
+        self.widgets.entry_IncrementStart = LabelledEntry(subsection, 'Step Start: ').connect(params,'_IncrementStart').enable(True).pack(side='left', padx=3)
         self.widgets.entry_IncrementIncrement = LabelledEntry(subsection, 'Step Increment: ').connect(params,'_IncrementIncrement').enable(state).pack(side='left', padx=3)
         self.widgets.entry_CurrentLimit = LabelledEntry(subsection, 'Current Limit (mA): ').connect(params,'_CurrentLimit').enable(state).pack(side='bottom', padx=3)
+        subsection.pack(fill='x', padx=10, pady=10)
+        section.pack(side='top', pady=10, padx=10, fill='both')
+
+
+        # Switch that enables Digitimer DS8 or DS5, disabled if parameters are disabled
+        section = tkinter.LabelFrame(Stimframe, text='Digitimer Control panel', bg=bg)
+        subsection = tkinter.Frame(section, bg=bg)
+        DS5 = bool(self.parent.operator.remote.GetParameter('EnableDS5ControlFilter'))
+        DS8 = bool(self.parent.operator.remote.GetParameter('EnableDS8ControlFilter'))
+        state = {True: 'normal', False: 'disabled'}[DS5 or DS8]
+        self.widgets.switch_DigitimerEnable = Switch(subsection, title='Digitimer Enable:', offLabel='ON', onLabel='OFF',
+                                               values=['on', 'off'], initialValue='on').connect(params,'_DigitimerEnable').enable('normal').pack(side='left', padx=10, pady=10)
+
+        self.widgets.switch_DigitimerSelect = Switch(subsection, title='DS5/DS8:', offLabel='DS5', onLabel='DS8',
+                                                    values=['DS5', 'DS8'], initialValue='DS5').connect(params,'_DigitimerSelect').enable(state).pack(side='left', padx=10, pady=10)
 
         subsection.pack(fill='x', padx=10, pady=10)
         section.pack(side='top', pady=10, padx=10, fill='both')
@@ -2503,8 +2569,8 @@ class SettingsWindow( Dialog, TkMPL ):
         Stimframe.pack(side='top', padx=2, pady=2, fill='both', expand=1)
         w1 = self.widgets.label_message = tkinter.Label(EMGframe, text='', bg=bg)
         w2 = self.widgets.label_message = tkinter.Label(Stimframe, text='', bg=bg)
-        w1.pack(ipadx=10, ipady=10);
-        w2.pack(ipadx=10, ipady=10);
+        w1.pack(ipadx=10, ipady=10)
+        w2.pack(ipadx=10, ipady=10)
 
     def mark( self, widgets, good=False, msg=None, color='#FF6666' ):
         if not isinstance( widgets, ( tuple, list ) ): widgets = [ widgets ]
@@ -2618,6 +2684,7 @@ class SettingsWindow( Dialog, TkMPL ):
         self.parent.SetTargets(   'vc', 'rc', 'ct', 'tt' )
         self.parent.SetTrialCount('ct','tt')
         self.parent.SetIncrement()
+        self.parent.SetupDigitimer()
         self.parent.DrawFigures()
 
 #class SubjectChooser( Dialog, TkMPL ):
@@ -2721,6 +2788,7 @@ class OfflineAnalysis( object ):
     instance (for managing settings) and an AnalysisWindow() instance, which will call
     methods of that Operator.
     """
+
     def __init__( self, data='ExampleData.pk', mode='tt' ):
 
         if isinstance( data, basestring ) and data.lower().endswith( '.pk' ):
@@ -2859,6 +2927,7 @@ class OfflineAnalysis( object ):
         return s
 
     def OpenFiles( self, filenames=None, **kwargs ):
+        import numpy
         if filenames == None:
             import tkFileDialog
             filenames = tkFileDialog.askopenfilenames( initialdir=self.initialdir, title="Select one or more data files", filetypes=[ ( "BCI2000 .dat file" , ".dat" ) , ( "All files" , ".*" ) ] )
@@ -2874,8 +2943,12 @@ class OfflineAnalysis( object ):
             filenames = sorted( filenames )
         if not filenames: return
         objs = [ self.ReadDatFile( filename, **kwargs ) for filename in filenames ]
-        objs = [ obj for obj in objs if len( obj.Epochs.Data ) ] # TODO: seems to exclude VC files
-        if len( objs ) == 0:
+
+        if objs[0].ImportantParameters['ApplicationMode'] == 'vc':
+            objs = [obj for obj in objs]
+        else:
+            objs = [ obj for obj in objs if len( obj.Epochs.Data ) ] # TODO: seems to exclude VC files
+        if (len( objs ) == 0):
             print '\nFound no trials.'
             import tkMessageBox; tkMessageBox.showerror( "EPOCS Offline Analysis", '\n   '.join( [ "No trials found after scanning the following:" ] + filenames ) )
             return
@@ -2919,15 +2992,19 @@ class OfflineAnalysis( object ):
         self.fs = float( unique.SamplingRate[ 0 ] )
         self.sbs = float( unique.SampleBlockSize[ 0 ] )
         self.lookback = float( unique.LookBack[ 0 ] )
-        data = reduce( list.__add__, [ obj.Epochs.Data for obj in objs ] )
+        if self.mode not in 'vc': data = reduce( list.__add__, [ obj.Epochs.Data for obj in objs ] )
+        else:
+            data = objs[0].States.BackgroundFeedbackValue / 1e6
+            data = data.tolist()
+
         self.data = { self.mode : data }
         self.GetCurrents(objs)
         window = self.Go()
         return window
 
     def GetCurrents(self,objs,mode=None):
-        #If using the Digitimer stimulator, we have the currents used to pass to AnalysisWindow()
         import numpy
+        #If using the Digitimer stimulator, we have the currents used to pass to AnalysisWindow()
         try:
             locs = numpy.where(numpy.diff(objs[0].States.TrialsCompleted) > 0)
             Currents = objs[0].States.CurrentAmplitude[locs]
@@ -2999,7 +3076,6 @@ if __name__ == '__main__':
     #self = OfflineAnalysis()
     #window = self.OpenFiles()
     #if window: window.wait_window()
-
 
     if '--offline' in opts:
         self = OfflineAnalysis()

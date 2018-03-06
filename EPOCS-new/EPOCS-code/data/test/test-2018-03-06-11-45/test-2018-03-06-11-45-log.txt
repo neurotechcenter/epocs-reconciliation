@@ -1,0 +1,8 @@
+Patient Code: test
+Session Code: 2018-03-06-11-45
+
+ EPOCS version: 1.1, Version date: 3-6-18
+
+
+2018-03-06  11:45       Started run R01 (Stimulus Test)
+2018-03-06  11:45       Stopped run R01 after 1 trials

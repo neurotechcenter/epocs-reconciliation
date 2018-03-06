@@ -1,0 +1,12 @@
+Traceback (most recent call last):
+  File "epocs.py", line 5746, in <module>
+    self = GUI()
+  File "epocs.py", line 2008, in __init__
+    self.GetSignalParameters()
+  File "epocs.py", line 2120, in GetSignalParameters
+    self.fs = float( self.operator.remote.GetParameter( 'SamplingRate' ).lower().strip( 'hz' ) )
+  File "C:\Users\HR18163admin\PycharmProjects\aEPOCS_LabVersion_v2\app\prog\BCI2000Remote.py", line 212, in GetParameter
+    return self._get_string_result( self._lib.BCI2000Remote_GetParameter, ctypes.c_char_p( name ) )
+  File "C:\Users\HR18163admin\PycharmProjects\aEPOCS_LabVersion_v2\app\prog\BCI2000Remote.py", line 270, in _get_string_result
+    raise self._object_error               
+RuntimeError: Could not get BCI2000 object

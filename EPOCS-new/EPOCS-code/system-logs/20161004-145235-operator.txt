@@ -1,0 +1,111 @@
+2016-10-04 14:52:39: BCI2000 Started
+2016-10-04 14:52:39: Started "NIDAQ_mx_Source"
+2016-10-04 14:52:39: SignalSource: Waiting for configuration ...
+2016-10-04 14:52:39: Started "aReflexConditioningSignalProcessing"
+2016-10-04 14:52:39: SignalProcessing: Waiting for configuration ...
+2016-10-04 14:52:39: Started "DummyApplication"
+2016-10-04 14:52:39: Set parameter BoardNumber to 2
+2016-10-04 14:52:39: Added parameter to list: SessionStamp
+2016-10-04 14:52:39: Added parameter to list: ApplicationMode
+2016-10-04 14:52:39: Added parameter to list: BackgroundScaleLimit
+2016-10-04 14:52:39: Added parameter to list: ResponseScaleLimit
+2016-10-04 14:52:39: Added parameter to list: BaselineResponseLevel
+2016-10-04 14:52:39: Application: Waiting for configuration ...
+2016-10-04 14:52:39: Loaded parameter file "C:\Users\HR18163admin\PycharmProjects\aEPOCS\app\prog\../parms/base-nidaqmx.prm"
+2016-10-04 14:52:39: Set parameter OutputMode to 0
+2016-10-04 14:52:39: Set parameter SubjectRun to 13
+2016-10-04 14:52:39: Set parameter FileFormat to dat
+2016-10-04 14:52:39: Set parameter SessionStamp to 2016-10-04-14-19
+2016-10-04 14:52:39: Set parameter TriggerExpression to 
+2016-10-04 14:52:39: Set parameter SubjectName to test
+2016-10-04 14:52:39: Set parameter DataDirectory to ../../data
+2016-10-04 14:52:39: Set parameter DataFile to ${SubjectName}/${SubjectName}-${SessionStamp}/${SubjectName}-${SessionStamp}-R${SubjectRun}-${ApplicationMode}.${FileFormat}
+2016-10-04 14:52:39: Set parameter LookBack to 100ms
+2016-10-04 14:52:39: Set parameter BackgroundSegmentDuration to 200ms
+2016-10-04 14:52:39: Set parameter ApplicationMode to ST
+2016-10-04 14:52:39: Set parameter LookForward to 500ms
+2016-10-04 14:52:39: Set parameter BackgroundChannels
+2016-10-04 14:52:39: Set parameter ResponseDefinition
+2016-10-04 14:52:39: Set parameter ResponseAssessment
+2016-10-04 14:52:39: Set parameter ReferenceAssessment
+2016-10-04 14:52:39: Set parameter MinTimeBetweenTriggers to 3s
+2016-10-04 14:52:39: Set parameter BackgroundHoldDuration to 0
+2016-10-04 14:52:39: Set parameter MaxRandomExtraHoldDuration to 0
+2016-10-04 14:52:39: Set parameter TriggerExpression to 
+2016-10-04 14:52:39: Set parameter FeedbackTimeConstant to 200ms
+2016-10-04 14:52:39: Set parameter BackgroundScaleLimit to 1000mV
+2016-10-04 14:52:39: Set parameter ResponseScaleLimit to 50mV
+2016-10-04 14:52:39: Set parameter BaselineResponseLevel to %
+2016-10-04 14:52:39: Set parameter SharedMemoryOutput to file://epocs.mmap
+2016-10-04 14:52:39: Set parameter OutputExpressions
+2016-10-04 14:52:51: Set parameter Criteria to 1
+2016-10-04 14:52:51: Set parameter AnalysisType to 1
+2016-10-04 14:52:51: Set parameter EnableCurrentControl to 1
+2016-10-04 14:52:51: Set parameter SubjectRun to 13
+2016-10-04 14:52:51: Set parameter FileFormat to dat
+2016-10-04 14:52:51: Set parameter SessionStamp to 2016-10-04-14-19
+2016-10-04 14:52:51: Set parameter TriggerExpression to 
+2016-10-04 14:52:51: Set parameter SubjectName to test
+2016-10-04 14:52:51: Set parameter DataDirectory to ../../data
+2016-10-04 14:52:51: Set parameter DataFile to ${SubjectName}/${SubjectName}-${SessionStamp}/${SubjectName}-${SessionStamp}-R${SubjectRun}-${ApplicationMode}.${FileFormat}
+2016-10-04 14:52:51: Set parameter LookBack to 100ms
+2016-10-04 14:52:51: Set parameter BackgroundSegmentDuration to 200ms
+2016-10-04 14:52:51: Set parameter ApplicationMode to ST
+2016-10-04 14:52:51: Set parameter LookForward to 500ms
+2016-10-04 14:52:51: Set parameter BackgroundChannels
+2016-10-04 14:52:51: Set parameter ResponseDefinition
+2016-10-04 14:52:51: Set parameter ResponseAssessment
+2016-10-04 14:52:51: Set parameter ReferenceAssessment
+2016-10-04 14:52:51: Set parameter MinTimeBetweenTriggers to 3s
+2016-10-04 14:52:51: Set parameter BackgroundHoldDuration to 0
+2016-10-04 14:52:51: Set parameter MaxRandomExtraHoldDuration to 0
+2016-10-04 14:52:51: Set parameter TriggerExpression to 
+2016-10-04 14:52:51: Set parameter FeedbackTimeConstant to 200ms
+2016-10-04 14:52:51: Set parameter BackgroundScaleLimit to 1000mV
+2016-10-04 14:52:51: Set parameter ResponseScaleLimit to 50mV
+2016-10-04 14:52:51: Set parameter BaselineResponseLevel to %
+2016-10-04 14:52:51: Set parameter SharedMemoryOutput to file://epocs.mmap
+2016-10-04 14:52:51: Set parameter OutputExpressions
+2016-10-04 14:52:51: Operator set configuration
+2016-10-04 14:52:52: SignalSource: NIDAQ_mx_Source initialized
+2016-10-04 14:52:53: [SignalProcessing] NIDAQFilterAO::Initialize: SampleRate set to: 900000.
+2016-10-04 14:52:53: [SignalProcessing] NIDAQFilterAO::Initialize: NumberofSamples set to: 467, with 9 steps.
+2016-10-04 14:52:53: Application: DummyApplication initialized
+2016-10-04 14:52:53: SignalProcessing: AReflexConditioningSignalProcessing initialized
+2016-10-04 14:52:53: Operator started operation
+2016-10-04 14:52:53: Set state Running to 1
+2016-10-04 14:52:53: SignalSource: NIDAQ_mx_Source running
+2016-10-04 14:52:53: SignalProcessing: AReflexConditioningSignalProcessing running
+2016-10-04 14:52:53: Application: DummyApplication running
+2016-10-04 14:52:56: [SignalProcessing] BackgroundTriggerFilter::Process: Trigger enabled after evaluating sample 9728.
+2016-10-04 14:52:56: [SignalProcessing] TrapFilter::Process: Trigger detected on sample 9735.
+2016-10-04 14:52:57: [SignalProcessing] CurrentControlCriteria::Process: new Current is 2mA.
+2016-10-04 14:52:57: Set state CurrentAmplitude to 33920
+2016-10-04 14:52:57: Set state NeedsUpdating to 1
+2016-10-04 14:52:57: Set state CurrentAmplitude to 37888
+2016-10-04 14:52:57: Set state NeedsUpdating to 1
+2016-10-04 14:52:57: Set state CurrentAmplitude to 8192
+2016-10-04 14:52:57: Set state NeedsUpdating to 1
+2016-10-04 14:52:57: Set state CurrentAmplitude to 0
+2016-10-04 14:52:57: Set state NeedsUpdating to 1
+2016-10-04 14:52:57: Set state CurrentAmplitude to 0
+2016-10-04 14:52:57: Set state NeedsUpdating to 1
+2016-10-04 14:52:59: [SignalProcessing] BackgroundTriggerFilter::Process: Trigger enabled after evaluating sample 19456.
+2016-10-04 14:52:59: [SignalProcessing] TrapFilter::Process: Trigger detected on sample 19462.
+2016-10-04 14:53:00: [SignalProcessing] CurrentControlCriteria::Process: new Current is 1mA.
+2016-10-04 14:53:00: Set state CurrentAmplitude to 16960
+2016-10-04 14:53:00: Set state NeedsUpdating to 1
+2016-10-04 14:53:00: Set state CurrentAmplitude to 51712
+2016-10-04 14:53:00: Set state NeedsUpdating to 1
+2016-10-04 14:53:00: Error: [SignalProcessing] NIDAQFilterAO::Process: NIDAQ Error: Attempted writing analog data that is too large or too small. Change Minimum Value and Maximum Value to reflect the range of the channel.
+Data:  5.171200
+Specified Range Minimum: -5.0
+Specified Range Maximum:  5.0
+
+Task Name: Analog_Output
+
+Status Code: -200561.
+2016-10-04 14:53:00: Error: [SignalProcessing] NIDAQFilterAO::Process: Failed to write to task "Analog_Output"
+2016-10-04 14:53:00: Error: [SignalProcessing] Lost connection to SignalProcessing
+2016-10-04 14:53:00: Set state CurrentAmplitude to 4096
+2016-10-04 14:53:00: Set state NeedsUpdating to 1

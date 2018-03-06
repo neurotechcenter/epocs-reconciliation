@@ -1,0 +1,115 @@
+2016-05-31 12:19:34: BCI2000 Started
+2016-05-31 12:19:34: Started "FilePlayback"
+2016-05-31 12:19:35: Started "ReflexConditioningSignalProcessing"
+2016-05-31 12:19:35: Started "DummyApplication"
+2016-05-31 12:19:35: Added parameter to list: SessionStamp
+2016-05-31 12:19:35: Added parameter to list: ApplicationMode
+2016-05-31 12:19:35: Added parameter to list: BackgroundScaleLimit
+2016-05-31 12:19:35: Added parameter to list: ResponseScaleLimit
+2016-05-31 12:19:35: Added parameter to list: BaselineResponseLevel
+2016-05-31 12:19:35: SignalProcessing: Waiting for configuration ...
+2016-05-31 12:19:35: Application: Waiting for configuration ...
+2016-05-31 12:19:37: Source: Waiting for configuration ...
+2016-05-31 12:19:37: Set parameter OutputMode to 0
+2016-05-31 12:19:37: Set parameter DataDirectory to ../../data
+2016-05-31 12:19:37: Set parameter SubjectRun to 01
+2016-05-31 12:19:37: Set parameter FileFormat to dat
+2016-05-31 12:19:37: Set parameter SessionStamp to 2016-05-31-12-19
+2016-05-31 12:19:37: Set parameter TriggerExpression to 
+2016-05-31 12:19:37: Set parameter SubjectName to axe
+2016-05-31 12:19:37: Set parameter LookForward to 500ms
+2016-05-31 12:19:37: Set parameter DataFile to ${SubjectName}/${SubjectName}-${SessionStamp}/${SubjectName}-${SessionStamp}-R${SubjectRun}-${ApplicationMode}.${FileFormat}
+2016-05-31 12:19:37: Set parameter LookBack to 100ms
+2016-05-31 12:19:37: Set parameter BackgroundSegmentDuration to 200ms
+2016-05-31 12:19:37: Set parameter ApplicationMode to ST
+2016-05-31 12:19:37: Set parameter BackgroundChannels
+2016-05-31 12:19:37: Set parameter ResponseDefinition
+2016-05-31 12:19:37: Set parameter ResponseAssessment
+2016-05-31 12:19:37: Set parameter MinTimeBetweenTriggers to 3s
+2016-05-31 12:19:37: Set parameter BackgroundHoldDuration to 0
+2016-05-31 12:19:37: Set parameter MaxRandomExtraHoldDuration to 0
+2016-05-31 12:19:37: Set parameter TriggerExpression to 
+2016-05-31 12:19:37: Set parameter FeedbackTimeConstant to 200ms
+2016-05-31 12:19:37: Set parameter BackgroundScaleLimit to 23mV
+2016-05-31 12:19:37: Set parameter ResponseScaleLimit to 50mV
+2016-05-31 12:19:37: Set parameter BaselineResponseLevel to %
+2016-05-31 12:19:37: Set parameter SharedMemoryOutput to file://epocs.mmap
+2016-05-31 12:19:37: Set parameter OutputExpressions
+2016-05-31 12:19:42: Set parameter DataDirectory to ../../data
+2016-05-31 12:19:42: Set parameter SubjectRun to 01
+2016-05-31 12:19:42: Set parameter FileFormat to dat
+2016-05-31 12:19:42: Set parameter SessionStamp to 2016-05-31-12-19
+2016-05-31 12:19:42: Set parameter TriggerExpression to 
+2016-05-31 12:19:42: Set parameter SubjectName to axe
+2016-05-31 12:19:42: Set parameter LookForward to 500ms
+2016-05-31 12:19:42: Set parameter DataFile to ${SubjectName}/${SubjectName}-${SessionStamp}/${SubjectName}-${SessionStamp}-R${SubjectRun}-${ApplicationMode}.${FileFormat}
+2016-05-31 12:19:42: Set parameter LookBack to 100ms
+2016-05-31 12:19:42: Set parameter BackgroundSegmentDuration to 200ms
+2016-05-31 12:19:42: Set parameter ApplicationMode to CT
+2016-05-31 12:19:42: Set parameter BackgroundChannels
+2016-05-31 12:19:42: Set parameter ResponseDefinition
+2016-05-31 12:19:42: Set parameter ResponseAssessment
+2016-05-31 12:19:42: Set parameter MinTimeBetweenTriggers to 5s
+2016-05-31 12:19:42: Set parameter BackgroundHoldDuration to 2s
+2016-05-31 12:19:42: Set parameter MaxRandomExtraHoldDuration to 0s
+2016-05-31 12:19:42: Set parameter TriggerExpression to 
+2016-05-31 12:19:42: Set parameter FeedbackTimeConstant to 200ms
+2016-05-31 12:19:42: Set parameter BackgroundScaleLimit to 23mV
+2016-05-31 12:19:42: Set parameter ResponseScaleLimit to 50mV
+2016-05-31 12:19:42: Set parameter BaselineResponseLevel to %
+2016-05-31 12:19:42: Set parameter SharedMemoryOutput to file://epocs.mmap
+2016-05-31 12:19:42: Set parameter OutputExpressions
+2016-05-31 12:19:42: Operator set configuration
+2016-05-31 12:19:42: Warning: [Source] DataIOFilter::Preflight: The EvaluateTiming parameter is false, so realtime operation will not be enforced.
+2016-05-31 12:19:42: Source: SignalSource initialized
+2016-05-31 12:19:42: Application: Initialized
+2016-05-31 12:19:42: SignalProcessing: Initialized
+2016-05-31 12:19:42: Operator started operation
+2016-05-31 12:19:42: Set state Running to 1
+2016-05-31 12:19:42: Source: SignalSource running
+2016-05-31 12:19:42: SignalProcessing: Running
+2016-05-31 12:19:42: Application: Running
+2016-05-31 12:19:48: [SignalProcessing] BackgroundTriggerFilter::Process: Trigger enabled after evaluating sample 8256.
+2016-05-31 12:19:48: [SignalProcessing] TrapFilter::Process: Trigger detected on sample 8323.
+2016-05-31 12:19:53: [SignalProcessing] BackgroundTriggerFilter::Process: Trigger enabled after evaluating sample 16320.
+2016-05-31 12:19:53: [SignalProcessing] TrapFilter::Process: Trigger detected on sample 16387.
+2016-05-31 12:19:58: [SignalProcessing] BackgroundTriggerFilter::Process: Trigger enabled after evaluating sample 24384.
+2016-05-31 12:19:58: [SignalProcessing] TrapFilter::Process: Trigger detected on sample 24451.
+2016-05-31 12:20:03: [SignalProcessing] BackgroundTriggerFilter::Process: Trigger enabled after evaluating sample 32448.
+2016-05-31 12:20:03: [SignalProcessing] TrapFilter::Process: Trigger detected on sample 32515.
+2016-05-31 12:20:08: [SignalProcessing] BackgroundTriggerFilter::Process: Trigger enabled after evaluating sample 40512.
+2016-05-31 12:20:08: [SignalProcessing] TrapFilter::Process: Trigger detected on sample 40643.
+2016-05-31 12:20:13: [SignalProcessing] BackgroundTriggerFilter::Process: Trigger enabled after evaluating sample 48576.
+2016-05-31 12:20:13: [SignalProcessing] TrapFilter::Process: Trigger detected on sample 48835.
+2016-05-31 12:20:18: [SignalProcessing] BackgroundTriggerFilter::Process: Trigger enabled after evaluating sample 56640.
+2016-05-31 12:20:18: [SignalProcessing] TrapFilter::Process: Trigger detected on sample 56899.
+2016-05-31 12:20:23: [SignalProcessing] BackgroundTriggerFilter::Process: Trigger enabled after evaluating sample 64704.
+2016-05-31 12:20:23: [SignalProcessing] TrapFilter::Process: Trigger detected on sample 64963.
+2016-05-31 12:20:28: [SignalProcessing] BackgroundTriggerFilter::Process: Trigger enabled after evaluating sample 72768.
+2016-05-31 12:20:28: [SignalProcessing] TrapFilter::Process: Trigger detected on sample 73027.
+2016-05-31 12:20:33: [SignalProcessing] BackgroundTriggerFilter::Process: Trigger enabled after evaluating sample 80832.
+2016-05-31 12:20:33: [SignalProcessing] TrapFilter::Process: Trigger detected on sample 81091.
+2016-05-31 12:20:38: [SignalProcessing] BackgroundTriggerFilter::Process: Trigger enabled after evaluating sample 88896.
+2016-05-31 12:20:39: [SignalProcessing] TrapFilter::Process: Trigger detected on sample 90115.
+2016-05-31 12:20:44: [SignalProcessing] BackgroundTriggerFilter::Process: Trigger enabled after evaluating sample 98688.
+2016-05-31 12:20:45: [SignalProcessing] TrapFilter::Process: Trigger detected on sample 99523.
+2016-05-31 12:20:51: [SignalProcessing] BackgroundTriggerFilter::Process: Trigger enabled after evaluating sample 110016.
+2016-05-31 12:20:51: [SignalProcessing] TrapFilter::Process: Trigger detected on sample 110339.
+2016-05-31 12:20:56: [SignalProcessing] BackgroundTriggerFilter::Process: Trigger enabled after evaluating sample 118080.
+2016-05-31 12:20:56: [SignalProcessing] TrapFilter::Process: Trigger detected on sample 118403.
+2016-05-31 12:21:04: [SignalProcessing] BackgroundTriggerFilter::Process: Trigger enabled after evaluating sample 129984.
+2016-05-31 12:21:04: [SignalProcessing] TrapFilter::Process: Trigger detected on sample 130115.
+2016-05-31 12:21:09: [SignalProcessing] BackgroundTriggerFilter::Process: Trigger enabled after evaluating sample 138048.
+2016-05-31 12:21:09: [SignalProcessing] TrapFilter::Process: Trigger detected on sample 138179.
+2016-05-31 12:21:20: [SignalProcessing] BackgroundTriggerFilter::Process: Trigger enabled after evaluating sample 156544.
+2016-05-31 12:21:21: [SignalProcessing] TrapFilter::Process: Trigger detected on sample 157315.
+2016-05-31 12:21:25: [SignalProcessing] BackgroundTriggerFilter::Process: Trigger enabled after evaluating sample 164608.
+2016-05-31 12:21:26: [SignalProcessing] TrapFilter::Process: Trigger detected on sample 165379.
+2016-05-31 12:21:34: [SignalProcessing] BackgroundTriggerFilter::Process: Trigger enabled after evaluating sample 177920.
+2016-05-31 12:21:36: [SignalProcessing] TrapFilter::Process: Trigger detected on sample 182467.
+2016-05-31 12:21:37: Operation suspended
+2016-05-31 12:21:37: Set state Running to 0
+2016-05-31 12:21:37: SignalProcessing: Suspended
+2016-05-31 12:21:37: Application: Suspended
+2016-05-31 12:21:37: Source: SignalSource suspended
+2016-05-31 12:21:40: Operator shut down connections

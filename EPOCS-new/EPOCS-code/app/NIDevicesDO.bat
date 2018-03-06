@@ -1,1 +1,2 @@
-start %cd%\NISetup\NIDigitalOutput.exe
+cd NISetup
+start NIDigitalOutput.exe

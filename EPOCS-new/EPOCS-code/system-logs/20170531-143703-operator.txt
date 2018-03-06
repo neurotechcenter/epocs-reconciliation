@@ -1,0 +1,142 @@
+2017-05-31 14:37:09: BCI2000 Started
+2017-05-31 14:37:09: Started "NIDAQ_mx_Source"
+2017-05-31 14:37:09: SignalSource: Waiting for configuration ...
+2017-05-31 14:37:09: Started "aReflexConditioningSignalProcessing"
+2017-05-31 14:37:09: SignalProcessing: Waiting for configuration ...
+2017-05-31 14:37:09: Started "DummyApplication"
+2017-05-31 14:37:09: Added parameter to list: SessionStamp
+2017-05-31 14:37:09: Added parameter to list: ApplicationMode
+2017-05-31 14:37:09: Added parameter to list: BackgroundScaleLimit
+2017-05-31 14:37:09: Added parameter to list: ResponseScaleLimit
+2017-05-31 14:37:09: Added parameter to list: BaselineResponseLevel
+2017-05-31 14:37:09: Application: Waiting for configuration ...
+2017-05-31 14:37:09: Loaded parameter file "C:/Users/HR18163admin/PycharmProjects/aEPOCS_LabVersion_v3/app/parms/base-nidaqmx.prm"
+2017-05-31 14:37:09: Loaded parameter file "C:/Users/HR18163admin/PycharmProjects/aEPOCS_LabVersion_v3/app/parms/NIDigitalOutputPort.prm"
+2017-05-31 14:37:09: Set parameter OutputMode to 0
+2017-05-31 14:37:09: Set parameter SubjectRun to 06
+2017-05-31 14:37:09: Set parameter FileFormat to dat
+2017-05-31 14:37:09: Set parameter SessionStamp to 2017-05-31-14-31
+2017-05-31 14:37:09: Set parameter TriggerExpression to 
+2017-05-31 14:37:09: Set parameter SubjectName to test
+2017-05-31 14:37:09: Set parameter DataDirectory to ../../data
+2017-05-31 14:37:09: Set parameter DataFile to ${SubjectName}/${SubjectName}-${SessionStamp}/${SubjectName}-${SessionStamp}-R${SubjectRun}-${ApplicationMode}.${FileFormat}
+2017-05-31 14:37:09: Set parameter LookBack to 100ms
+2017-05-31 14:37:09: Set parameter BackgroundSegmentDuration to 200ms
+2017-05-31 14:37:09: Set parameter ApplicationMode to ST
+2017-05-31 14:37:09: Set parameter LookForward to 500ms
+2017-05-31 14:37:09: Set parameter BackgroundChannels
+2017-05-31 14:37:09: Set parameter ResponseDefinition
+2017-05-31 14:37:09: Set parameter ResponseAssessment
+2017-05-31 14:37:09: Set parameter ReferenceAssessment
+2017-05-31 14:37:09: Set parameter MinTimeBetweenTriggers to 3s
+2017-05-31 14:37:09: Set parameter BackgroundHoldDuration to 0
+2017-05-31 14:37:09: Set parameter MaxRandomExtraHoldDuration to 0
+2017-05-31 14:37:09: Set parameter TriggerExpression to 
+2017-05-31 14:37:09: Set parameter FeedbackTimeConstant to 200ms
+2017-05-31 14:37:09: Set parameter BackgroundScaleLimit to 23mV
+2017-05-31 14:37:09: Set parameter ResponseScaleLimit to 50mV
+2017-05-31 14:37:09: Set parameter BaselineResponseLevel to %
+2017-05-31 14:37:09: Set parameter SharedMemoryOutput to file://epocs.mmap
+2017-05-31 14:37:09: Set parameter OutputExpressions
+2017-05-31 14:37:13: Set parameter AnalysisType to 1
+2017-05-31 14:37:17: Set parameter InitialCurrent to 1.0
+2017-05-31 14:37:17: Set parameter SubjectRun to 06
+2017-05-31 14:37:17: Set parameter FileFormat to dat
+2017-05-31 14:37:17: Set parameter SessionStamp to 2017-05-31-14-31
+2017-05-31 14:37:17: Set parameter TriggerExpression to 
+2017-05-31 14:37:17: Set parameter SubjectName to test
+2017-05-31 14:37:17: Set parameter DataDirectory to ../../data
+2017-05-31 14:37:17: Set parameter DataFile to ${SubjectName}/${SubjectName}-${SessionStamp}/${SubjectName}-${SessionStamp}-R${SubjectRun}-${ApplicationMode}.${FileFormat}
+2017-05-31 14:37:17: Set parameter LookBack to 100ms
+2017-05-31 14:37:17: Set parameter BackgroundSegmentDuration to 200ms
+2017-05-31 14:37:17: Set parameter ApplicationMode to ST
+2017-05-31 14:37:17: Set parameter LookForward to 500ms
+2017-05-31 14:37:17: Set parameter BackgroundChannels
+2017-05-31 14:37:17: Set parameter ResponseDefinition
+2017-05-31 14:37:17: Set parameter ResponseAssessment
+2017-05-31 14:37:17: Set parameter ReferenceAssessment
+2017-05-31 14:37:17: Set parameter MinTimeBetweenTriggers to 3s
+2017-05-31 14:37:17: Set parameter BackgroundHoldDuration to 0
+2017-05-31 14:37:17: Set parameter MaxRandomExtraHoldDuration to 0
+2017-05-31 14:37:17: Set parameter TriggerExpression to 
+2017-05-31 14:37:17: Set parameter FeedbackTimeConstant to 200ms
+2017-05-31 14:37:17: Set parameter BackgroundScaleLimit to 23mV
+2017-05-31 14:37:17: Set parameter ResponseScaleLimit to 50mV
+2017-05-31 14:37:17: Set parameter BaselineResponseLevel to %
+2017-05-31 14:37:17: Set parameter SharedMemoryOutput to file://epocs.mmap
+2017-05-31 14:37:17: Set parameter OutputExpressions
+2017-05-31 14:37:17: Operator set configuration
+2017-05-31 14:37:19: SignalSource: NIDAQ_mx_Source initialized
+2017-05-31 14:37:21: Warning: [SignalProcessing] DS5ControlFilter::Preflight: DS5 not connected, check that the cable is connected, the DS5 is on and the DS5 control software is installed.
+2017-05-31 14:37:21: [SignalProcessing] NIDAQFilterAO::Initialize: SampleRate set to: 900000.
+2017-05-31 14:37:21: Application: DummyApplication initialized
+2017-05-31 14:37:21: [SignalProcessing] NIDAQFilterAO::Initialize: NumberofSamples set to: 934, with 9 steps.
+2017-05-31 14:37:23: Warning: [SignalProcessing] DS5ControlFilter::Initialize: DS5 not connected, check that the cable is connected, the DS5 is on and the DS5 control software is installed.
+2017-05-31 14:37:23: SignalProcessing: AReflexConditioningSignalProcessing initialized
+2017-05-31 14:37:23: Operator started operation
+2017-05-31 14:37:23: Set state Running to 1
+2017-05-31 14:37:23: SignalSource: NIDAQ_mx_Source running
+2017-05-31 14:37:24: Warning: [SignalProcessing] DS5ControlFilter::StartRun: DS5 not connected, check that the cable is connected, the DS5 is on and the DS5 control software is installed.
+2017-05-31 14:37:24: SignalProcessing: AReflexConditioningSignalProcessing running
+2017-05-31 14:37:24: Application: DummyApplication running
+2017-05-31 14:37:26: [SignalProcessing] BackgroundTriggerFilter::Process: Trigger enabled after evaluating sample 9728.
+2017-05-31 14:37:26: [SignalProcessing] TrapFilter::Process: Trigger detected on sample 9735.
+2017-05-31 14:37:29: [SignalProcessing] BackgroundTriggerFilter::Process: Trigger enabled after evaluating sample 19456.
+2017-05-31 14:37:29: [SignalProcessing] TrapFilter::Process: Trigger detected on sample 19462.
+2017-05-31 14:37:30: Operation suspended
+2017-05-31 14:37:30: Set state Running to 0
+2017-05-31 14:37:30: SignalSource: NIDAQ_mx_Source suspended
+2017-05-31 14:37:30: Application: DummyApplication suspended
+2017-05-31 14:37:31: Warning: [SignalProcessing] DS5ControlFilter::StopRun: DS5 not connected, check that the cable is connected, the DS5 is on and the DS5 control software is installed.
+2017-05-31 14:37:31: SignalProcessing: AReflexConditioningSignalProcessing suspended
+2017-05-31 14:37:38: Set parameter InitialCurrent to 0
+2017-05-31 14:37:58: Set parameter AnalysisType to 1
+2017-05-31 14:37:58: Set parameter InitialCurrent to 0
+2017-05-31 14:37:58: Set parameter SubjectRun to 07
+2017-05-31 14:37:58: Set parameter FileFormat to dat
+2017-05-31 14:37:58: Set parameter SessionStamp to 2017-05-31-14-31
+2017-05-31 14:37:58: Set parameter TriggerExpression to 
+2017-05-31 14:37:58: Set parameter SubjectName to test
+2017-05-31 14:37:58: Set parameter DataDirectory to ../../data
+2017-05-31 14:37:58: Set parameter DataFile to ${SubjectName}/${SubjectName}-${SessionStamp}/${SubjectName}-${SessionStamp}-R${SubjectRun}-${ApplicationMode}.${FileFormat}
+2017-05-31 14:37:58: Set parameter LookBack to 100ms
+2017-05-31 14:37:58: Set parameter BackgroundSegmentDuration to 200ms
+2017-05-31 14:37:58: Set parameter ApplicationMode to ST
+2017-05-31 14:37:58: Set parameter LookForward to 500ms
+2017-05-31 14:37:58: Set parameter BackgroundChannels
+2017-05-31 14:37:58: Set parameter ResponseDefinition
+2017-05-31 14:37:58: Set parameter ResponseAssessment
+2017-05-31 14:37:58: Set parameter ReferenceAssessment
+2017-05-31 14:37:58: Set parameter MinTimeBetweenTriggers to 3s
+2017-05-31 14:37:58: Set parameter BackgroundHoldDuration to 0
+2017-05-31 14:37:58: Set parameter MaxRandomExtraHoldDuration to 0
+2017-05-31 14:37:58: Set parameter TriggerExpression to 
+2017-05-31 14:37:58: Set parameter FeedbackTimeConstant to 200ms
+2017-05-31 14:37:58: Set parameter BackgroundScaleLimit to 23mV
+2017-05-31 14:37:58: Set parameter ResponseScaleLimit to 50mV
+2017-05-31 14:37:58: Set parameter BaselineResponseLevel to %
+2017-05-31 14:37:58: Set parameter SharedMemoryOutput to file://epocs.mmap
+2017-05-31 14:37:58: Set parameter OutputExpressions
+2017-05-31 14:37:59: Operator set configuration
+2017-05-31 14:37:59: SignalSource: NIDAQ_mx_Source initialized
+2017-05-31 14:38:01: Warning: [SignalProcessing] DS5ControlFilter::Preflight: DS5 not connected, check that the cable is connected, the DS5 is on and the DS5 control software is installed.
+2017-05-31 14:38:01: [SignalProcessing] NIDAQFilterAO::Initialize: SampleRate set to: 900000.
+2017-05-31 14:38:01: [SignalProcessing] NIDAQFilterAO::Initialize: NumberofSamples set to: 934, with 9 steps.
+2017-05-31 14:38:01: Application: DummyApplication initialized
+2017-05-31 14:38:02: Warning: [SignalProcessing] DS5ControlFilter::Initialize: DS5 not connected, check that the cable is connected, the DS5 is on and the DS5 control software is installed.
+2017-05-31 14:38:02: SignalProcessing: AReflexConditioningSignalProcessing initialized
+2017-05-31 14:38:02: Operator started operation
+2017-05-31 14:38:02: Set state Running to 1
+2017-05-31 14:38:02: SignalSource: NIDAQ_mx_Source running
+2017-05-31 14:38:04: Warning: [SignalProcessing] DS5ControlFilter::StartRun: DS5 not connected, check that the cable is connected, the DS5 is on and the DS5 control software is installed.
+2017-05-31 14:38:04: SignalProcessing: AReflexConditioningSignalProcessing running
+2017-05-31 14:38:04: Application: DummyApplication running
+2017-05-31 14:38:05: [SignalProcessing] BackgroundTriggerFilter::Process: Trigger enabled after evaluating sample 9728.
+2017-05-31 14:38:05: [SignalProcessing] TrapFilter::Process: Trigger detected on sample 9734.
+2017-05-31 14:38:08: Operation suspended
+2017-05-31 14:38:08: Set state Running to 0
+2017-05-31 14:38:08: Set parameter InitialCurrent to 0
+2017-05-31 14:38:08: SignalSource: NIDAQ_mx_Source suspended
+2017-05-31 14:38:08: Application: DummyApplication suspended
+2017-05-31 14:38:09: Warning: [SignalProcessing] DS5ControlFilter::StopRun: DS5 not connected, check that the cable is connected, the DS5 is on and the DS5 control software is installed.
+2017-05-31 14:38:09: SignalProcessing: AReflexConditioningSignalProcessing suspended

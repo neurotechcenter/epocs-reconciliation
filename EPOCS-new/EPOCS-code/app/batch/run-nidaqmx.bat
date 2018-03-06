@@ -14,7 +14,7 @@ set environment SOURCE $2                  # "replay" or "live"
 set environment CUSTOM $3                  # empty, or a path to a BCI2000 script file
 
 if [ $MODE == "master" ]; show window; end
-
+show window;
 set title ${extract file base $0}
 reset system
 

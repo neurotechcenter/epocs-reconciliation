@@ -38,7 +38,8 @@ class CurrentControlWindow(tkinter.Toplevel):
     def __init__(self, parent):
 
         tkinter.Toplevel.__init__(self)
-        self.wm_title('DS5 Current Stimulation Control')
+        if int(parent.operator.remote.GetParameter('EnableDS8ControlFilter')) == 1: self.wm_title('DS8 Current Stimulation Control')
+        else: self.wm_title('DS5 Current Stimulation Control')
         #self.wm_geometry('225x150')
         self.wm_resizable(width=False,height=False)
         self.wm_attributes("-topmost",1)

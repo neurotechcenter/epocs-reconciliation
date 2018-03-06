@@ -1,0 +1,91 @@
+2018-03-06 11:45:13: BCI2000 Started
+2018-03-06 11:45:13: Started "NIDAQ_mx_Source"
+2018-03-06 11:45:13: SignalSource: Waiting for configuration ...
+2018-03-06 11:45:13: Started "aReflexConditioningSignalProcessing"
+2018-03-06 11:45:13: SignalProcessing: Waiting for configuration ...
+2018-03-06 11:45:13: Started "DummyApplication"
+2018-03-06 11:45:13: Added parameter to list: SessionStamp
+2018-03-06 11:45:13: Added parameter to list: ApplicationMode
+2018-03-06 11:45:13: Added parameter to list: BackgroundScaleLimit
+2018-03-06 11:45:13: Added parameter to list: ResponseScaleLimit
+2018-03-06 11:45:13: Added parameter to list: BaselineResponseLevel
+2018-03-06 11:45:13: Application: Waiting for configuration ...
+2018-03-06 11:45:13: Loaded parameter file "C:/Users/HR18163admin/PycharmProjects/aEPOCS_LabVersion_v4/app/parms/base-nidaqmx.prm"
+2018-03-06 11:45:13: Loaded parameter file "C:/Users/HR18163admin/PycharmProjects/aEPOCS_LabVersion_v4/app/parms/NIDigitalOutputPort.prm"
+2018-03-06 11:45:13: Set parameter OutputMode to 0
+2018-03-06 11:45:13: Set parameter SubjectRun to 01
+2018-03-06 11:45:13: Set parameter FileFormat to dat
+2018-03-06 11:45:13: Set parameter SessionStamp to 2018-03-06-11-45
+2018-03-06 11:45:13: Set parameter TriggerExpression to 
+2018-03-06 11:45:13: Set parameter SubjectName to test
+2018-03-06 11:45:13: Set parameter DataDirectory to ../../data
+2018-03-06 11:45:13: Set parameter DataFile to ${SubjectName}/${SubjectName}-${SessionStamp}/${SubjectName}-${SessionStamp}-R${SubjectRun}-${ApplicationMode}.${FileFormat}
+2018-03-06 11:45:13: Set parameter LookBack to 100ms
+2018-03-06 11:45:13: Set parameter BackgroundSegmentDuration to 200ms
+2018-03-06 11:45:13: Set parameter ApplicationMode to ST
+2018-03-06 11:45:13: Set parameter LookForward to 500ms
+2018-03-06 11:45:13: Set parameter BackgroundChannels
+2018-03-06 11:45:13: Set parameter ResponseDefinition
+2018-03-06 11:45:13: Set parameter ResponseAssessment
+2018-03-06 11:45:13: Set parameter ReferenceAssessment
+2018-03-06 11:45:13: Set parameter MinTimeBetweenTriggers to 3s
+2018-03-06 11:45:13: Set parameter BackgroundHoldDuration to 0
+2018-03-06 11:45:13: Set parameter MaxRandomExtraHoldDuration to 0
+2018-03-06 11:45:13: Set parameter TriggerExpression to 
+2018-03-06 11:45:13: Set parameter FeedbackTimeConstant to 200ms
+2018-03-06 11:45:13: Set parameter BackgroundScaleLimit to 23mV
+2018-03-06 11:45:13: Set parameter ResponseScaleLimit to 50mV
+2018-03-06 11:45:13: Set parameter BaselineResponseLevel to %
+2018-03-06 11:45:13: Set parameter SharedMemoryOutput to file://epocs.mmap
+2018-03-06 11:45:13: Set parameter OutputExpressions
+2018-03-06 11:45:13: Set parameter EnableDS8ControlFilter to 1
+2018-03-06 11:45:13: Set parameter EnableDS5ControlFilter to 0
+2018-03-06 11:45:13: Set parameter AnalogOutput to 0
+2018-03-06 11:45:20: Set parameter AnalysisType to 1
+2018-03-06 11:45:20: Set parameter InitialCurrent to 1.0
+2018-03-06 11:45:20: Set parameter SubjectRun to 01
+2018-03-06 11:45:20: Set parameter FileFormat to dat
+2018-03-06 11:45:20: Set parameter SessionStamp to 2018-03-06-11-45
+2018-03-06 11:45:20: Set parameter TriggerExpression to 
+2018-03-06 11:45:20: Set parameter SubjectName to test
+2018-03-06 11:45:20: Set parameter DataDirectory to ../../data
+2018-03-06 11:45:20: Set parameter DataFile to ${SubjectName}/${SubjectName}-${SessionStamp}/${SubjectName}-${SessionStamp}-R${SubjectRun}-${ApplicationMode}.${FileFormat}
+2018-03-06 11:45:20: Set parameter LookBack to 100ms
+2018-03-06 11:45:20: Set parameter BackgroundSegmentDuration to 200ms
+2018-03-06 11:45:20: Set parameter ApplicationMode to ST
+2018-03-06 11:45:20: Set parameter LookForward to 500ms
+2018-03-06 11:45:20: Set parameter BackgroundChannels
+2018-03-06 11:45:20: Set parameter ResponseDefinition
+2018-03-06 11:45:20: Set parameter ResponseAssessment
+2018-03-06 11:45:20: Set parameter ReferenceAssessment
+2018-03-06 11:45:20: Set parameter MinTimeBetweenTriggers to 3s
+2018-03-06 11:45:20: Set parameter BackgroundHoldDuration to 0
+2018-03-06 11:45:20: Set parameter MaxRandomExtraHoldDuration to 0
+2018-03-06 11:45:20: Set parameter TriggerExpression to 
+2018-03-06 11:45:20: Set parameter FeedbackTimeConstant to 200ms
+2018-03-06 11:45:20: Set parameter BackgroundScaleLimit to 23mV
+2018-03-06 11:45:20: Set parameter ResponseScaleLimit to 50mV
+2018-03-06 11:45:20: Set parameter BaselineResponseLevel to %
+2018-03-06 11:45:20: Set parameter SharedMemoryOutput to file://epocs.mmap
+2018-03-06 11:45:20: Set parameter OutputExpressions
+2018-03-06 11:45:20: Operator set configuration
+2018-03-06 11:45:23: Warning: [SignalProcessing] DS5ControlFilter::Initialize: Unable to load DS8 library. Make sure the DS8 is on, and the DS8 software has been installed.
+2018-03-06 11:45:23: SignalProcessing: AReflexConditioningSignalProcessing initialized
+2018-03-06 11:45:23: Application: DummyApplication initialized
+2018-03-06 11:45:26: SignalSource: NIDAQ_mx_Source initialized
+2018-03-06 11:45:26: Operator started operation
+2018-03-06 11:45:26: Set state Running to 1
+2018-03-06 11:45:26: SignalSource: NIDAQ_mx_Source running
+2018-03-06 11:45:26: SignalProcessing: AReflexConditioningSignalProcessing running
+2018-03-06 11:45:26: Warning: [SignalProcessing] NIDAQFilterAO: NIDAQFilterAO::Process: Execution required more than a sample block duration.
+2018-03-06 11:45:26: Application: DummyApplication running
+2018-03-06 11:45:29: [SignalProcessing] BackgroundTriggerFilter::Process: Trigger enabled after evaluating sample 9728.
+2018-03-06 11:45:29: [SignalProcessing] TrapFilter::Process: Trigger detected on sample 9733.
+2018-03-06 11:45:31: Set state CurrentAmplitude to 0
+2018-03-06 11:45:31: Set state NeedsUpdating to 1
+2018-03-06 11:45:31: Operation suspended
+2018-03-06 11:45:31: Set state Running to 0
+2018-03-06 11:45:31: SignalProcessing: AReflexConditioningSignalProcessing suspended
+2018-03-06 11:45:31: Application: DummyApplication suspended
+2018-03-06 11:45:31: SignalSource: NIDAQ_mx_Source suspended
+2018-03-06 11:45:33: Operator shut down connections

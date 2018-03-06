@@ -1,0 +1,22 @@
+2016-08-09 11:25:44: BCI2000 Started
+2016-08-09 11:25:44: Started "NIDAQ_mx_Source"
+2016-08-09 11:25:44: SignalSource: Waiting for configuration ...
+2016-08-09 11:25:44: Started "ReflexConditioningSignalProcessing"
+2016-08-09 11:25:44: SignalProcessing: Waiting for configuration ...
+2016-08-09 11:25:44: Started "DummyApplication"
+2016-08-09 11:25:44: Added parameter to list: SessionStamp
+2016-08-09 11:25:44: Added parameter to list: ApplicationMode
+2016-08-09 11:25:44: Added parameter to list: BackgroundScaleLimit
+2016-08-09 11:25:44: Added parameter to list: ResponseScaleLimit
+2016-08-09 11:25:44: Added parameter to list: BaselineResponseLevel
+2016-08-09 11:25:44: Application: Waiting for configuration ...
+2016-08-09 11:25:44: Loaded parameter file "C:\Users\HR18163admin\PycharmProjects\EPOCS_amir\app\prog\../parms/base-nidaqmx.prm"
+2016-08-09 11:25:44: Set parameter VisualizeTiming to 1
+2016-08-09 11:25:44: Set parameter VisualizeSource to 1
+2016-08-09 11:25:44: Set parameter VisualizeBackgroundAverages to 1
+2016-08-09 11:25:44: Set parameter VisualizeTrapFilter to 1
+2016-08-09 11:25:44: Set parameter VisualizeRangeIntegrator to 1
+2016-08-09 11:25:44: Operator set configuration
+2016-08-09 11:25:44: Error: [SignalSource] DataIOFilter::Preflight: NIADC::Preflight: Board number 1 not present.
+2016-08-09 11:25:44: Error: [SignalSource] DataIOFilter::Preflight: NIADC::Preflight: or does not support DAQmx driver ver 8.0.
+2016-08-09 11:29:13: Operator shut down connections

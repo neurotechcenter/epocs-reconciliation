@@ -6,11 +6,9 @@ import py2exe
 if not hasattr( sys, 'argv' ): sys.argv = [ 'make_exe' ]
 if len( sys.argv ) < 2: sys.argv.append( 'py2exe' )
 
-
-
 import matplotlib
 import matplotlib.backends.backend_tkagg
-includes = [ 'matplotlib.backends.backend_tkagg' ]
+includes = [ 'matplotlib.backends.backend_tkagg', 'clr' ]
 excludes = [ 'scipy', 'BCPy2000.SigTools' ]
 
 options = {
@@ -30,6 +28,8 @@ tclfiles = [
 data_files = [
 	'epocs.ico',
 	'ExampleData.pk',
+	'Interop.DS5Lib.dll',
+	'Python.Runtime.dll',
 ]
 data_files += matplotlib.get_py2exe_datafiles()
 data_files += tclfiles

@@ -1,0 +1,4 @@
+Patient Code: test
+Session Code: 2018-03-06-11-43
+
+ EPOCS version: 1.1, Version date: 3-6-18

@@ -1,0 +1,83 @@
+2018-02-26 10:13:04: BCI2000 Started
+2018-02-26 10:13:04: Started "NIDAQ_mx_Source"
+2018-02-26 10:13:04: SignalSource: Waiting for configuration ...
+2018-02-26 10:13:04: Started "aReflexConditioningSignalProcessing"
+2018-02-26 10:13:04: Started "DummyApplication"
+2018-02-26 10:13:04: Added parameter to list: SessionStamp
+2018-02-26 10:13:04: Added parameter to list: ApplicationMode
+2018-02-26 10:13:04: Added parameter to list: BackgroundScaleLimit
+2018-02-26 10:13:04: Added parameter to list: ResponseScaleLimit
+2018-02-26 10:13:04: Added parameter to list: BaselineResponseLevel
+2018-02-26 10:13:04: Application: Waiting for configuration ...
+2018-02-26 10:13:04: SignalProcessing: Waiting for configuration ...
+2018-02-26 10:13:04: Loaded parameter file "C:/Users/HR18163admin/PycharmProjects/aEPOCS_LabVersion_v3/app/parms/base-nidaqmx.prm"
+2018-02-26 10:13:04: Loaded parameter file "C:/Users/HR18163admin/PycharmProjects/aEPOCS_LabVersion_v3/app/parms/NIDigitalOutputPort.prm"
+2018-02-26 10:13:04: Set parameter OutputMode to 0
+2018-02-26 10:13:04: Set parameter SubjectRun to 03
+2018-02-26 10:13:04: Set parameter FileFormat to dat
+2018-02-26 10:13:04: Set parameter SessionStamp to 2018-02-26-10-10
+2018-02-26 10:13:04: Set parameter TriggerExpression to 
+2018-02-26 10:13:04: Set parameter SubjectName to test
+2018-02-26 10:13:04: Set parameter DataDirectory to ../../data
+2018-02-26 10:13:04: Set parameter DataFile to ${SubjectName}/${SubjectName}-${SessionStamp}/${SubjectName}-${SessionStamp}-R${SubjectRun}-${ApplicationMode}.${FileFormat}
+2018-02-26 10:13:04: Set parameter LookBack to 100ms
+2018-02-26 10:13:04: Set parameter BackgroundSegmentDuration to 200ms
+2018-02-26 10:13:04: Set parameter ApplicationMode to ST
+2018-02-26 10:13:04: Set parameter LookForward to 500ms
+2018-02-26 10:13:04: Set parameter BackgroundChannels
+2018-02-26 10:13:04: Set parameter ResponseDefinition
+2018-02-26 10:13:04: Set parameter ResponseAssessment
+2018-02-26 10:13:04: Set parameter ReferenceAssessment
+2018-02-26 10:13:04: Set parameter MinTimeBetweenTriggers to 3s
+2018-02-26 10:13:04: Set parameter BackgroundHoldDuration to 0
+2018-02-26 10:13:04: Set parameter MaxRandomExtraHoldDuration to 0
+2018-02-26 10:13:04: Set parameter TriggerExpression to 
+2018-02-26 10:13:04: Set parameter FeedbackTimeConstant to 200ms
+2018-02-26 10:13:04: Set parameter BackgroundScaleLimit to 800mV
+2018-02-26 10:13:04: Set parameter ResponseScaleLimit to 50mV
+2018-02-26 10:13:04: Set parameter BaselineResponseLevel to %
+2018-02-26 10:13:04: Set parameter SharedMemoryOutput to file://epocs.mmap
+2018-02-26 10:13:04: Set parameter OutputExpressions
+2018-02-26 10:13:07: Operator set configuration
+2018-02-26 10:13:09: Application: DummyApplication initialized
+2018-02-26 10:13:10: [SignalProcessing] NIDAQFilterAO::Initialize: nDigital: 1.
+2018-02-26 10:13:10: Error: [SignalProcessing] NIDAQFilterAO::Initialize: NIDAQ Error: NI-DAQmx is unable to communicate with the device. Make sure the device is present in and accessible to the system, is not currently being reset, and is not reserved by another driver such as Traditional NI-DAQ (Legacy).
+Task Name: Digital_Output0
+
+Status Code: -200324.
+2018-02-26 10:13:10: Error: [SignalProcessing] NIDAQFilterAO::Initialize: Failed to start task "Digital_Output" .
+2018-02-26 10:13:10: Error: [SignalProcessing] NIDAQFilterAO::Initialize: NIDAQ Error: NI-DAQmx is unable to communicate with the device. Make sure the device is present in and accessible to the system, is not currently being reset, and is not reserved by another driver such as Traditional NI-DAQ (Legacy).
+Task Name: Digital_Output0
+
+Status Code: -200324.
+2018-02-26 10:13:10: Error: [SignalProcessing] NIDAQFilterAO::Initialize: Failed to write to task "Digital_Output"
+2018-02-26 10:13:13: SignalSource: NIDAQ_mx_Source initialized
+2018-02-26 10:13:31: Operator set configuration
+2018-02-26 10:13:34: Application: DummyApplication initialized
+2018-02-26 10:13:34: [SignalProcessing] NIDAQFilterAO::Initialize: nDigital: 1.
+2018-02-26 10:13:34: Error: [SignalProcessing] NIDAQFilterAO::Initialize: NIDAQ Error: NI-DAQmx is unable to communicate with the device. Make sure the device is present in and accessible to the system, is not currently being reset, and is not reserved by another driver such as Traditional NI-DAQ (Legacy).
+Task Name: Digital_Output0
+
+Status Code: -200324.
+2018-02-26 10:13:34: Error: [SignalProcessing] NIDAQFilterAO::Initialize: Failed to start task "Digital_Output" .
+2018-02-26 10:13:34: Error: [SignalProcessing] NIDAQFilterAO::Initialize: NIDAQ Error: NI-DAQmx is unable to communicate with the device. Make sure the device is present in and accessible to the system, is not currently being reset, and is not reserved by another driver such as Traditional NI-DAQ (Legacy).
+Task Name: Digital_Output0
+
+Status Code: -200324.
+2018-02-26 10:13:34: Error: [SignalProcessing] NIDAQFilterAO::Initialize: Failed to write to task "Digital_Output"
+2018-02-26 10:13:38: SignalSource: NIDAQ_mx_Source initialized
+2018-02-26 10:13:41: Operator set configuration
+2018-02-26 10:13:44: Application: DummyApplication initialized
+2018-02-26 10:13:44: [SignalProcessing] NIDAQFilterAO::Initialize: nDigital: 1.
+2018-02-26 10:13:44: Error: [SignalProcessing] NIDAQFilterAO::Initialize: NIDAQ Error: NI-DAQmx is unable to communicate with the device. Make sure the device is present in and accessible to the system, is not currently being reset, and is not reserved by another driver such as Traditional NI-DAQ (Legacy).
+Task Name: Digital_Output0
+
+Status Code: -200324.
+2018-02-26 10:13:44: Error: [SignalProcessing] NIDAQFilterAO::Initialize: Failed to start task "Digital_Output" .
+2018-02-26 10:13:44: Error: [SignalProcessing] NIDAQFilterAO::Initialize: NIDAQ Error: NI-DAQmx is unable to communicate with the device. Make sure the device is present in and accessible to the system, is not currently being reset, and is not reserved by another driver such as Traditional NI-DAQ (Legacy).
+Task Name: Digital_Output0
+
+Status Code: -200324.
+2018-02-26 10:13:44: Error: [SignalProcessing] NIDAQFilterAO::Initialize: Failed to write to task "Digital_Output"
+2018-02-26 10:13:48: SignalSource: NIDAQ_mx_Source initialized
+2018-02-26 10:13:53: Operator shut down connections

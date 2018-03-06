@@ -1,0 +1,79 @@
+2016-08-09 10:45:33: BCI2000 Started
+2016-08-09 10:45:33: Started "FilePlayback"
+2016-08-09 10:45:33: Started "ReflexConditioningSignalProcessing"
+2016-08-09 10:45:34: SignalProcessing: Waiting for configuration ...
+2016-08-09 10:45:34: Started "DummyApplication"
+2016-08-09 10:45:34: Added parameter to list: SessionStamp
+2016-08-09 10:45:34: Added parameter to list: ApplicationMode
+2016-08-09 10:45:34: Added parameter to list: BackgroundScaleLimit
+2016-08-09 10:45:34: Added parameter to list: ResponseScaleLimit
+2016-08-09 10:45:34: Added parameter to list: BaselineResponseLevel
+2016-08-09 10:45:34: Application: Waiting for configuration ...
+2016-08-09 10:45:35: SignalSource: Waiting for configuration ...
+2016-08-09 10:45:36: Set parameter OutputMode to 0
+2016-08-09 10:45:36: Set parameter VisualizeSource to 1
+2016-08-09 10:45:36: Set parameter SubjectRun to 01
+2016-08-09 10:45:36: Set parameter FileFormat to dat
+2016-08-09 10:45:36: Set parameter SessionStamp to 2016-08-09-10-45
+2016-08-09 10:45:36: Set parameter TriggerExpression to 
+2016-08-09 10:45:36: Set parameter SubjectName to KAG
+2016-08-09 10:45:36: Set parameter DataDirectory to ../../data
+2016-08-09 10:45:36: Set parameter DataFile to ${SubjectName}/${SubjectName}-${SessionStamp}/${SubjectName}-${SessionStamp}-R${SubjectRun}-${ApplicationMode}.${FileFormat}
+2016-08-09 10:45:36: Set parameter LookBack to 100ms
+2016-08-09 10:45:36: Set parameter BackgroundSegmentDuration to 200ms
+2016-08-09 10:45:36: Set parameter ApplicationMode to ST
+2016-08-09 10:45:36: Set parameter LookForward to 500ms
+2016-08-09 10:45:36: Set parameter BackgroundChannels
+2016-08-09 10:45:36: Set parameter ResponseDefinition
+2016-08-09 10:45:36: Set parameter ResponseAssessment
+2016-08-09 10:45:36: Set parameter MinTimeBetweenTriggers to 3s
+2016-08-09 10:45:36: Set parameter BackgroundHoldDuration to 0
+2016-08-09 10:45:36: Set parameter MaxRandomExtraHoldDuration to 0
+2016-08-09 10:45:36: Set parameter TriggerExpression to 
+2016-08-09 10:45:36: Set parameter FeedbackTimeConstant to 200ms
+2016-08-09 10:45:36: Set parameter BackgroundScaleLimit to 20mV
+2016-08-09 10:45:36: Set parameter ResponseScaleLimit to 50mV
+2016-08-09 10:45:36: Set parameter BaselineResponseLevel to %
+2016-08-09 10:45:36: Set parameter SharedMemoryOutput to file://epocs.mmap
+2016-08-09 10:45:36: Set parameter OutputExpressions
+2016-08-09 10:45:38: Set parameter SubjectRun to 01
+2016-08-09 10:45:38: Set parameter FileFormat to dat
+2016-08-09 10:45:38: Set parameter SessionStamp to 2016-08-09-10-45
+2016-08-09 10:45:38: Set parameter TriggerExpression to 
+2016-08-09 10:45:38: Set parameter SubjectName to KAG
+2016-08-09 10:45:38: Set parameter DataDirectory to ../../data
+2016-08-09 10:45:38: Set parameter DataFile to ${SubjectName}/${SubjectName}-${SessionStamp}/${SubjectName}-${SessionStamp}-R${SubjectRun}-${ApplicationMode}.${FileFormat}
+2016-08-09 10:45:38: Set parameter LookBack to 100ms
+2016-08-09 10:45:38: Set parameter BackgroundSegmentDuration to 200ms
+2016-08-09 10:45:38: Set parameter ApplicationMode to RC
+2016-08-09 10:45:38: Set parameter LookForward to 500ms
+2016-08-09 10:45:38: Set parameter BackgroundChannels
+2016-08-09 10:45:38: Set parameter ResponseDefinition
+2016-08-09 10:45:38: Set parameter ResponseAssessment
+2016-08-09 10:45:38: Set parameter MinTimeBetweenTriggers to 5s
+2016-08-09 10:45:38: Set parameter BackgroundHoldDuration to 2s
+2016-08-09 10:45:38: Set parameter MaxRandomExtraHoldDuration to 0s
+2016-08-09 10:45:38: Set parameter TriggerExpression to 
+2016-08-09 10:45:38: Set parameter FeedbackTimeConstant to 200ms
+2016-08-09 10:45:38: Set parameter BackgroundScaleLimit to 20mV
+2016-08-09 10:45:38: Set parameter ResponseScaleLimit to 50mV
+2016-08-09 10:45:38: Set parameter BaselineResponseLevel to %
+2016-08-09 10:45:38: Set parameter SharedMemoryOutput to file://epocs.mmap
+2016-08-09 10:45:38: Set parameter OutputExpressions
+2016-08-09 10:45:38: Operator set configuration
+2016-08-09 10:45:38: Warning: [SignalSource] DataIOFilter::Preflight: The EvaluateTiming parameter is false, so realtime operation will not be enforced.
+2016-08-09 10:45:39: SignalProcessing: ReflexConditioningSignalProcessing initialized
+2016-08-09 10:45:39: Application: DummyApplication initialized
+2016-08-09 10:45:39: SignalSource: FilePlayback initialized
+2016-08-09 10:45:39: Operator started operation
+2016-08-09 10:45:39: Set state Running to 1
+2016-08-09 10:45:39: SignalSource: FilePlayback running
+2016-08-09 10:45:39: SignalProcessing: ReflexConditioningSignalProcessing running
+2016-08-09 10:45:39: Application: DummyApplication running
+2016-08-09 10:45:45: [SignalProcessing] TrapFilter::Process: Trigger detected on sample 20101.
+2016-08-09 10:45:46: Operation suspended
+2016-08-09 10:45:46: Set state Running to 0
+2016-08-09 10:45:46: SignalSource: FilePlayback suspended
+2016-08-09 10:45:46: SignalProcessing: ReflexConditioningSignalProcessing suspended
+2016-08-09 10:45:46: Application: DummyApplication suspended
+2016-08-09 10:45:50: Operator shut down connections
