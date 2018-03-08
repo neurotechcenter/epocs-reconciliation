@@ -122,8 +122,8 @@ try:
 except:
     pass
 
-EPOCSVERSION = 1.1
-EPOCSVERSIONDATE = "3-6-18"
+EPOCSVERSION = 1.2
+EPOCSVERSIONDATE = "3-8-18"
 
 #del spam, spam_info
 #This calls CoreFunctions so no need to do import it
@@ -1993,33 +1993,43 @@ class AnalysisWindow( Dialog, TkMPL ):
         self.data = parent.data[ mode ]
         self.parent = parent
 
-        #Sort the data if we have currents, and use the currents in the ResponseSequence
-        if online==True:
-            if hasattr(self.parent,'stimGUI'): c = parent.stimGUI.CurrentAmplitudeState
-            else: c = []
+        # Sort the data if we have currents, and use the currents in the ResponseSequence
+        if online == True:
+            if hasattr(self.parent, 'stimGUI'):
+                c = parent.stimGUI.CurrentAmplitudeState
+            else:
+                c = []
             DS5 = int(self.parent.operator.remote.GetParameter('EnableDS5ControlFilter'))
+            DS8 = int(self.parent.operator.remote.GetParameter('EnableDS8ControlFilter'))
         else:
             if parent.Currents != []:
                 c = parent.Currents
                 DS5 = 1
-            else: DS5=0; c= []
+                DS8 = 1
+            else:
+                DS5 = 0; DS8 = 0; c = []
 
         self.StimPool = 1
 
-        if c != [] and DS5==1: #if no DS5 then don't do this, it will cause more problems than good
+        if c != [] and (DS5 == 1 or DS8 == 1):  # if no DS5 then don't do this, it will cause more problems than good
 
-            if (mode in ['rc','offline']):
+            if (mode in ['rc', 'offline']):
                 cosrted = sorted(c)
-                if cosrted[0] > 50: self.Currents = ['{:.3f}'.format(i/1000) for i in cosrted]
-                else: self.Currents = ['{:.3f}'.format(i) for i in cosrted]
+                if max(cosrted) > 50:
+                    self.Currents = ['{:.2f}'.format(i / 1000) for i in cosrted]
+                else:
+                    self.Currents = ['{:.2f}'.format(i) for i in cosrted]
                 cindx = sorted(range(len(c)), key=lambda k: c[k])
-                #Need to refine this for pooled data
+                # Need to refine this for pooled data
                 data_sorted = [self.data[k] for k in cindx]
                 self.data = data_sorted
             else:
-                if c[0] > 50: self.Currents = ['{:.3f}'.format(i/1000) for i in c]
-                else: self.Currents = ['{:.3f}'.format(i) for i in c]
-        else: self.Currents = []
+                if max(c) > 50:
+                    self.Currents = ['{:.2f}'.format(i / 1000) for i in c]
+                else:
+                    self.Currents = ['{:.2f}'.format(i) for i in c]
+        else:
+            self.Currents = []
 
         self.description = parent.GetDescription( mode )
         self.acceptMode = None
