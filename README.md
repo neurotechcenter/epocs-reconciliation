@@ -23,3 +23,13 @@ amplifier and stimulator both use electrodes that are stuck temporarily to the s
 system can also be configured to use a mechanical stimulator (for conditioning natural stretch
 reflexes) or a transcanial magnetic stimulator (for investigating the role of responses generated
 by the brain rather than reflexes from the spinal cord).
+
+This branch of EPOCS that has automated control of a DS5 Stimulator and USB NIDAQ.
+Introduces several new BCI2000 programs to achieve this to be documented.
+
+This version is designed to be modualar- modules to allow various windows to be updated...
+
+Modules: 
+
+DS5/DS8 Stimulus Control
+M-Wave Analysis Window
