@@ -27,9 +27,7 @@ by the brain rather than reflexes from the spinal cord).
 This branch of EPOCS that has automated control of a DS5 Stimulator and USB NIDAQ.
 Introduces several new BCI2000 programs to achieve this to be documented.
 
-This version is designed to be modualar- modules to allow various windows to be updated...
-
-Modules: 
+This version (2016-2018) by Dr. Amir Eftekhar contains updated modules and installation to allow various windows to be updated and includes: 
 
 DS5/DS8 Stimulus Control
 M-Wave Analysis Window
