@@ -1,7 +1,0 @@
-Exception in Tkinter callback
-Traceback (most recent call last):
-  File "Tkinter.pyc", line 1470, in __call__
-  File "epocs.py", line 1780, in ok
-  File "epocs.py", line 2686, in apply
-  File "epocs.py", line 1157, in SetupDigitimer
-NameError: global name 'DS5LibClass' is not defined

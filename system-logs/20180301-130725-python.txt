@@ -1,5 +1,0 @@
-Traceback (most recent call last):
-  File "epocs.py", line 3084, in <module>
-  File "epocs.py", line 790, in __init__
-  File "epocs.py", line 1157, in SetupDigitimer
-NameError: global name 'DS5LibClass' is not defined

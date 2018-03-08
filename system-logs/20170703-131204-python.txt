@@ -1,6 +1,0 @@
-Exception in Tkinter callback
-Traceback (most recent call last):
-  File "Tkinter.pyc", line 1470, in __call__
-  File "DependantClasses\CoreFunctions.pyc", line 90, in curried
-  File "epocs.py", line 1143, in MWaveAnalysisFunc
-NameError: global name 'MWaveAnalysisWindow' is not defined
