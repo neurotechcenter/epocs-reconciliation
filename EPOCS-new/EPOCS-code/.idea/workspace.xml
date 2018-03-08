@@ -2,9 +2,20 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="e1301dda-31c0-47c8-ace6-16211829c2af" name="Default" comment="">
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.hg_archival.txt" afterPath="$PROJECT_DIR$/.hg_archival.txt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/vcs.xml" afterPath="$PROJECT_DIR$/.idea/vcs.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/NIDevicesAO.bat" afterPath="$PROJECT_DIR$/app/NIDevicesAO.bat" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/NIDevicesDO.bat" afterPath="$PROJECT_DIR$/app/NIDevicesDO.bat" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/custom/SampleAt6400Hz.bat" afterPath="$PROJECT_DIR$/app/custom/SampleAt6400Hz.bat" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/custom/TriggerGateUDP.bat" afterPath="$PROJECT_DIR$/app/custom/TriggerGateUDP.bat" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/custom/VisualizeSource.bat" afterPath="$PROJECT_DIR$/app/custom/VisualizeSource.bat" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/custom/VisualizeTrapFilter.bat" afterPath="$PROJECT_DIR$/app/custom/VisualizeTrapFilter.bat" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/custom/treadmill.bat" afterPath="$PROJECT_DIR$/app/custom/treadmill.bat" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/gui/epocs.py" afterPath="$PROJECT_DIR$/app/gui/epocs.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/parms/base-nidaqmx.prm" afterPath="$PROJECT_DIR$/app/parms/base-nidaqmx.prm" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/prog/BCI2000Remote.py" afterPath="$PROJECT_DIR$/app/prog/BCI2000Remote.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/prog/Backup/BCI2000Remote.py" afterPath="$PROJECT_DIR$/app/prog/Backup/BCI2000Remote.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/patch-r4528/OperatorLib.patch" afterPath="$PROJECT_DIR$/app/src/patch-r4528/OperatorLib.patch" />
     </list>
     <ignored path="EPOCS_amir.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -27,7 +38,7 @@
       <file leaf-file-name="epocs.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/gui/epocs.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="212">
+            <state relative-caret-position="1972">
               <caret line="124" column="0" lean-forward="false" selection-start-line="124" selection-start-column="0" selection-end-line="125" selection-end-column="27" />
               <folding>
                 <element signature="e#4803#4828#0" expanded="true" />
@@ -40,11 +51,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="epocs.py" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/../aEPOCS_LabVersion_v4jen/app/gui/epocs.py">
+      <file leaf-file-name="make_exe.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/app/gui/make_exe.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="340">
-              <caret line="127" column="20" lean-forward="true" selection-start-line="127" selection-start-column="20" selection-end-line="127" selection-end-column="20" />
+            <state relative-caret-position="289">
+              <caret line="32" column="0" lean-forward="false" selection-start-line="32" selection-start-column="0" selection-end-line="32" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -113,16 +124,16 @@
         <option value="$PROJECT_DIR$/app/gui/DependantClasses/CurrentControl.py" />
         <option value="$PROJECT_DIR$/app/parms/NIDigitalOutputPort.prm" />
         <option value="$PROJECT_DIR$/data/test/test-LastSettings.txt" />
-        <option value="$PROJECT_DIR$/app/gui/make_exe.py" />
         <option value="$PROJECT_DIR$/app/gui/DependantClasses/DS5LibClass.py" />
         <option value="$PROJECT_DIR$/app/gui/epocs.py" />
         <option value="$PROJECT_DIR$/../aEPOCS_LabVersion_v4jen/app/gui/epocs.py" />
+        <option value="$PROJECT_DIR$/app/gui/make_exe.py" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="406" />
-    <option name="width" value="1515" />
+    <option name="x" value="551" />
+    <option name="width" value="1352" />
     <option name="height" value="1040" />
   </component>
   <component name="ProjectView">
@@ -429,10 +440,9 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="406" y="0" width="1515" height="1040" extended-state="0" />
-    <editor active="true" />
+    <frame x="551" y="0" width="1352" height="1040" extended-state="0" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.21649484" sideWeight="0.49118942" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.21981424" sideWeight="0.49118942" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.2094818" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
@@ -719,13 +729,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/../aEPOCS/app/gui/epocs.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="423">
-          <caret line="3880" column="37" lean-forward="false" selection-start-line="3880" selection-start-column="37" selection-end-line="3880" selection-end-column="37" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/../aEPOCS/app/gui/epocs.py" />
     <entry file="file://$PROJECT_DIR$/../aEPOCS_LabVersion_v1/app/gui/epocs.py" />
     <entry file="file://$PROJECT_DIR$/../aEPOCS_LabVersion_v2/app/gui/epocs.py" />
     <entry file="file://$USER_HOME$/.PyCharm2016.2/system/python_stubs/739806999/sys.py">
@@ -797,7 +801,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="4760">
           <caret line="280" column="0" lean-forward="false" selection-start-line="280" selection-start-column="0" selection-end-line="280" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -820,38 +823,21 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="194">
           <caret line="93" column="16" lean-forward="true" selection-start-line="93" selection-start-column="16" selection-end-line="93" selection-end-column="16" />
-          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/app/parms/NIDigitalOutputPort.prm" />
-    <entry file="file://$PROJECT_DIR$/../aEPOCS/app/gui/StimulusControl/ControlFunctions.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="11237">
-          <caret line="663" column="20" lean-forward="false" selection-start-line="663" selection-start-column="13" selection-end-line="663" selection-end-column="20" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/gui/make_exe.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="934">
-          <caret line="65" column="20" lean-forward="true" selection-start-line="65" selection-start-column="20" selection-end-line="65" selection-end-column="20" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/../aEPOCS/app/gui/StimulusControl/ControlFunctions.py" />
     <entry file="file://$PROJECT_DIR$/app/gui/DependantClasses/DS5LibClass.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="697">
           <caret line="43" column="0" lean-forward="false" selection-start-line="43" selection-start-column="0" selection-end-line="43" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#15#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/app/gui/epocs.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="212">
+        <state relative-caret-position="1972">
           <caret line="124" column="0" lean-forward="false" selection-start-line="124" selection-start-column="0" selection-end-line="125" selection-end-column="27" />
           <folding>
             <element signature="e#4803#4828#0" expanded="true" />
@@ -863,10 +849,11 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/../aEPOCS_LabVersion_v4jen/app/gui/epocs.py">
+    <entry file="file://$PROJECT_DIR$/../aEPOCS_LabVersion_v4jen/app/gui/epocs.py" />
+    <entry file="file://$PROJECT_DIR$/app/gui/make_exe.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="340">
-          <caret line="127" column="20" lean-forward="true" selection-start-line="127" selection-start-column="20" selection-end-line="127" selection-end-column="20" />
+        <state relative-caret-position="289">
+          <caret line="32" column="0" lean-forward="false" selection-start-line="32" selection-start-column="0" selection-end-line="32" selection-end-column="0" />
           <folding />
         </state>
       </provider>
