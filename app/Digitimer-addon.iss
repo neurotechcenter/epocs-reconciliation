@@ -42,7 +42,7 @@ Source: "gui\DependantClasses\DS5LibClass.py"; DestDir: "{app}\app\gui\Dependant
 
 [Run]
 Filename: {app}\app\prog\DS5Setup.exe; Description: Install DS5 drivers; Flags: postinstall skipifsilent
-Filename: {app}\app\prog\DS8R-Install-1.2.0.0.exe; Description: Instal DS8 drivers; Flags: postinstall skipifsilent
+Filename: {app}\app\prog\DS8R-Install-1.2.0.0.exe; Description: Install DS8 drivers; Flags: postinstall skipifsilent
 Filename: {app}\app\NISetup\NIAnalogOutput.exe; Description: Setup NI Analog Output Ports; Flags: postinstall skipifsilent
 
 

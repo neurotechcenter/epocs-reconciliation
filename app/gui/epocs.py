@@ -125,8 +125,8 @@ try:
 except:
     pass
 
-EPOCSVERSION = 1.2
-EPOCSVERSIONDATE = "3-8-18"
+EPOCSVERSION = 1.3
+EPOCSVERSIONDATE = "3-12-18"
 
 #del spam, spam_info
 #This calls CoreFunctions so no need to do import it
@@ -1163,10 +1163,20 @@ class GUI( tksuperclass, TkMPL ):
                 self.operator.bci2000('set parameter EnableDS8ControlFilter 1')
                 self.operator.bci2000('set parameter EnableDS5ControlFilter 0')
                 self.operator.bci2000('set parameter AnalogOutput 0')
+
+            #Enable Stimulation Control
+            EnableWidget(self.MatchWidgets('stim'), True)
+
+
         else:
             self.operator.bci2000('set parameter EnableDS5ControlFilter 0')
             self.operator.bci2000('set parameter AnalogOutput 0')
             self.operator.bci2000('set parameter EnableDS8ControlFilter 0')
+
+            #Disable Stimulation Control
+            EnableWidget(self.MatchWidgets('stim'), False)
+            if hasattr(self,'stimGUI'):
+                self.stimGUI.withdraw()
 
     def SettingsFrame( self, code, settings=True, analysis=True ):
         """
@@ -1220,12 +1230,12 @@ class GUI( tksuperclass, TkMPL ):
         self.SettingsFrame(code, **kwargs)
 
         if hasattr(self,'stimGUI'):
-            Cbutton = self.widgets[code + 'stim'] = tkinter.Button(frame, text='Stimulation\nControl Panel', command=self.stimGUI.deiconify)
+            Cbutton = self.widgets[code + '_stim'] = tkinter.Button(frame, text='Stimulation\nControl Panel', command=self.stimGUI.deiconify)
             Cbutton.pack(side='left', ipadx=20, padx=2, pady=2)
 
-            DS5 = int(self.operator.remote.GetParameter('EnableDS5ControlFilter'))
-            DS8 = int(self.operator.remote.GetParameter('EnableDS8ControlFilter'))
-            if (DS5 == 0) and (DS8 == 0):
+            DigEnabled = self.operator.params._DigitimerEnable
+
+            if (DigEnabled == 'off'):
                 Cbutton.config(state='disabled')
 
         if DEVEL and code in [ 'vc', 'rc', 'ct', 'tt' ]:
@@ -2560,7 +2570,7 @@ class SettingsWindow( Dialog, TkMPL ):
         DS5 = bool(self.parent.operator.remote.GetParameter('EnableDS5ControlFilter'))
         DS8 = bool(self.parent.operator.remote.GetParameter('EnableDS8ControlFilter'))
         import DependantClasses as DependantClasses
-        Libs = (DS5LibClass in dir(DependantClasses))
+        Libs = ('DS5LibClass' in dir(DependantClasses))
 
         state = {True: 'normal', False: 'disabled'}[(DS5 or DS8) and (Libs)]
         self.widgets.switch_DigitimerEnable = Switch(subsection, title='Digitimer Enable:', offLabel='ON', onLabel='OFF',

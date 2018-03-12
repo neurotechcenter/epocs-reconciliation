@@ -39,14 +39,14 @@ Name: "epocs"; Description: "EPOCS"; Types: epocs full
 Name: "mwave"; Description: "Mwave Tool"; Types: mwave full
 
 [Files]
-Source: "..\*";             DestDir: "{app}";             Excludes:"\data,\system-logs,.ini,.log,.mmap,.pyc,\app\gui\DependantClasses\CurrentControl.py,\app\gui\DependantClasses\MwaveAnalysisClass.py"; Flags: ignoreversion recursesubdirs createallsubdirs; Components: epocs
+Source: "..\*";             DestDir: "{app}";             Excludes:"\data,\system-logs,.ini,.log,.mmap,.pyc,\app\gui\DependantClasses\CurrentControl.py,\app\gui\DependantClasses\DS5LibClass.py,app\parms\NIDigitalOutputPort.prm,\app\gui\DependantClasses\Interop.DS5Lib.py,\app\gui\DependantClasses\MwaveAnalysisClass.py"; Flags: ignoreversion recursesubdirs createallsubdirs; Components: epocs
 Source: "..\data\sample\*"; DestDir: "{app}\data\sample";                                                     Flags: ignoreversion recursesubdirs createallsubdirs     ; Components: epocs
 Source: "gui\DependantClasses\MwaveAnalysisClass.py"; DestDir: "{app}\app\gui\DependantClasses"; Flags: ignoreversion; Components: mwave 
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Run]
 Filename: {app}\app\prog\NIDAQ1551f0_downloader.exe; Description: Install NIDAQmx 15.5; Flags: postinstall skipifsilent
-Filename: {app}\app\NISetup\NIDigitalOutput.exe; Description: Setup NI Device Output Ports; Flags: postinstall nowait skipifsilent
+Filename: {app}\app\NISetup\NIDigitalOutput.exe; Description: Setup NI Device Output Ports; Flags: postinstall skipifsilent
 
 [Dirs]
 Name: "{app}"; Permissions: users-modify
