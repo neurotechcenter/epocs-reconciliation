@@ -115,7 +115,10 @@ try:
 except:
     pass
 
-from DependantClasses.DS5LibClass import DS5LibClass as DS5LibClass
+try:
+    from DependantClasses.DS5LibClass import DS5LibClass as DS5LibClass
+except:
+    pass
 
 try:
     from DependantClasses import CurrentControl as CurrentControl
@@ -232,7 +235,7 @@ class Operator( object ):
             _IncrementStart = 0.5,
             _IncrementIncrement=0.25,
             _CurrentLimit=50,
-            _DigitimerEnable='on',
+            _DigitimerEnable='off',
             _DigitimerSelect='DS8',
         )
         self.remote = None
@@ -1993,12 +1996,10 @@ class AnalysisWindow( Dialog, TkMPL ):
         self.data = parent.data[ mode ]
         self.parent = parent
 
-        # Sort the data if we have currents, and use the currents in the ResponseSequence
-        if online == True:
-            if hasattr(self.parent, 'stimGUI'):
-                c = parent.stimGUI.CurrentAmplitudeState
-            else:
-                c = []
+        #Sort the data if we have currents, and use the currents in the ResponseSequence
+        if online==True:
+            if hasattr(self.parent,'stimGUI'): c = parent.stimGUI.CurrentAmplitudeState
+            else: c = []
             DS5 = int(self.parent.operator.remote.GetParameter('EnableDS5ControlFilter'))
             DS8 = int(self.parent.operator.remote.GetParameter('EnableDS8ControlFilter'))
         else:
@@ -2006,30 +2007,24 @@ class AnalysisWindow( Dialog, TkMPL ):
                 c = parent.Currents
                 DS5 = 1
                 DS8 = 1
-            else:
-                DS5 = 0; DS8 = 0; c = []
+            else: DS5=0; DS8 = 0; c= []
 
         self.StimPool = 1
 
-        if c != [] and (DS5 == 1 or DS8 == 1):  # if no DS5 then don't do this, it will cause more problems than good
+        if c != [] and (DS5==1 or DS8==1): #if no DS5 then don't do this, it will cause more problems than good
 
-            if (mode in ['rc', 'offline']):
+            if (mode in ['rc','offline']):
                 cosrted = sorted(c)
-                if max(cosrted) > 50:
-                    self.Currents = ['{:.2f}'.format(i / 1000) for i in cosrted]
-                else:
-                    self.Currents = ['{:.2f}'.format(i) for i in cosrted]
+                if max(cosrted) > 50: self.Currents = ['{:.2f}'.format(i/1000) for i in cosrted]
+                else: self.Currents = ['{:.2f}'.format(i) for i in cosrted]
                 cindx = sorted(range(len(c)), key=lambda k: c[k])
-                # Need to refine this for pooled data
+                #Need to refine this for pooled data
                 data_sorted = [self.data[k] for k in cindx]
                 self.data = data_sorted
             else:
-                if max(c) > 50:
-                    self.Currents = ['{:.2f}'.format(i / 1000) for i in c]
-                else:
-                    self.Currents = ['{:.2f}'.format(i) for i in c]
-        else:
-            self.Currents = []
+                if max(c) > 50: self.Currents = ['{:.2f}'.format(i/1000) for i in c]
+                else: self.Currents = ['{:.2f}'.format(i) for i in c]
+        else: self.Currents = []
 
         self.description = parent.GetDescription( mode )
         self.acceptMode = None
@@ -2564,9 +2559,12 @@ class SettingsWindow( Dialog, TkMPL ):
         subsection = tkinter.Frame(section, bg=bg)
         DS5 = bool(self.parent.operator.remote.GetParameter('EnableDS5ControlFilter'))
         DS8 = bool(self.parent.operator.remote.GetParameter('EnableDS8ControlFilter'))
-        state = {True: 'normal', False: 'disabled'}[DS5 or DS8]
+        import DependantClasses as DependantClasses
+        Libs = (DS5LibClass in dir(DependantClasses))
+
+        state = {True: 'normal', False: 'disabled'}[(DS5 or DS8) and (Libs)]
         self.widgets.switch_DigitimerEnable = Switch(subsection, title='Digitimer Enable:', offLabel='ON', onLabel='OFF',
-                                               values=['on', 'off'], initialValue='on').connect(params,'_DigitimerEnable').enable('normal').pack(side='left', padx=10, pady=10)
+                                               values=['on', 'off'], initialValue='on').connect(params,'_DigitimerEnable').enable(state).pack(side='left', padx=10, pady=10)
 
         self.widgets.switch_DigitimerSelect = Switch(subsection, title='DS5/DS8:', offLabel='DS5', onLabel='DS8',
                                                     values=['DS5', 'DS8'], initialValue='DS5').connect(params,'_DigitimerSelect').enable(state).pack(side='left', padx=10, pady=10)

@@ -43,6 +43,7 @@ Filtering     float      PulseWidth=                        0.5ms               
 Filtering     float      InitialCurrent=                    1                       // Initial Current to Use for Stimulation mA
 Filtering     matrix     FilterExpression=                  1 { Output%20Type Device%20Name Port/Line	Expression/Current} Digital       Dev1       port0/Line7 EnableTrigger
 Filtering     int        EnableDS5ControlFilter=            0
+Filtering     int        EnableDS8ControlFilter=            0
 Filtering     int        AnalogOutput=                      0
 StimulationControl float DeltaCurrent=                      1                       //Delta Current to use in automation
 Stimulation   int        StimulationType=                   2                       //Biphasic=2, Monophasic = 1

@@ -1,7 +1,0 @@
-Patient Code: TestSubject
-Session Code: 2017-03-27-08-58
-
-
-
-2017-03-27  10:18       Started run R01 (Control Trials)
-2017-03-27  10:19       Stopped run R01 after 0 trials
