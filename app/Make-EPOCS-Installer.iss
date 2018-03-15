@@ -17,7 +17,7 @@ AppPublisher={#MyAppPublisher}
 DefaultDirName={sd}\{#MyAppName}
 DefaultGroupName={#MyAppName}
 OutputDir={#UserProfile}\Desktop
-OutputBaseFilename=Install-EPOCSv4
+OutputBaseFilename=Install-EPOCS
 SetupIconFile=.\gui\epocs.ico
 Compression=lzma
 SolidCompression=yes
@@ -39,14 +39,17 @@ Name: "epocs"; Description: "EPOCS"; Types: epocs full
 Name: "mwave"; Description: "Mwave Tool"; Types: mwave full
 
 [Files]
-Source: "..\*";             DestDir: "{app}";             Excludes:"\data,\system-logs,.ini,.log,.mmap,.pyc,\app\gui\DependantClasses\CurrentControl.py,\app\gui\DependantClasses\DS5LibClass.py,app\parms\NIDigitalOutputPort.prm,\app\gui\DependantClasses\Interop.DS5Lib.py,\app\gui\DependantClasses\MwaveAnalysisClass.py"; Flags: ignoreversion recursesubdirs createallsubdirs; Components: epocs
+Source: "..\*";             DestDir: "{app}";             Excludes:"\data,\system-logs,.ini,.log,.mmap,.pyc,\app\gui\DependantClasses\CurrentControl.py,\app\gui\DependantClasses\DS5LibClass.py,app\parms\NIDigitalOutputPort.prm,\app\gui\DependantClasses\Interop.DS5Lib.py,\app\gui\DependantClasses\MwaveAnalysisClass.py"; Flags: ignoreversion recursesubdirs createallsubdirs; Components: epocs 
 Source: "..\data\sample\*"; DestDir: "{app}\data\sample";                                                     Flags: ignoreversion recursesubdirs createallsubdirs     ; Components: epocs
 Source: "gui\DependantClasses\MwaveAnalysisClass.py"; DestDir: "{app}\app\gui\DependantClasses"; Flags: ignoreversion; Components: mwave 
+Source: "prog\NIDAQ1551f0_downloader.exe."; DestDir: "{app}\app\gui\progs\"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Run]
-Filename: {app}\app\prog\NIDAQ1551f0_downloader.exe; Description: Install NIDAQmx 15.5; Flags: postinstall skipifsilent
-Filename: {app}\app\NISetup\NIDigitalOutput.exe; Description: Setup NI Device Output Ports; Flags: postinstall skipifsilent
+Filename: {app}\app\prog\vcredist_x86.exe; Description: Visual Studio 2012 Redistributable; Flags: postinstall skipifsilent; Check: "not IsWin64"
+Filename: {app}\app\prog\vcredist_x64.exe; Description: Visual Studio 2012 Redistributable; Flags: postinstall skipifsilent; Check: IsWin64
+;Filename: {app}\app\prog\NIDAQ1551f0_downloader.exe; Description: Install NIDAQmx 15.5; Flags: postinstall skipifsilent
+Filename: {app}\app\NISetup\NIDigitalOutput.exe; Description: Setup NI Device Output Ports; Flags: postinstall skipifsilent unchecked
 
 [Dirs]
 Name: "{app}"; Permissions: users-modify
@@ -66,4 +69,21 @@ Type: files; Name: "{app}\app\gui-bin\epocs.exe.log"
 Type: files; Name: "{app}\app\prog\BCI2000Remote.pyc"
 Type: files; Name: "{app}\app\prog\Operator.ini"
 Type: files; Name: "{app}\app\prog\epocs.mmap"
+
+[Code]
+function InitializeSetup: boolean;
+var
+  ResultCode: Integer;
+begin
+  Result := RegKeyExists(HKEY_LOCAL_MACHINE,'SOFTWARE\Wow6432Node\National Instruments\NI-DAQmx\CurrentVersion')
+  if not Result then
+    begin
+    if MsgBox('National Instruments NIDAQmx not found. Please re-run EPOCS installation after installing NIDAQmx. Install version 15.5 now? ', mbConfirmation, MB_YESNO) = IDYES then
+      
+      ExtractTemporaryFile('NIDAQ1551f0_downloader.exe');
+      ExecAsOriginalUser( ExpandConstant('{tmp}\NIDAQ1551f0_downloader.exe'), '', '', SW_SHOWNORMAL, ewNoWait, ResultCode)
+    Result := False;
+    end
+end;
+
 
