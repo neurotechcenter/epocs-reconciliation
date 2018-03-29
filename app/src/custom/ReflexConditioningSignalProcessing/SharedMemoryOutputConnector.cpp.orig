@@ -33,7 +33,7 @@
 
 using namespace std;
 
-RegisterFilter( SharedMemoryOutputConnector, 2.H );
+RegisterFilter( SharedMemoryOutputConnector, 2.G );
 
 
 SharedMemoryOutputConnector::SharedMemoryOutputConnector()

@@ -58,5 +58,8 @@ Filter( TrapFilter, 2.E );
 #include "RangeIntegrator.h"
 Filter( RangeIntegrator, 2.F );
 
+#include "CurrentControlCriteria.h"
+Filter( CurrentControlCriteria, 2.G );
+
 #include "SharedMemoryOutputConnector.h"
-Filter( SharedMemoryOutputConnector, 2.G );
+Filter( SharedMemoryOutputConnector, 2.H );

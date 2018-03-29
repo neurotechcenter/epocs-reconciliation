@@ -34,7 +34,7 @@ SET( HDR_PROJECT
   RangeIntegrator.h
   NIDAQFilterAO.h
   DS5ControlFilter.h
-  DS8library.h
+  MixedCode.h
   stdafx.h
   targetver.h
   ${BCI2000_SRC_DIR}/contrib/SignalSource/NIDAQ-MX/nidaq/NIDAQmx.imports.h
@@ -65,6 +65,6 @@ BCI2000_ADD_SIGNAL_PROCESSING_MODULE(
   "${SRC_PROJECT}" "${HDR_PROJECT}" 
 )
 
-TARGET_LINK_LIBRARIES(aReflexConditioningSignalProcessing ${BCI2000_SRC_DIR}/Custom/aReflexConditioningSignalProcessing/Libraries/DS8library.lib)
+TARGET_LINK_LIBRARIES(aReflexConditioningSignalProcessing ${BCI2000_SRC_DIR}/Custom/aReflexConditioningSignalProcessing/Libraries/MixedCode.lib)
 
 

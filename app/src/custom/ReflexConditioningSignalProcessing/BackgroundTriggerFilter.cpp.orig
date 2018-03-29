@@ -38,7 +38,7 @@
 using namespace std;
 
 
-RegisterFilter( BackgroundTriggerFilter, 2.P );
+RegisterFilter( BackgroundTriggerFilter, 2.B );
 
 BackgroundTriggerFilter::BackgroundTriggerFilter() :
   mVis( NULL ),

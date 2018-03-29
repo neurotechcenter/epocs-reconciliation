@@ -1,0 +1,6 @@
+DS5control no longer uses DS5 CLR wrapper (decided not to work).
+
+Moved DS5 control to python and fixed bug in DS8 control (limiting current to 5mA). 
+
+This is now incorporated in EPOCS_labversion_v4
+

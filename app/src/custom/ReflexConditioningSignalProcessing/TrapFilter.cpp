@@ -39,7 +39,7 @@
 
 using namespace std;
 
-RegisterFilter( TrapFilter, 2.Q );
+RegisterFilter( TrapFilter, 2.E );
 
 TrapFilter::TrapFilter() :
 mVis( NULL ),
