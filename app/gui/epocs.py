@@ -922,16 +922,16 @@ class GUI( tksuperclass, TkMPL ):
             self.operator.bci2000('Set Parameter AnalysisType 1') #p2p
             self.operator.needSetConfig = 1
             if hasattr(self, 'stimGUI'):
-                self.stimGUI.SetNewCurrent(value=self.stimGUI.CurrentAmplitude / 1000)  # This will in the initial amplitude or update to what the user sets
+                self.stimGUI.SetNewCurrent(value=float(self.stimGUI.CurrentAmplitude) / 1000)  # This will in the initial amplitude or update to what the user sets
                 self.stimGUI.CurrentAmplitudeState.append(self.stimGUI.CurrentAmplitude)
         if mode in ['rc']:
             self.operator.bci2000('Set Parameter AnalysisType 1')
             self.operator.needSetConfig = 1
-            if hasattr(self, 'stimGUI'): self.stimGUI.SetNewCurrent(value=self.stimGUI.CurrentAmplitude / 1000)
+            if hasattr(self, 'stimGUI'): self.stimGUI.SetNewCurrent(value=float(self.stimGUI.CurrentAmplitude) / 1000)
         if mode in ['ct','tt']:
             self.operator.bci2000('Set Parameter AnalysisType 0')
             self.operator.needSetConfig = 1
-            if hasattr(self, 'stimGUI'): self.stimGUI.SetNewCurrent(value=self.stimGUI.CurrentAmplitude / 1000)
+            if hasattr(self, 'stimGUI'): self.stimGUI.SetNewCurrent(value=float(self.stimGUI.CurrentAmplitude) / 1000)
 
     def Start( self, mode ):
         """
