@@ -1,0 +1,47 @@
+
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML+RDFa 1.0//EN"
+    "http://www.w3.org/MarkUp/DTD/xhtml-rdfa-1.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en"
+      xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+      xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+      xmlns:dc="http://purl.org/dc/elements/1.1/"
+      xmlns:foaf="http://xmlns.com/foaf/0.1/">
+  <head>
+        <meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
+        <link rel="stylesheet" type="text/css" href="theme.css" />
+      <title>
+        EPOCS Offline Analysis
+      </title>
+  </head>
+  <body>
+  <img src="logo.png" width="100%" />
+<h1>EPOCS Offline Analysis</h1>
+<h2>For developers:</h2>
+<p>The online EPOCS application can only display an analysis of each GUI tab's most recent run, and only as long as the data are still in memory. Offline Analysis mode allows users to recreate the same "Analysis" window from old files.  EPOCS can be run in "Offline Analysis" mode by one of the following methods:</p>
+<ul>
+<li>Launch via a shortcut to <code>app/gui-bin/epocs-offline.exe</code></li>
+<li>Run from source by launching via a shortcut to <code>app/gui/offline.bat</code></li>
+<li>Run from source from an IPython prompt by typing <code>run epocs --offline</code></li>
+</ul>
+<p>Note that the "run from source" options require installation of a Python distribution with certain third-party packages, as detailed on the <a href="EPOCSGUI.html">EPOCS GUI</a> page.</p>
+<p>EPOCS Offline Analysis allows multiple files to be analysed at once (shift-click or ctrl-click on them to select multiple files in the dialog). As at 2014-07-31 it has the following properties and limitations:</p>
+<ul>
+<li>
+<p>No Voluntary Contraction analysis is performed, and no usable information will be read from files ending <code>-VC.dat</code>.  The application displays the timing, sequence and distribution of time-locked responses, as in EPOCS' online analysis of Control Trials or Training Trials.  This is suitable for files ending <code>-ST.dat</code>, <code>-RC.dat</code>, <code>-CT.dat</code> or <code>-TT.dat</code>.</p>
+</li>
+<li>
+<p>It takes a few seconds to read each file.</p>
+</li>
+<li>
+<p>The application is a console application.  Log messages go to the black console window, and not to a file.</p>
+</li>
+<li>
+<p>Errors are also displayed on the console window, which may then close a split second later. Run from a Command Prompt if there are error messages you need to read.</p>
+</li>
+<li>
+<p>The log also automatically goes to the clipboard, and can be pasted elsewhere (a notepad file, or the "Log" tab of an online EPOCS session) using ctrl-v  (NB: this seems to work fine from the compiled <code>epocs-offline.exe</code>, but when you're running from source there is one quirk: you must paste <em>before</em> the console application quits to avoid losing the information).</p>
+</li>
+</ul>
+  </body>
+</html>

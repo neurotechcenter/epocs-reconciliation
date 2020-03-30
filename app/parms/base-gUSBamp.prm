@@ -1,0 +1,78 @@
+Source 					int 	  SamplingRate= 		2400 // the signal sampling rate
+Source 					int 	  SampleBlockSize= 	    96 // the signal sample block size
+Source                  int       SourceCh=             16                   // number of digitized and stored channels
+Source                  intlist   SourceChList=         16     1     2     3     4     5     6     7     8     9    10    11    12    13    14    15    16    17    18    19    20    21    22    23    24    25    26    27    28    29    30    31    32    33    34    35    36    37    38    39    40    41    42    43    44    45    46    47    48    49    50    51    52    53    54    55    56    57    58    59    60    61    62    63    64    65    66    67    68    69    70    71    72    73    74    75    76    77    78    79    80    81    82    83    84    85    86    87    88    89    90    91    92    93    94    95    96    97    98    99   100   101   102   103   104   105   106   107   108   109   110   111   112   113   114   115   116   117   118   119   120   121   122   123   124   125   126   127   128   129   130   131   132   133   134   135   136  // list of channels to digitize
+Source                  list      ChannelNames=         16     EMG1	EMG2	EMG3	EMG4	EMG5	EMG6	EMG7	EMG8	EMG9	EMG10	EMG11	EMG12	EMG13	EMG14	EMG15	EMG16	EMG17	EMG18	EMG19	EMG20	EMG21	EMG22	EMG23	EMG24	EMG25	EMG26	EMG27	EMG28	EMG29	EMG30	EMG31	EMG32 //Channel Names
+Source                  floatlist SourceChOffset=       16     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0  // Offset for channels in A/D units
+Source                  floatlist SourceChGain=         16     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1     1  // gain for each channel (A/D units -> muV)
+Source                  list      TransmitChList=       16     1     2     3     4     5     6     7     8     9    10    11    12    13    14    15    16    17    18    19    20    21    22    23    24    25    26    27    28    29    30    31    32    33    34    35    36    37    38    39    40    41    42    43    44    45    46    47    48    49    50    51    52    53    54    55    56    57    58    59    60    61    62    63    64    65    66    67    68    69    70    71    72    73    74    75    76    77    78    79    80    81    82    83    84    85    86    87    88    89    90    91    92    93    94    95    96    97    98    99   100   101   102   103   104   105   106   107   108   109   110   111   112   113   114   115   116   117   118   119   120   121   122   123   124   125   126   127   128   129   130   131   132   133   134   135   136  // list of transmitted channels
+Source                  int       EnableDigitalInput=                1             // enable digital input:  0: false, 1: true (enumeration)
+Source                  int       DigitalOutput=               0             // enable digital output on block acquisition (boolean)
+Source                  int       CommonGround=                1             // internally connect GNDs from all blocks:  0: false, 1: true (enumeration)
+Source                  int       CommonReference=             1             // internally connect Refs from all blocks:  0: false, 1: true (enumeration)
+Source                  int       AcquisitionMode=             0             // data acquisition mode:  0: analog signal acquisition, 1: calibration, 2: impedance (enumeration)
+Source                  int       SignalType=                  1             // numeric type of output signal:  0: int16, 1: float32 (enumeration)
+Source                  int       FilterEnabled=               0             // Enable pass band filter (0=no, 1=yes)
+Source                  int       NotchEnabled=                0             // Enable notch (0=no, 1=yes)
+Source                  string    DeviceIDMaster=              auto // deviceID for the device whose SYNC goes to the slaves
+Source                  list      DeviceIDs=             2     auto // list of USBamps to be used (or auto)
+
+Filtering     float      HighPassCorner=                   0.5Hz
+Filtering     int        HighPassOrder=                    2
+
+Filtering     float      LowPassCorner=                  500Hz
+Filtering     int        LowPassOrder=                     0
+
+Filtering     float      NotchCenter=                     60Hz
+Filtering     int        NotchOrder=                       0
+
+Filtering     float      FilterGain=                       1.0                      // Overall filter gain
+Filtering     int        Downsample=                       0                        // Downsample to >= 4*LowPassCorner (boolean)
+
+
+Background    matrix     BackgroundChannels=         2 { Input%20Channel Subtract%20Mean? Norm Min%20Amplitude Max%20Amplitude Feedback%20Weight }                                                               EMG1              yes         1        5mV           18mV               1.0             EMG2              yes         1        0mV           15mV               0.0          // specification of signal channels used to monitor baseline compliance
+Background    float      FeedbackTimeConstant=           200ms                      // length of time over which to average the feedback signal (will be rounded up to a whole number of segment lengths)
+Background    float      BackgroundFreezeTime=          1000ms                      // after a trigger is triggered, the background bar's height and color will be frozen for this duration (expressed in sampleblocks, or milliseconds if "ms" is appended)
+Background    float      BackgroundHoldDuration=           2s                       // the duration for which consecutive time segments must comply with the target baseline activity ranges
+Background    float      MaxRandomExtraHoldDuration=       1s                       // a random extra duration may be added to BackgroundHoldDuration on each trial, up to this amount
+Background    float      BackgroundSegmentDuration=      200ms                      // the duration of one background segment (in sampleblocks, or in milliseconds if "ms" is appended)
+Trigger       string     TriggerExpression=                %                        // optional BCI2000 Expression that must be satisfied for trigger to fire
+Trigger       float      TriggerStateDuration=             2                        // duration (whole number of sampleblocks) for which the EnableTrigger output state is kept high
+Trigger       float      MinTimeBetweenTriggers=           5s                       // trigger refractory time (in sampleblocks, or in seconds if "s" is appended)
+Trigger       list       ChannelsToTrap=             2   EMG1      EMG2      	    // names or indices of the input channels to be trapped
+Trigger       string     TriggerChannel=                 TRIG                       // name or index of the input channel used to monitor the trigger
+Trigger       float      TriggerThreshold=                 1.0V                     // voltage that the trigger must exceed to be counted as a rising edge
+Trigger       float      LookForward=                    500ms                      // length of signal segment to capture after each trigger
+Trigger       float      LookBack=                       100ms                      // length of signal segment to capture before each trigger
+Trigger		  int		 TriggerSource=					 2							//1=NIDaq Channel, 2=gusb
+Trigger		  int		 TriggerState=					 DigitalInput1				//Channel to use for trigger
+
+Responses     matrix     ResponseDefinition=   2 { Input%20Channel Start End Subtract%20Mean? Norm Weight Response%20Name }          EMG1  15ms  30ms  no  1  1.0  EMG1  EMG1  5ms  15ms  no  1  1.0  EMG1a  // define the response signals:
+Responses     matrix     ResponseAssessment=   1 { Response%20Name Min%20Amplitude Max%20Amplitude Feedback%20Weight }   EMG1 5mV 15mV 1.0 // process the response signals:
+Responses     int        OutputMode=                       0                        // which signal to pass on, 0: pass through input unchanged, 1: output responses (enumeration)
+
+Filtering     float      PulseWidth=                        0.5ms                     // PulseWidth of the Analog Stimulii
+Filtering     float      InitialCurrent=                    0                       // Initial Current to Use for Stimulation mA
+Filtering     int        EnableDS5ControlFilter=            0
+Filtering     int        EnableDS8ControlFilter=            0
+Filtering     int        AnalogOutput=                      0
+StimulationControl float DeltaCurrent=                      1                       //Delta Current to use in automation
+Stimulation   int        StimulationType=                   2                       //Biphasic=2, Monophasic = 1
+
+Visualize     float      BackgroundVisualizationUnit=      1mV                      // Unit for numerical representation of BackgroundTriggerFilter
+Visualize     int        VisualizeBackgroundAverages=      0                        // Visualize segment averages from BackgroundTriggerFilter (boolean)
+Visualize     int        VisualizeTrapFilter=              0                        // Visualize TrapFilter output (boolean)
+Visualize     int        VisualizeRangeIntegrator=         0                        // Visualize RangeIntegrator output (boolean)
+Visualize     int        VisualizeTiming=                  0
+Visualize     int        VisualizeSource=                  0
+
+Visualize     int        VisualizeSourceTime=              2s
+Visualize     int        VisualizeSourceDecimation=        1
+Visualize     int        VisualizeSourceBufferSize=      auto
+Visualize     int        SourceMin=                     -100mV
+Visualize     int        SourceMax=                      100mV
+
+
+
+Application string GaugesWindowBackgroundColor= 0xFFFFFF
+Application matrix Gauges= 2 { caption captionsize type xpos ypos width height  signal1                       min1 max1 vprecision showscale }                            Background     0.3      bar  0.1  0.2 0.3   0.8    BackgroundFeedbackValue/1000    0   30       5          1                            Response       0.3      bar  0.6  0.2 0.3   0.8    Response/1000                   0   70       6          1
