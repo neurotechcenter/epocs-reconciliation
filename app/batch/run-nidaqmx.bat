@@ -9,15 +9,13 @@ system taskkill /F /FI "IMAGENAME eq DummyApplication.exe"
 
 change directory $BCI2000LAUNCHDIR
 
-set environment MODE master 
-if [ $1 ]; set environment MODE $1; end    # "master" or "slave"
+set environment MODE $1                    # "master" or "slave"
 set environment SOURCE $2                  # "replay" or "live"
 set environment AMP $3			   		   # empty, or gusbamp if using gusb
 set environment CUSTOM $4                  # empty, or a path to a BCI2000 script file
 	
 
 if [ $MODE == "master" ]; show window; end
-show window;
 set title ${extract file base $0}
 reset system
 

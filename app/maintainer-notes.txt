@@ -1,0 +1,14 @@
+The Visual Studio 2012 Redistributable package (32-bit version) had to be downloaded and installed in order to get past VCOMP110.DLL not found errors.
+It might be that the 64-bit version is also required? I installed that first, having been misled into thinking everything was 64-bit now.
+Note that some BCI2000 binaries appear to be 64-bit (Operator.exe, DummyApplication.exe) and others are 32-bit (aReflexConditioningSignalProcessing.exe, NIDAQ_mx_Source.exe) but nonetheless they seem to work together with each other (who knew?).
+The Python 2.7 distro definitely has to be 32-bit, otherwise it will fail to load the BCI2000 remote DLL (currently using FullMonty275 as of old).
+
+Presumably aReflexConditioningSignalProcessing.exe (and maybe others?) were built non-statically-linked, hence the VCOMP110.DLL problem.
+Note the different name. Perhaps the 'a' stands for Amir?   What are the differences relative to the original, and where are the sources?
+
+NIDigitalOutputParameters.prm  appears to be intended to be generated automatically by the NISetup/NIDigitalOutput.exe utility.
+As such, it needed to be removed from version control (it's now getting ignored) and re-generated. This corrected an error whereby the system was looking for the wrong board.
+This parameter file is the subject of a lot of semantic confusion.  For one thing, it's not just about output: it specifies input channel addresses/names/gains as well.
+For another, there's some logic in epocs.py that sets a variable called DigitimerSetup according to the presence or absence of this file, yet clearly it's NI-specific and its relationship to Digitimer is tangential/coincidental at best.
+
+One of the command-line tools (tools/cmdline/bci_stream2mat.exe) goes missing periodically---presumably the victim of a realtime virus scanner?
