@@ -1,14 +1,39 @@
-The Visual Studio 2012 Redistributable package (32-bit version) had to be downloaded and installed in order to get past VCOMP110.DLL not found errors.
+Notes from initial EPOCS setup attempts, May 2020
+
+The Visual Studio 2012 Redistributable package (32-bit version) had to be downloaded and installed in order to get past "VCOMP110.DLL not found" errors.
 It might be that the 64-bit version is also required? I installed that first, having been misled into thinking everything was 64-bit now.
-Note that some BCI2000 binaries appear to be 64-bit (Operator.exe, DummyApplication.exe) and others are 32-bit (aReflexConditioningSignalProcessing.exe, NIDAQ_mx_Source.exe) but nonetheless they seem to work together with each other (who knew?).
+Note that some BCI2000 binaries appear to be 64-bit (Operator.exe, DummyApplication.exe) and others are 32-bit (aReflexConditioningSignalProcessing.exe,
+NIDAQ_mx_Source.exe) but nonetheless they seem to work together with each other (who knew?).
 The Python 2.7 distro definitely has to be 32-bit, otherwise it will fail to load the BCI2000 remote DLL (currently using FullMonty275 as of old).
 
 Presumably aReflexConditioningSignalProcessing.exe (and maybe others?) were built non-statically-linked, hence the VCOMP110.DLL problem.
 Note the different name. Perhaps the 'a' stands for Amir?   What are the differences relative to the original, and where are the sources?
 
-NIDigitalOutputParameters.prm  appears to be intended to be generated automatically by the NISetup/NIDigitalOutput.exe utility.
-As such, it needed to be removed from version control (it's now getting ignored) and re-generated. This corrected an error whereby the system was looking for the wrong board.
-This parameter file is the subject of a lot of semantic confusion.  For one thing, it's not just about output: it specifies input channel addresses/names/gains as well.
-For another, there's some logic in epocs.py that sets a variable called DigitimerSetup according to the presence or absence of this file, yet clearly it's NI-specific and its relationship to Digitimer is tangential/coincidental at best.
+NIDigitalOutputPort.prm  appears to be intended to be generated automatically by the NISetup/NIDigitalOutput.exe utility.
+As such, it needed to be removed from version control (it's now getting ignored) and re-generated. This corrected an error whereby the system was looking
+for the wrong board. This parameter file is the subject of a lot of semantic confusion.  For one thing, despite its name it's not just about output: it
+specifies input channel addresses/names/gains as well, and the utility performs calibration of these. For another thing, there's some logic in epocs.py
+that sets a variable called DigitimerSetup according to the presence or absence of this file, yet clearly it's NI-specific and its relationship to Digitimer
+is tangential/coincidental at best. Note that there's also a NIAnalogOutput.exe utility in the NISetup directory, and that *also* (despite *its* name)
+overwrites NIDigitalOutputPort.prm---the differences being that it sets the AnalogOutput parameter to 1 and adds an extra row to FilterExpressions.
+Neither of these two parameters appears in the original C++ sources---they must be defined in the missing sources of aReflexConditioningSignalProcessing
+(note: FilterExpressions is an inappropriately generic name and should be changed).
 
-One of the command-line tools (tools/cmdline/bci_stream2mat.exe) goes missing periodically---presumably the victim of a realtime virus scanner?
+Where are the sources for these NI*Output.exe utilities? Looks like they're Qt applications...
+
+Note that it's easy to get NIDigitalOutput.exe wrong: we use P0.7 in our default hardware setup, but the application's default is P0.0: remember to change it!
+
+Once we get past that, we run up against this::
+
+	  File "epocs.py", line 1701, in Incoming
+		if self.stimGUI.Automate.get() and AUTOMATION:
+	  File "C:\neurotech\FullMonty275\App\lib\lib-tk\Tkinter.py", line 1826, in __getattr__
+		return getattr(self.tk, attr)
+	AttributeError: stimGUI
+
+...which can be fixed, but its straight-up brokenness raises the question of whether this is the version of EPOCS we should be starting with at all.
+
+
+One of the command-line tools (tools/cmdline/bci_stream2mat.exe) goes missing periodically on Aiko's lab computer #1---possibly the victim of a realtime
+virus scanner?
+
