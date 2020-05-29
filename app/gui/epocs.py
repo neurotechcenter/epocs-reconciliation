@@ -1154,7 +1154,7 @@ class GUI( tksuperclass, TkMPL ):
         # if stopped during the automate process we save the results for viewing.
         # RCs we need to store all the data that's generated as this version of the code is designed for testing Automation vs. Manual
 
-        if (mode in ['rc']):
+        if hasattr(self, 'stimGUI') and mode in ['rc']:
             if (self.stimGUI.Automate.get() and hasattr(self,'ControlObject') and AUTOMATION and not self.ControlObject.ProcessCompleted) or (not self.stimGUI.Automate.get()):
 
                 self.stimGUI.RCStorage['data'].append(self.data[mode])
@@ -1698,7 +1698,7 @@ class GUI( tksuperclass, TkMPL ):
             self.NewTrial( block )
             self.AnalyzeValues(block, states)  ###AMIR New function to extract H and W Signal Features
 
-            if self.stimGUI.Automate.get() and AUTOMATION:
+            if hasattr(self, 'stimGUI') and self.stimGUI.Automate.get() and AUTOMATION:
                 if (code in 'st'):
                     ProcessCompleted = self.ControlObject.STProcess()
                 if (code in 'rc'):
@@ -1781,7 +1781,7 @@ class GUI( tksuperclass, TkMPL ):
             good = ( states.ResponseGreen != 0.0 )
             self.UpdateBar( height, good, code, 'response' )
 
-        #if changed.EnableTrigger:
+        #if changed.EnableTrigger and hasattr(self, 'stimGUI'):
         #	self.stimGUI.GetCurrent(mode=code)
 
             #Set the new current the user sees when EnableTrigger is set. We then know what the person was just stimulated with
@@ -2150,7 +2150,7 @@ class AnalysisWindow( Dialog, TkMPL ):
 
         #Sort the data if we have currents, and use the currents in the ResponseSequence
         if online==True:
-            if hasattr(self.parent,'stimGUI'): c = parent.stimGUI.CurrentAmplitudeState[ mode ]
+            if hasattr(self.parent,'stimGUI'): c = self.parent.stimGUI.CurrentAmplitudeState[ mode ]
             else: c = []
             DS5 = int(self.parent.operator.remote.GetParameter('EnableDS5ControlFilter'))
             DS8 = int(self.parent.operator.remote.GetParameter('EnableDS8ControlFilter'))
@@ -2328,7 +2328,7 @@ class AnalysisWindow( Dialog, TkMPL ):
 
             if self.mode in ['st']:
                 button = tkinter.Button(header, text='ST Comparison', command=Curry(STAnalysisWindow, parent=self.parent, mode=self.mode))
-                if self.parent.stimGUI.STDataStorage == []: button['state'] = 'disabled'
+                if hasattr(self.parent, 'stimGUI') and self.parent.stimGUI.STDataStorage == []: button['state'] = 'disabled'
                 button.pack(side='right', pady=3)
 
             figure, widget, container = self.NewFigure( parent=tabframe, prefix='overlay', suffix='main', width=figwidth, height=fighalfheight )
