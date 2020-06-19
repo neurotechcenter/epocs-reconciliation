@@ -102,7 +102,7 @@ if os.path.isfile( os.path.join(PACKAGESDIR, 'StimulusControl/ControlFunctions.p
     try:
         from DependantClasses.StimulusControl import ControlFunctions as StimControl
         AUTOMATION = True
-    except:
+    except:  # TODO: DANGER - indiscriminate exception-catching
         AUTOMATION = False
         pass
 else:
@@ -112,7 +112,7 @@ if os.path.isfile( os.path.join(PACKAGESDIR, 'MwaveAnalysisClass.py' ) ):
     try:
         from DependantClasses.MwaveAnalysisClass import MWaveAnalysisWindow as MWaveAnalysisWindow
         MWAVEANALYSISTOOL = True
-    except:
+    except:  # TODO: DANGER - indiscriminate exception-catching
         MWAVEANALYSISTOOL = False
         pass
 else:
@@ -123,7 +123,7 @@ if os.path.isfile( os.path.join(PACKAGESDIR, 'DS5LibClass.py' ) ) and os.path.is
         from DependantClasses.DS5LibClass import DS5LibClass as DS5LibClass
         from DependantClasses import CurrentControl as CurrentControl
         DIGITIMER = True
-    except:
+    except:  # TODO: DANGER - indiscriminate exception-catching
         DIGITIMER = False
         AUTOMATION = False
         pass
@@ -135,7 +135,7 @@ if os.path.isfile( os.path.join(PACKAGESDIR, 'CSVfileClass.py' ) ):
     try:
         from DependantClasses.CSVfileClass import CSVfileClass as CSVfileClass
         CSVFILECLASS = True
-    except:
+    except:  # TODO: DANGER - indiscriminate exception-catching
         CSVFILECLASS = False
         pass
 else:
@@ -1027,7 +1027,7 @@ class GUI( tksuperclass, TkMPL ):
                         self.ControlObject = StimControl.CurrentControl(parent=self,mode=mode)
                     if AUTOMATION: self.stimGUI.AutomateCheck.config(state='disabled')
                 return True
-            except:
+            except:  # TODO: DANGER - indiscriminate exception-catching
                 if hasattr(self, 'stimGUI'): self.stimGUI.SetNewCurrent(value=self.stimGUI.CurrentAmplitude / 1000)  # This will in the initial amplitude or update to what the user sets
                 return False
 
@@ -1044,7 +1044,7 @@ class GUI( tksuperclass, TkMPL ):
                     if AUTOMATION:
                         self.stimGUI.AutomateCheck.config(state='disabled')
                 return True
-            except:
+            except:  # TODO: DANGER - indiscriminate exception-catching
                 return False
 
         if mode in ['ct','tt']:
@@ -2570,7 +2570,7 @@ class AnalysisWindow( Dialog, TkMPL ):
                 Mwindow = [round(params._ComparisonStartMsec[0] / 1000.0,5), round(params._ComparisonEndMsec[0] / 1000.0,5)]
                 Mtarget = params._MwaveOverlay[0]
                 MtargetPerc = params._MwaveOverlay[1]
-            except:
+            except:  # TODO: DANGER - indiscriminate exception-catching
                 Hwindow = [0,0]
                 Mwindow = [0,0]
                 Mtarget = 0
@@ -3499,7 +3499,7 @@ class OfflineAnalysis( object ):
             MwavePercentage = obj.Parms.MwavePercentage.NumericValue
             self.operator.params._MwaveOverlay[1] = float(MwavePercentage)
             self.MwaveTarget_in_dat_FLAG = True
-        except:
+        except:  # TODO: DANGER - indiscriminate exception-catching
             pass
 
         self.data = { self.mode : data }
@@ -3514,7 +3514,7 @@ class OfflineAnalysis( object ):
             locs = numpy.where(numpy.diff(objs[0].States.TrialsCompleted) > 0)
             Currents = objs[0].States.CurrentAmplitude[locs]
             self.Currents = Currents.tolist()
-        except:
+        except:  # TODO: DANGER - indiscriminate exception-catching
             self.Currents = []
 
     # more duck-typing
