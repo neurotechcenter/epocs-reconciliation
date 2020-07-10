@@ -15,6 +15,7 @@ scraps/make-icon/epocs_icon.*
 data/*
 !data/sample
 
+.hg
 .hgignore
 .DS_Store
 .idea
