@@ -15,8 +15,7 @@ scraps/make-icon/epocs_icon.*
 data/*
 !data/sample
 
-.hg
-.hgignore
+.hg*
 .DS_Store
 .idea
 .vscode
@@ -26,6 +25,7 @@ data/*
 *.egg-info
 *.code-workspace
 *.lnk
+*.orig
 unins000.dat
 unins000.exe
 
