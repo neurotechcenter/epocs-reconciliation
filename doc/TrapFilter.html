@@ -1,0 +1,39 @@
+
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML+RDFa 1.0//EN"
+    "http://www.w3.org/MarkUp/DTD/xhtml-rdfa-1.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en"
+      xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+      xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+      xmlns:dc="http://purl.org/dc/elements/1.1/"
+      xmlns:foaf="http://xmlns.com/foaf/0.1/">
+  <head>
+        <meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
+        <link rel="stylesheet" type="text/css" href="theme.css" />
+      <title>
+        TrapFilter
+      </title>
+  </head>
+  <body>
+  <img src="logo.png" width="100%" />
+<h1>TrapFilter</h1>
+<h2>Synopsis</h2>
+<p>TODO</p>
+<h2>Authors</h2>
+<p>Jeremy Hill</p>
+<h2>Parameters</h2>
+<h3></h3>
+<p>TODO</p>
+<pre><code>Trigger:Trigger%20Detection   string     TriggerChannel=            3      3     % % // name or index of the input channel used to monitor the trigger
+Trigger:Trigger%20Detection   float      TriggerThreshold=          1.0V   1.0V  0 % // voltage that the trigger must exceed to be counted as a rising edge
+Trigger:Epoch                 stringlist ChannelsToTrap=      1     2      2     % % // names or indices of the input channels to be trapped
+Trigger:Epoch                 float      LookForward=             150ms  150ms   1 % // length of signal segment to capture after each trigger
+Trigger:Epoch                 float      LookBack=                 75ms   75ms   1 % // length of signal segment to capture before each trigger
+Visualize:Processing%20Stages int        VisualizeTrapFilter=       1      1     0 1 // Visualize TrapFilter output (boolean)
+</code></pre>
+
+<h2>States</h2>
+<h3>TrialsCompleted</h3>
+<p>This state variable reflects the number of trials that have occurred (i.e. the number of trigger events detected and hence the number of epochs trapped) since the beginning of the run.</p>
+  </body>
+</html>

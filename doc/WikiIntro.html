@@ -1,0 +1,42 @@
+
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML+RDFa 1.0//EN"
+    "http://www.w3.org/MarkUp/DTD/xhtml-rdfa-1.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en"
+      xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+      xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+      xmlns:dc="http://purl.org/dc/elements/1.1/"
+      xmlns:foaf="http://xmlns.com/foaf/0.1/">
+  <head>
+        <meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
+        <link rel="stylesheet" type="text/css" href="theme.css" />
+      <title>
+        Welcome
+      </title>
+  </head>
+  <body>
+  <img src="logo.png" width="100%" />
+<h1>Welcome</h1>
+<p>Welcome to your wiki! This is a copy of the default page.</p>
+<h2>Wiki features</h2>
+<p>This wiki uses the <a href="http://daringfireball.net/projects/markdown/">Markdown</a> syntax.</p>
+<p>The wiki itself is actually a mercurial repository, which means you can clone it, edit it locally/offline, add images or any other file type, and push it back to us. It will be live immediately.</p>
+<p>Go ahead and try:</p>
+<pre><code>$ hg clone https://jezhill@bitbucket.org/jezhill/epocs/wiki
+</code></pre>
+
+<p>Wiki pages are normal files, with the .md extension. You can edit them locally, as well as creating new ones.</p>
+<h2>Syntax highlighting</h2>
+<p>You can also highlight snippets of text (we use the excellent <a href="http://www.pygments.org/">Pygments</a> library).</p>
+<p>Here's an example of some Python code:</p>
+<pre><code>#!python
+
+def wiki_rocks(text):
+    formatter = lambda t: &quot;funky&quot;+t
+    return formatter(text)
+</code></pre>
+
+<p>You can check out the source of this page to see how that's done, and make sure to bookmark <a href="http://pygments.org/docs/lexers/">the vast library of Pygment lexers</a>, we accept the 'short name' or the 'mimetype' of anything in there.</p>
+<p>Have fun!</p>
+  </body>
+</html>
