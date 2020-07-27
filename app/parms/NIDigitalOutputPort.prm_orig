@@ -1,6 +1,0 @@
-Filtering     matrix     FilterExpressions= 1 { Output%20Type Device%20Name Port/Line	Expression/Current} Digital       Dev1	port0/line0	EnableTrigger
-Source        int        SourceCh= 3
-Source        list       ChannelNames=               3 EMG1 EMG2 TRIG
-Source        int     BoardNumber= 1
-Source        floatlist  SourceChGain=               3 164.624	164.624	164.624	
-Source        floatlist  SourceChOffset=             3 -392	-392	-392	
