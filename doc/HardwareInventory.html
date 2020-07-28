@@ -1,0 +1,99 @@
+
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML+RDFa 1.0//EN"
+    "http://www.w3.org/MarkUp/DTD/xhtml-rdfa-1.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en"
+      xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+      xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+      xmlns:dc="http://purl.org/dc/elements/1.1/"
+      xmlns:foaf="http://xmlns.com/foaf/0.1/">
+  <head>
+        <meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
+        <link rel="stylesheet" type="text/css" href="theme.css" />
+      <title>
+        Hardware Inventory
+      </title>
+  </head>
+  <body>
+  <img src="logo.png" width="100%" />
+<h1>Hardware Inventory</h1>
+<h2>Amplification</h2>
+<ul>
+<li>version 1: Bortec<ul>
+<li><a href="http://www.bortec.ca/pages/amt_8.htm">AMT-8 EMG system</a> consisting of special EMG leads, a pre-amplifier and battery pack worn by the patient, and a rack-mounted 8-channel amplifier.  Our convention is to turn all the hand-adjustable dials to minimum.  Channel gains may be changed if necessary using the push-buttons.</li>
+</ul>
+</li>
+<li>version 2:  Grass/Natus<ul>
+<li>2 x <a href="http://www.grasstechnologies.com/products/amplifiers/p511.html">P511</a> high-performance EMG/EEG amplifiers (rack-mounted)</li>
+<li><a href="https://www.grasstechnologies.com/products/amplifiers/rps2.html">RPS312RM</a> medical-grade power supply</li>
+</ul>
+</li>
+</ul>
+<p>The first amplifier (or first channel) should be connected to the agonist muscle, and the second should be connected to the antagonist.  We color-code these two signal pathways as blue and red, respectively.</p>
+<h2>Digitization</h2>
+<ul>
+<li>
+<p>versions 1-2: National Instruments</p>
+<ul>
+<li><a href="http://sine.ni.com/nips/cds/view/p/lang/en/nid/207405">PCIe 6321</a> X-series data acquisition card installed in a PC</li>
+<li><a href="http://sine.ni.com/nips/cds/view/p/lang/en/nid/203462">BNC-2090A</a> rack-mountable connector block</li>
+<li><a href="http://sine.ni.com/nips/cds/view/p/lang/en/nid/201628">SHC68-68-EPM</a> cable (1m) to connect the card to the connnector block</li>
+</ul>
+<p>The first amplified EMG output (agonist muscle: <code>OUTPUT 1</code> of the AMT-8, or the <code>OUTPUT</code> of the first P511 amp) is connected to first analog input of the digitizer (<code>AI0</code> on the BNC-2090A,  also known as <code>ACH0</code> on previous versions).  The second amplified EMG output (antagonist muscle: <code>OUTPUT 2</code> of the AMT-8, or the <code>OUTPUT</code> of the second P511 amp) is connected to the second analog input of the digitizer (<code>AI1</code> on the BNC-2090A, also known as <code>ACH1</code> on previous versions).  </p>
+</li>
+</ul>
+<h2>Processing</h2>
+<ul>
+<li>
+<p>versions 1-2:</p>
+<p>Processing is performed by a PC.  We use a Lenovo ThinkCentre M83 10AL (Core i7 4770, 3.4Ghz/8GB/1TB, GT630 graphics card, Windows 7). The BCI2000-based EPOCS software system runs on this computer, with its <a href="SignalProcessingFilters.html">"filters"</a> ordered such that the data are acquired from the National Instruments card, then the data are evaluated to determine whether a trigger pulse should be given, then the National Instruments card is instructed to issue the trigger pulse if necessary. The signal data are then already available in memory for feedback and analysis.  All of this is possible because the National Instruments PCI board, together with its API, allows input of data and output of triggers at a very low latency and with little latency jitter.</p>
+</li>
+<li>
+<p>Beyond:</p>
+<p>It is generally difficult to make real-time systems work with millisecond precision over USB.  For future more-portable versions of our system, we will have to change the strategy: offload the real-time processing, triggering, and patient feedback to a micro-processor, which would then send the trial data to a computer via USB for offline analysis.</p>
+</li>
+</ul>
+<h2>Triggering</h2>
+<ul>
+<li>
+<p>versions 1-2:</p>
+<p>Triggering is performed by the same hardware that performs digitization, above. Use either the first analog output (BNC connector marked <code>AO0</code> on the BNC-2090A), or preferably the digital output.  To connect a BNC cable to the digital output, you can use the BNC connector marked <code>USER2</code>  but you must first insert a piece of insulated wire to bridge the spring terminals marked <code>P07</code> (previously <code>DIO7</code>) and <code>USER2</code> on the far right.  Connect the BNC cable to a tee piece (female-female-female BNC adapter) and run one connection from there back to the third analog input channel (marked <code>AI2</code>, or <code>ACH2</code> on some previous versions).  Run additional forks of this cable to the stimulators (e.g. to the <code>-SYNC IN- STIM DELAY</code> connector of the S48 stimulator) and to the oscilloscope's <code>Ext Trig</code> connector if desired.</p>
+<p>We found that with one stimulator, the analog and digital trigger outputs performed equally well.  With more complex setups we found that the analog output began to cause problems. For example, when we left the S48 wired up but used one of its outputs at the back to pass the trigger signal to a Magstim TMS machine, we observed a strange delay in triggering the Magstim via the analog output, but not via the digital. The TTL circuitry behind the digital output is presumably better at reaching and maintaining the required trigger voltage under varying loads.</p>
+</li>
+</ul>
+<h2>Stimulation</h2>
+<ul>
+<li>versions 1-2: Grass/Natus<ul>
+<li><a href="http://www.grasstechnologies.com/products/stimulators/stims48.html">S48 square pulse stimulator</a></li>
+<li><a href="http://www.grasstechnologies.com/products/stimulators/stimsiu5psiu6.html">SIU5 RF transformer isolation unit</a></li>
+<li><a href="http://www.grasstechnologies.com/products/stimulators/stimccu1electrd.html">CCU1 constant-current unit</a></li>
+</ul>
+</li>
+</ul>
+<p>For TMS studies, we use a Magstim stimulator.</p>
+<h2>Feedback to patient</h2>
+<ul>
+<li>
+<p>versions 1-2:</p>
+<p>Since a PC is used for signal-processing, the level of background EMG and the size of the reflex response are simply shown on screen, using a standard 19" LCD monitor.</p>
+</li>
+</ul>
+<h2>Feedback to therapist/researcher</h2>
+<p>(as well as configuration, control and offline analysis <em>by</em> the therapist/researcher)</p>
+<ul>
+<li>
+<p>versions 1-2:</p>
+<p>Since the data have already been acquired by the PC as part of the processing pipeline, the same PC runs the interface that allows researchers and therapists to configure the system and analyze the results. They use the same standard LCD monitor that the patients see, along with a standard keyboard and a <a href="http://www.kensington.com/en/gb/4493/K72337EU/">Kensington Orbit</a> USB trackball.</p>
+</li>
+</ul>
+<h2>Housing</h2>
+<ul>
+<li>versions 1-2<ul>
+<li>We use the Bretford TC15FF-BK multimedia cart which is a mobile unit providing 19" rack-mounting rails between front and rear lockable doors.</li>
+<li>We use the PowerVar 2.0 Power Conditioner (ABC200-11MED) to reduce leakage currents to acceptable levels and allow our system to pass certification by our hospital's clinical engineering department. Only the PowerVar's built-in cable is allowed to pass out through the hole in the Bretford cabinet and plug into the wall. All other devices plug into the Bretford's power-strip which in turn plugs into the back of the PowerVar.</li>
+<li>We use a Monoprice LCD502 Monitor arm to mount our LCD monitor on top of the cart. We chose this model because its 65mm-wide clamp fits into the 75mm hole on the top surface of the Bretford cabinet, where it can be shimmed securely using a block of wood against the underside of the metal. If the arm appears to be leaning slightly, another block can be used to brace the top surface internally in the center.</li>
+</ul>
+</li>
+</ul>
+  </body>
+</html>
