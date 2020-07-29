@@ -1,0 +1,48 @@
+
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML+RDFa 1.0//EN"
+    "http://www.w3.org/MarkUp/DTD/xhtml-rdfa-1.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en"
+      xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+      xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+      xmlns:dc="http://purl.org/dc/elements/1.1/"
+      xmlns:foaf="http://xmlns.com/foaf/0.1/">
+  <head>
+        <meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
+        <link rel="stylesheet" type="text/css" href="theme.css" />
+      <title>
+        SharedMemoryOutputConnector
+      </title>
+  </head>
+  <body>
+  <img src="logo.png" width="100%" />
+<h1>SharedMemoryOutputConnector</h1>
+<h2>Synopsis</h2>
+<p>This filter is designed to replace the UDP-based ConnectorOutputFilter (from BCI2000's core framework library) in performing inter-process communication, specifically in cases where (a) the sending and receiving processes are on the same computer and (b) more bandwidth is desired (we found that UDP-based transfer very quickly started to use significant amounts of CPU and lose data, when transferring a moderately large amount of signal data per SampleBlock, even on a high-end machine).</p>
+<p>The SharedMemoryOutputConnector packs each SampleBlock's worth of data into a shared memory region that is implemented via the SharedMemory class from the BCI2000 framework.</p>
+<p>Currently the format/protocol is very simple.  The signal and State variable data are packed into the shared memory region as follows:</p>
+<ol>
+<li>Four unsigned 32-bit integers:<ul>
+<li>SampleBlock counter</li>
+<li>number of channels  C</li>
+<li>number of samples S per block</li>
+<li>number of State variables V</li>
+</ul>
+</li>
+<li>Signal values as a packed array of C*S double-precision floating-point numbers in row- (i.e. sample-) first order.</li>
+<li>State-variable values as a packed array of V double-precision floating-point numbers</li>
+<li>A space-delimited ASCII byte string specifying the corresponding State variable names in order, followed by a newline, followed by a null terminator.</li>
+</ol>
+<p>Since this protocol is only designed for transmission between processes on the same CPU, native endianness is assumed throughout.</p>
+<p>The SampleBlock counter is always the last piece of information to be updated by the Process() method on any given SampleBlock, so changes in its value can be monitored by the receiving process to determine when a new SampleBlock is available.</p>
+<h2>Authors</h2>
+<p>Jeremy Hill</p>
+<h2>Parameters</h2>
+<h3>OutputExpressions</h3>
+<p>This parameter is a list of <a href="http://doc.bci2000.org/User_Reference:Expression_Syntax">BCI2000 expressions</a>.  If you leave it blank, this filter's output will be equal to its input, i.e. the signal will be passed through unchanged. But the input signal has already been passed to <em>another</em> process via shared memory—so maybe it is expedient to pass some <em>other</em> information on to the next filter in the BCI2000 filter chain? Or maybe it is a good idea simply to reduce the bandwidth required by the filter chain?  If so, use this parameter.</p>
+<h3>SharedMemoryOutput</h3>
+<p>This parameter is a string.  It should be a URL specifying the shared memory resource, beginning either with <code>shm://</code> or <code>file://</code> (the latter is for the "memory-mapped file" implementation of shared-memory IPC).</p>
+<h2>States</h2>
+<p>This filter does not define any state variables.</p>
+  </body>
+</html>

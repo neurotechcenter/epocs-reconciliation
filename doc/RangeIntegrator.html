@@ -1,0 +1,42 @@
+
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML+RDFa 1.0//EN"
+    "http://www.w3.org/MarkUp/DTD/xhtml-rdfa-1.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en"
+      xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+      xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+      xmlns:dc="http://purl.org/dc/elements/1.1/"
+      xmlns:foaf="http://xmlns.com/foaf/0.1/">
+  <head>
+        <meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
+        <link rel="stylesheet" type="text/css" href="theme.css" />
+      <title>
+        RangeIntegrator
+      </title>
+  </head>
+  <body>
+  <img src="logo.png" width="100%" />
+<h1>RangeIntegrator</h1>
+<h2>Synopsis</h2>
+<p>TODO</p>
+<h2>Authors</h2>
+<p>Jeremy Hill</p>
+<h2>Parameters</h2>
+<h3></h3>
+<p>TODO</p>
+<pre><code>Responses:Response%20Magnitudes matrix ResponseDefinition= 
+            1 { Input%20Channel Start   End   Subtract%20Mean? Norm   Weight  Response%20Name } 
+                    1          28ms    35ms        no          1      1.0          H            
+            % % % // define the response signals:
+Responses:Response%20Magnitudes matrix ResponseAssessment= 1 { Response%20Name Min%20Amplitude Max%20Amplitude Feedback%20Weight }   H 5mV 15mV 1.0 % % % // process the response signals:
+Responses:Response%20Magnitudes int    OutputMode= 0 0 0 1 // which signal to pass on, 0: pass through input unchanged, 1: output responses (enumeration)
+</code></pre>
+
+<h2>States</h2>
+<p>TODO</p>
+<pre><code>ResponseFeedbackValue 32 0
+ResponseGreen          1 0
+SuccessfulTrials      16 0
+</code></pre>
+  </body>
+</html>

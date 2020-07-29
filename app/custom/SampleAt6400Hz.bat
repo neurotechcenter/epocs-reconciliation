@@ -1,0 +1,2 @@
+SET PARAMETER SamplingRate   6400Hz
+SET PARAMETER SampleBlockSize 256
