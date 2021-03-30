@@ -29,6 +29,7 @@
 #define INCLUDED_TrapFilter_H
 
 #include "GenericFilter.h"
+#include "Expression.h"
 
 class TrapFilter : public GenericFilter
 {
@@ -54,6 +55,8 @@ class TrapFilter : public GenericFilter
   int mLookBackSamples;
   int mRingBufferSize;
   int mRingBufferCursor;
+  int mTriggerChannelSource;
+  std::string mTriggerState;
   GenericSignal * mRingBuffer;
   GenericSignal * mOutput;
   int mSamplesSinceLastTrigger;

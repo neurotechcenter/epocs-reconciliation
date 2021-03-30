@@ -54,13 +54,15 @@ class RangeIntegrator : public GenericFilter
   std::vector<double> mMinValues;
   std::vector<double> mMaxValues;
   std::vector<double> mFeedbackWeights;
+  std::vector<int>    mRefAssessmentIndices;
+  std::vector<double> mRefFeedbackWeights;
   SignalProperties    mResponseProperties;
   bool                mComputeMeans;
   bool                mPassThrough;
   double              mInputGain;
   double              mInputOffset;
   int                 mTrialsCompleted;
-  
+  int				  mAnalysisType;
   void ParseMatrices(
 
     std::vector<int>    & inputChannelIndices,
@@ -75,6 +77,8 @@ class RangeIntegrator : public GenericFilter
     std::vector<double> & minValues,
     std::vector<double> & maxValues,
     std::vector<double> & feedbackWeights,
+	std::vector<int>    & refassessmentIndices,
+	std::vector<double> & reffeedbackWeights,
 
     const SignalProperties &  InputProperties,
     SignalProperties &  responseProperties

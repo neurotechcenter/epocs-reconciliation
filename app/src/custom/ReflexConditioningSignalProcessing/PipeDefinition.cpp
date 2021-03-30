@@ -46,15 +46,25 @@ Filter( IIRBandpass, 2.A );
 #include "BackgroundTriggerFilter.h"
 Filter( BackgroundTriggerFilter, 2.B );
 
-#include "NIDAQFilter.h"
-Filter( NIDAQFilter, 2.C );
+#include "NIDAQFilterAO.h"
+Filter( NIDAQFilterAO, 2.C );
+
+/*
+#include "DS5ControlFilter.h"
+Filter( DS5ControlFilter, 2.D );
+
+#include "D188ControlFilter.h"
+Filter( D188ControlFilter, 2.E );
+*/
+
+#include "DigitimerFilter.h"
+Filter( DigitimerFilter, 2.D );
 
 #include "TrapFilter.h"
-Filter( TrapFilter, 2.D );
+Filter( TrapFilter, 2.E );
 
 #include "RangeIntegrator.h"
-Filter( RangeIntegrator, 2.E );
+Filter( RangeIntegrator, 2.F );
 
 #include "SharedMemoryOutputConnector.h"
-Filter( SharedMemoryOutputConnector, 2.F );
-
+Filter( SharedMemoryOutputConnector, 2.G );

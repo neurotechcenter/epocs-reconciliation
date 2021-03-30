@@ -39,7 +39,7 @@
 
 using namespace std;
 
-RegisterFilter( TrapFilter, 2.Q );
+RegisterFilter( TrapFilter, 2.F );
 
 TrapFilter::TrapFilter() :
 mVis( NULL ),
@@ -61,6 +61,8 @@ TrapFilter::Publish()
   BEGIN_PARAMETER_DEFINITIONS
     "Trigger:Trigger%20Detection   string     TriggerChannel=            3      3     % % // name or index of the input channel used to monitor the trigger",
     "Trigger:Trigger%20Detection   float      TriggerThreshold=          1.0V   1.0V  0 % // voltage that the trigger must exceed to be counted as a rising edge",
+	"Trigger:Trigger%20Detection   int		  TriggerSource=		1  1  1  2 // Options are 1=TriggerChannel 2=DigitalInput1(gUSBamplifier) (enumeration)",	
+	"Trigger:Trigger%20Detection   string     TriggerState=         DigitalInput1 % % % // if gUSB being used, the digital channel state to use",
     "Trigger:Epoch                 stringlist ChannelsToTrap=      1     2      2     % % // names or indices of the input channels to be trapped",
     "Trigger:Epoch                 float      LookForward=             150ms  150ms   1 % // length of signal segment to capture after each trigger",
     "Trigger:Epoch                 float      LookBack=                 75ms   75ms   1 % // length of signal segment to capture before each trigger",
@@ -92,7 +94,9 @@ TrapFilter::Preflight( const SignalProperties& InputProperties, SignalProperties
     string entry = Parameter( "ChannelsToTrap" )( i );
     int channelOfInterest = ( int )InputProperties.ChannelIndex( entry );
     if( channelOfInterest < 0 )
+	{
       bcierr << "invalid or unrecognized channel " << entry << " in ChannelsToTrap parameter" << endl;
+	}
     else
       OutputProperties.ChannelLabels()[ i ] = InputProperties.ChannelLabels()[ channelOfInterest ];
   }
@@ -101,9 +105,29 @@ TrapFilter::Preflight( const SignalProperties& InputProperties, SignalProperties
   OutputProperties.SetElements( lookForwardSamples + lookBackSamples );
   OutputProperties.ElementUnit().SetOffset( ( double )lookBackSamples );
   
-  if( InputProperties.ChannelIndex( ( string )Parameter( "TriggerChannel" ) ) < 0 )
-    bcierr << "invalid or unrecognized channel " << ( string )Parameter( "TriggerChannel" ) << " in TriggerChannel parameter" << endl;
-  
+  if (Parameters->Exists("TriggerChannel")) Parameter("TriggerChannel");
+  if (Parameters->Exists("TriggerSource")) Parameter("TriggerSource");
+  if (Parameters->Exists("TriggerState")) Parameter("TriggerState");
+  if (Parameter("TriggerSource") == 1) //Source is an input channel to the source board (e.g., NI)
+  {
+	  if ( InputProperties.ChannelIndex( ( string )Parameter( "TriggerChannel" ) ) < 0 )
+	  {
+		  bcierr << "invalid or unrecognized channel " << ( string )Parameter( "TriggerChannel" ) << " in TriggerChannel parameter" << endl;
+	  }
+  }
+  else //using the gUSB amplifier DI1
+  {
+	  if (!States->Exists(( string )Parameter("TriggerState")))
+	  {
+		  bcierr << "gUSBamplifier chosen as trigger source, but DigitalInput1 not found" << endl;
+	  }
+	  else
+	  {
+		  State(( string )Parameter("TriggerState"));
+	  }
+  }
+
+
   IN_VOLTS_W4530( "TriggerThreshold" );
 }
 
@@ -114,15 +138,30 @@ TrapFilter::Initialize( const SignalProperties& InputProperties, const SignalPro
   mInputGain = InputProperties.ValueUnit().Gain();
   mInputOffset = InputProperties.ValueUnit().Offset();
   if( InputProperties.ValueUnit().Symbol() != "V" )
+  {
     bcierr << "internal error: input signal values are expressed in " << InputProperties.ValueUnit().Symbol() << ", not V - do not know how to handle this" << endl;
+  }
   if( InputProperties.ElementUnit().Symbol() != "s" )
+  {
     bcierr << "internal error: input element values are expressed in " << InputProperties.ElementUnit().Symbol() << ", not s - do not know how to handle this" << endl;
+  }
 
   mChannelIndices.clear();
   int nChannelsOfInterest = Parameter( "ChannelsToTrap" )->NumValues();
   for( int i = 0; i < nChannelsOfInterest; i++ )
     mChannelIndices.push_back( ( int )InputProperties.ChannelIndex( ( string )Parameter( "ChannelsToTrap" )( i ) ) );
+
   mTriggerChannelIndex = ( int )InputProperties.ChannelIndex( ( string )Parameter( "TriggerChannel" ) );
+  mTriggerChannelSource = Parameter("TriggerSource");
+  mTriggerState = ( string )Parameter("TriggerState");
+  if (mTriggerChannelSource == 2 )
+  {
+	  if (!States->Exists(mTriggerState))
+	  {
+		  bcierr << "gUSBamplifier chosen as trigger source, but DigitalInput1 not found" << endl;
+	  }
+  }
+
   mLookForwardSamples = ( int )( 0.5 + IN_SECONDS_W4530( "LookForward" ) * InputProperties.SamplingRate() );
   mLookBackSamples    = ( int )( 0.5 + IN_SECONDS_W4530( "LookBack"    ) * InputProperties.SamplingRate() );
   mRingBufferSize = mLookBackSamples + mLookForwardSamples;
@@ -161,8 +200,18 @@ TrapFilter::Process( const GenericSignal& InputSignal, GenericSignal& OutputSign
 {
   for( int inputElement = 0; inputElement < InputSignal.Elements(); inputElement++ )
   {
-    double val = InputSignal( mTriggerChannelIndex, inputElement );
-    val = ( val - mInputOffset ) * mInputGain; // val is now in Volts, like mTrigggerThreshold
+	double val = 0;
+	if (mTriggerChannelSource == 1)
+	{
+		val = InputSignal( mTriggerChannelIndex, inputElement );
+		val = ( val - mInputOffset ) * mInputGain; // val is now in Volts, like mTrigggerThreshold 
+	}
+	else
+	{
+		val = State(mTriggerState)(inputElement);
+		val = val*5; //value is 0-1, and to avoid redefining the threshold, let's bring it to 0-5, as with the NI device
+	}
+
     bool currentTriggerState = ( val >= mTriggerThreshold );
     mSamplesSeen++;
     if( currentTriggerState && !mTriggerStateOnPreviousSample && mSamplesSinceLastTrigger >= mLookForwardSamples )

@@ -76,6 +76,7 @@ BackgroundTriggerFilter::Publish()
        "Trigger:Triggering%20Conditions string     TriggerExpression=                    %      %    % % // optional BCI2000 Expression that must be satisfied for trigger to fire",
        "Trigger:Trigger%20Output        float      TriggerStateDuration=                 2      2    1 % // duration (whole number of sampleblocks) for which the EnableTrigger output state is kept high",
        "Trigger:Triggering%20Conditions float      MinTimeBetweenTriggers=               5s     5s   2 % // trigger refractory time in sampleblocks (or in seconds if \"s\" is appended)",
+	   "Trigger:Triggering%20Conditions float      MaxRandomTimeBetweenTriggers=         0s     0s   0s 2s // max extra trigger refractory time in sampleblocks (or in seconds if \"s\" is appended)",
 
     "Visualize:Processing%20Stages      int        VisualizeBackgroundAverages=          0      0    0 1 // Visualize segment averages from BackgroundTriggerFilter (boolean)",
     "Visualize:Processing%20Stages      float      BackgroundVisualizationUnit=          1mV    1mV  0 % // Unit for numerical representation of BackgroundTriggerFilter",
@@ -95,6 +96,7 @@ BackgroundTriggerFilter::Publish()
     "BackgroundGreen             1 0 0 0",
     "EnableTrigger               1 0 0 0",
     "TriggerExpressionSatisfied  1 0 0 0",
+	"StimulationControl			 1 0 0 0", //An extra control state in case we need it in python	
   END_STATE_DEFINITIONS
 
 }
@@ -186,6 +188,7 @@ void
 BackgroundTriggerFilter::Preflight( const SignalProperties& InputProperties, SignalProperties& OutputProperties ) const
 {
   OutputProperties = InputProperties; // signal will be passed through unmodified.
+
   std::vector<int>    channelIndices;
   std::vector<bool>   subtractMeanFlags;
   std::vector<double> norms;
@@ -215,6 +218,10 @@ BackgroundTriggerFilter::Preflight( const SignalProperties& InputProperties, Sig
   if( blocks != ::ceil( blocks ) )
     bciwarn << "MinTimeBetweenTriggers will be rounded up to " << ::ceil( blocks ) << " whole sample-blocks (=" <<  ::ceil( blocks ) * msecPerBlock << "ms)"  << endl;
 
+  blocks = Parameter( "MaxRandomTimeBetweenTriggers" ).InSampleBlocks();
+  if( blocks != ::ceil( blocks ) )
+    bciwarn << "MaxRandomTimeBetweenTriggers will be rounded up to " << ::ceil( blocks ) << " whole sample-blocks (=" <<  ::ceil( blocks ) * msecPerBlock << "ms)"  << endl;
+
   string eStr = Parameter( "TriggerExpression" );
   eStr = StringUtils::Strip( eStr );
   if( eStr.size() )
@@ -224,11 +231,17 @@ BackgroundTriggerFilter::Preflight( const SignalProperties& InputProperties, Sig
   }
   double fbtSec = Parameter( "FeedbackTimeConstant" ).InSeconds();
   if( fbtSec < 0.050 ) bcierr << "FeedbackTimeConstant should not be shorter than 50ms" << endl;
+  
+  if( States->Exists( "StimulationControl" ) ) State( "StimulationControl" );
+
+  
+  
 }
 
 void
 BackgroundTriggerFilter::Initialize( const SignalProperties& InputProperties, const SignalProperties& OutputProperties )
 {
+
   mMonitoringOffset = 0.0;
   mMonitoringGain = Parameter( "BackgroundVisualizationUnit" ).InVolts();
 
@@ -265,7 +278,14 @@ BackgroundTriggerFilter::Initialize( const SignalProperties& InputProperties, co
     bciwarn << "MaxRandomExtraHoldDuration (" << ( string )Parameter( "MaxRandomExtraHoldDuration" ) << ") has been rounded up to " << roundedExtraHoldDurationSeconds << "s to make it an integer number of " << secondsPerSegment * 1000.0 << "ms segments" << endl;
   mMaxNumberOfSegments = mMinNumberOfSegments + extraSegments;
 
+  //Add Randomization here...
   mRefractoryBlocks = ( int )::ceil( Parameter( "MinTimeBetweenTriggers" ).InSampleBlocks() );
+  mExtraRefractoryBlocks = ( int )::ceil( Parameter( "MaxRandomTimeBetweenTriggers" ).InSampleBlocks() );
+  RandomN = (int)(0.5 + (double)mExtraRefractoryBlocks *( (double)mRandomGenerator.Random() / (double)mRandomGenerator.RandMax() ));
+  //bciout << "RefractoryBlocks: " << mRefractoryBlocks << endl;
+  //bciout << "ExtraRefractoryBlocks: " << mExtraRefractoryBlocks << endl;
+
+
   mTriggerDurationBlocks = ( int )::ceil( Parameter( "TriggerStateDuration" ).InSampleBlocks() );
   mBlocksToFreezeBackground = ( int )::ceil( Parameter( "BackgroundFreezeTime" ).InSampleBlocks() );
   
@@ -358,7 +378,21 @@ BackgroundTriggerFilter::Process( const GenericSignal& InputSignal, GenericSigna
   bool inTheGreen = true;
   bool enableTrigger = true;
   if( mSamplesSeen < ( unsigned long )mSegmentBuffer->Elements() ) enableTrigger = false;
-  if( mBlocksSinceLastTrigger < mRefractoryBlocks ) enableTrigger = false;
+
+  int temp = mRefractoryBlocks;
+
+ 
+  if ( mExtraRefractoryBlocks > 0 )
+  {   
+	  temp = (int) ( (mRefractoryBlocks - mExtraRefractoryBlocks) +  2*RandomN );
+	  //bciout << temp << endl;
+  }
+  
+  if( mBlocksSinceLastTrigger < temp ) enableTrigger = false;
+  else { 
+	  //bciout << "SampleBlocks Limit:" << temp << endl;
+	  RandomN = (int)(0.5 + (double)mExtraRefractoryBlocks *( (double)mRandomGenerator.Random() / (double)mRandomGenerator.RandMax() ));
+  }
   
   double combinedFeedbackValue = 0.0;
   for( int bufferedChannel = 0; bufferedChannel < mSegmentBuffer->Channels(); bufferedChannel++ )

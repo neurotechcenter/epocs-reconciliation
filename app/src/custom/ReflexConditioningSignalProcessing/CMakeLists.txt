@@ -1,7 +1,7 @@
 ###########################################################################
 ## $Id:  $
-## Authors: Jeremy Hill <jezhill@gmail.com>
-## Description: Build information for the ReflexConditioningSignalProcessing project
+## Authors: Amir Eftekhar (a.eftekhar@gmail.com)
+## Description: Build information for the aReflexConditioningSignalProcessing project
 ##              
 ##              
 ###########################################################################
@@ -10,18 +10,22 @@ IF( NOT WIN32 )
 	RETURN()  # ever since NIDAQFilter became part of the signal-processing module, no hope of compiling on non-Windows
 ENDIF( NOT WIN32 )
 
-ADD_SUBDIRECTORY( cmdline )
+#ADD_SUBDIRECTORY( cmdline )
 
 # Set the executable name
-SET( EXECUTABLE_NAME ReflexConditioningSignalProcessing )
+SET( EXECUTABLE_NAME aReflexConditioningSignalProcessing )
 
 # Set the project specific sources
 SET( SRC_PROJECT
-  PipeDefinition.cpp         # Edit this file to specify which filters are used in what order.
+  PipeDefinition.cpp        
   BackgroundTriggerFilter.cpp
+  #DS5ControlFilter.cpp
   TrapFilter.cpp
   RangeIntegrator.cpp
-  ${BCI2000_SRC_DIR}/contrib/SignalSource/NIDAQ-MX/NIDAQ-Logging/NIDAQFilter.cpp
+  #D188ControlFilter.cpp
+  DigitimerFilter.cpp
+  stdafx.cpp
+  NIDAQFilterAO.cpp
   ${BCI2000_SRC_DIR}/contrib/SignalSource/NIDAQ-MX/nidaq/NIDAQmx.imports.cpp
   SharedMemoryOutputConnector.cpp
 )
@@ -30,7 +34,14 @@ SET( HDR_PROJECT
   BackgroundTriggerFilter.h
   TrapFilter.h
   RangeIntegrator.h
-  ${BCI2000_SRC_DIR}/contrib/SignalSource/NIDAQ-MX/NIDAQ-Logging/NIDAQFilter.h
+  NIDAQFilterAO.h
+  #DS5ControlFilter.h
+  #D188ControlFilter.h
+  DigitimerFilter.h
+  DS8library.h
+  D188Library.h
+  stdafx.h
+  targetver.h
   ${BCI2000_SRC_DIR}/contrib/SignalSource/NIDAQ-MX/nidaq/NIDAQmx.imports.h
   ${BCI2000_SRC_DIR}/contrib/SignalSource/NIDAQ-MX/nidaq/NIDAQmx.h
   SharedMemoryOutputConnector.h
@@ -45,10 +56,12 @@ IF( NOT WIN32 ) # TODO: remove this section when BCI2000 can build on OSX again
 ENDIF( NOT WIN32 )
 
 
-INCLUDE_DIRECTORIES( ${BCI2000_SRC_DIR}/contrib/SignalSource/NIDAQ-MX/nidaq )
+INCLUDE_DIRECTORIES( ${BCI2000_SRC_DIR}/contrib/SignalSource/NIDAQ-MX/nidaq)
+INCLUDE_DIRECTORIES( ${BCI2000_SRC_DIR}/Custom/aReflexConditioningSignalProcessing/Libraries)
+
 IF( USE_DYNAMIC_IMPORTS )
 ELSE()
-  LINK_DIRECTORIES( ${BCI2000_SRC_DIR}/contrib/SignalSource/NIDAQ-MX/nidaq )
+  LINK_DIRECTORIES( ${BCI2000_SRC_DIR}/contrib/SignalSource/NIDAQ-MX/nidaq ${BCI2000_SRC_DIR}/Custom/aReflexConditioningSignalProcessing/Libraries)
 ENDIF()
 
 LIST( APPEND SRC_PROJECT ${BCI2000_SRC_DIR}/shared/modules/CoreMain.cpp )
@@ -57,7 +70,6 @@ BCI2000_ADD_SIGNAL_PROCESSING_MODULE(
   "${SRC_PROJECT}" "${HDR_PROJECT}" 
 )
 
-
-
-
+TARGET_LINK_LIBRARIES(aReflexConditioningSignalProcessing ${BCI2000_SRC_DIR}/Custom/aReflexConditioningSignalProcessing/Libraries/DS8library.lib)
+TARGET_LINK_LIBRARIES(aReflexConditioningSignalProcessing ${BCI2000_SRC_DIR}/Custom/aReflexConditioningSignalProcessing/Libraries/D188library.lib)
 

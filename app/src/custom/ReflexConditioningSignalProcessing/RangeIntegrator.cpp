@@ -38,7 +38,7 @@
 using namespace std;
 
 
-RegisterFilter( RangeIntegrator, 2.R );
+RegisterFilter( RangeIntegrator, 2.G );
 
 
 RangeIntegrator::RangeIntegrator()
@@ -56,16 +56,20 @@ RangeIntegrator::Publish()
 {
  BEGIN_PARAMETER_DEFINITIONS
    "Responses:Response%20Magnitudes matrix ResponseDefinition= "
-               " 1 { Input%20Channel Start   End   Subtract%20Mean? Norm   Weight  Response%20Name } "
-               "         1          28ms    35ms        no          1      1.0          H            "
+               " 2 { Input%20Channel Start   End   Subtract%20Mean? Norm   Weight  Response%20Name } "
+               "         EMG1          28ms    35ms        no          1      1.0          EMG1            "
+			   "         EMG1          6ms     22ms        no          1      1.0          EMG1a           "
                " % % % // define the response signals:",
-   "Responses:Response%20Magnitudes matrix ResponseAssessment= 1 { Response%20Name Min%20Amplitude Max%20Amplitude Feedback%20Weight }   H 5mV 15mV 1.0 % % % // process the response signals:",
+   "Responses:Response%20Magnitudes matrix ResponseAssessment= 1 { Response%20Name Min%20Amplitude Max%20Amplitude Feedback%20Weight }   EMG1 5mV 15mV 1.0 // process the response signals:",
+   "Responses:Response%20Magnitudes matrix ReferenceAssessment= 1 { Response%20Name Feedback%20Weight }   EMG1a 1.0 // process the reference signals:",
    "Responses:Response%20Magnitudes int    OutputMode= 0 0 0 1 // which signal to pass on, 0: pass through input unchanged, 1: output responses (enumeration)",
+   "Responses:Response%20Magnitudes int    AnalysisType= 0 0 0 1 // analyse the signal using, 0: Mean Rectified, 1: Peak-to-Peak (enumeration)",
 
  END_PARAMETER_DEFINITIONS
   
  BEGIN_STATE_DEFINITIONS 
    "ResponseFeedbackValue 32 0 0 0",
+   "ReferenceFeedbackValue 32 0 0 0",
    "ResponseGreen          1 0 0 0",
    "SuccessfulTrials      16 0 0 0",
  END_STATE_DEFINITIONS
@@ -87,6 +91,8 @@ RangeIntegrator::ParseMatrices(
   std::vector<double> & minValues,
   std::vector<double> & maxValues,
   std::vector<double> & feedbackWeights,
+  std::vector<int>    & refassessmentIndices,
+  std::vector<double> & reffeedbackWeights,
 
   const SignalProperties &  InputProperties,
   SignalProperties &  responseProperties
@@ -102,6 +108,7 @@ RangeIntegrator::ParseMatrices(
   responseProperties.ElementUnit().SetOffset( 0.0 );
   responseProperties.ElementUnit().SetGain( ( double ) Parameter( "SampleBlockSize" ) / Parameter( "SamplingRate" ).InHertz() );
   responseProperties.ElementUnit().SetSymbol( "s" );
+  responseProperties.ChannelLabels().Clear();
 
   inputChannelIndices.clear();
   startSamples.clear();
@@ -226,6 +233,34 @@ RangeIntegrator::ParseMatrices(
     double weight = assessmentMatrix( row, ++col );  // TODO: will this issue a reasonable error message if the entry is not valid?
     feedbackWeights.push_back( weight );
   }
+
+  reffeedbackWeights.clear();
+  refassessmentIndices.clear();
+	
+  paramName = "ReferenceAssessment";
+  ParamRef referenceMatrix = Parameter( paramName );
+  if( referenceMatrix->NumColumns() != 2 )
+  {
+    bcierr << paramName << " parameter must have 2 columns" << endl;
+    return;
+  }
+  for( int row = 0; row < referenceMatrix->NumRows(); row++ )
+  {
+    int col = -1;
+    
+    string referenceNameString = StringUtils::Strip( referenceMatrix( row, ++col ) );
+    int referenceIndex = ( int )responseProperties.ChannelIndex( referenceNameString );
+	
+    if( referenceIndex < 0 )
+      bcierr << "Invalid response specification \"" << referenceNameString << "\" in " << paramName << " parameter, row " << row + 1 << ", column " << col + 1 << "(does not match any of the responses defined in ResponseDefinition parameter)" << endl;
+    refassessmentIndices.push_back( referenceIndex );
+        
+    double weight = referenceMatrix( row, ++col );  // TODO: will this issue a reasonable error message if the entry is not valid?
+    reffeedbackWeights.push_back( weight );
+  }
+
+
+
 }
 
 void
@@ -248,10 +283,12 @@ RangeIntegrator::Preflight( const SignalProperties & InputProperties, SignalProp
   std::vector<double> minValues;
   std::vector<double> maxValues;
   std::vector<double> feedbackWeights;
+  std::vector<int>    refassessmentIndices;
+  std::vector<double> reffeedbackWeights;
   
   SignalProperties responseProperties;
   ParseMatrices( inputChannelIndices, startSamples, stopSamples, subtractMeanFlags, norms, weights, responseChannelIndices,
-                 assessmentIndices, minValues, maxValues, feedbackWeights,
+                 assessmentIndices, minValues, maxValues, feedbackWeights,refassessmentIndices,reffeedbackWeights,
                  InputProperties, responseProperties );
   if( Parameter( "OutputMode" ) == 0 )
     OutputProperties = InputProperties;
@@ -259,6 +296,7 @@ RangeIntegrator::Preflight( const SignalProperties & InputProperties, SignalProp
     OutputProperties = responseProperties;
   
   if( States->Exists( "TrialsCompleted" ) ) State( "TrialsCompleted" );
+
 }
 
 void
@@ -274,13 +312,16 @@ RangeIntegrator::Initialize( const SignalProperties & InputProperties, const Sig
   mPassThrough = ( Parameter( "OutputMode" ) == 0 );
 
   ParseMatrices( mInputChannelIndices, mStartSamples, mStopSamples, mSubtractMeanFlags, mNorms, mWeights, mResponseChannelIndices,
-                 mAssessmentIndices, mMinValues, mMaxValues, mFeedbackWeights,
+                 mAssessmentIndices, mMinValues, mMaxValues, mFeedbackWeights,mRefAssessmentIndices,mRefFeedbackWeights,
                  InputProperties, mResponseProperties );
 
   mComputeMeans = false;
   for( unsigned int i = 0; i < mSubtractMeanFlags.size(); i++ )
     if( mSubtractMeanFlags[ i ] )
       mComputeMeans = true;
+
+  mAnalysisType = Parameter("AnalysisType"); //0: MeanRect, 1: Peak2Peak
+  
 }
 
 void
@@ -296,6 +337,8 @@ RangeIntegrator::Process( const GenericSignal & InputSignal, GenericSignal & Out
   int nComponents = mInputChannelIndices.size();
   int nResponses = mResponseProperties.Channels();
   std::vector<double> means;
+  
+
   if( mComputeMeans )
   {
     int nChannels = InputSignal.Channels();
@@ -313,23 +356,45 @@ RangeIntegrator::Process( const GenericSignal & InputSignal, GenericSignal & Out
     }
   }
   GenericSignal responseSignal( mResponseProperties ); // zeroed already  
+
   for( int i = 0; i < nComponents; i++ )
   {
     int ch = mInputChannelIndices[ i ];
     double magnitude = 0.0;
+	double SignalMax = 0.0;
+	double SignalMin = 0.0;
     double mean = mSubtractMeanFlags[ i ] ? means[ ch ] : 0.0;
     int nSamples = mStopSamples[ i ] - mStartSamples[ i ];
+
     for( int el = mStartSamples[ i ]; el < mStopSamples[ i ]; el++ )
     {
       double val = InputSignal( ch, el );
       val = ( val - mInputOffset ) * mInputGain; // now expressed in Volts
       val -= mean;
-      if( mNorms[ i ] )
-        val = ::pow( ::fabs( val ), mNorms[ i ] );
-      magnitude += val / ( double )nSamples;
+
+	  if( mAnalysisType == 0)
+	  {
+		  if( mNorms[ i ] )
+		  { 
+			  val = ::pow( ::fabs( val ), mNorms[ i ] );
+		  }
+		  magnitude += val / ( double )nSamples;
+	  }
+	  else
+	  {
+		  if( val > SignalMax )
+			  SignalMax = val;
+		  if( val < SignalMin )
+			  SignalMin = val;
+	  }
     }
-    if( mNorms[ i ] != 0.0 && mNorms[ i ] != 1.0 )
-      magnitude = ::pow( magnitude, 1.0 / mNorms[ i ] );
+	// NOT SURE WHAT THIS WAS FOR SO REMOVED...
+    //if( mNorms[ i ] != 0.0 && mNorms[ i ] != 1.0 )
+    //  magnitude = ::pow( magnitude, 1.0 / mNorms[ i ] );
+	if( mAnalysisType == 1)
+	{
+		magnitude = SignalMax - SignalMin;
+	}
     responseSignal( mResponseChannelIndices[ i ], 0 ) += magnitude * mWeights[ i ];
   }
   double feedbackValue = 0.0;
@@ -352,6 +417,20 @@ RangeIntegrator::Process( const GenericSignal & InputSignal, GenericSignal & Out
   feedbackValue = ( ( feedbackValue < maxValue ) ? feedbackValue : maxValue );
   feedbackValue = ( ( feedbackValue > 0 ) ? feedbackValue : 0 );
   State( "ResponseFeedbackValue" ) = ( unsigned int )( 0.5 + feedbackValue );
+  
+  //REFERENC ASSESSMENT
+  feedbackValue = 0.0;
+
+  for( unsigned int i = 0; i < mRefAssessmentIndices.size(); i++ )
+  {
+    double reference = responseSignal( mRefAssessmentIndices[ i ], 0 );
+    feedbackValue += mRefFeedbackWeights[ i ] * reference;
+  }
+
+  feedbackValue *= 1e6;
+  feedbackValue = ( ( feedbackValue < maxValue ) ? feedbackValue : maxValue );
+  feedbackValue = ( ( feedbackValue > 0 ) ? feedbackValue : 0 );
+  State( "ReferenceFeedbackValue" ) = ( unsigned int )(0.5 + feedbackValue );
   
   if( mPassThrough )
     OutputSignal = InputSignal;

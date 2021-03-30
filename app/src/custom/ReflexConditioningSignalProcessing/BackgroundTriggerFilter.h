@@ -32,6 +32,7 @@
 #include "Expression.h"
 #include "RandomGenerator.h"
 
+
 class BackgroundTriggerFilter : public GenericFilter
 {
  public:
@@ -67,6 +68,7 @@ class BackgroundTriggerFilter : public GenericFilter
   int mSamplesPerSegment;
   unsigned long mSamplesSeen;
   int mRefractoryBlocks;
+  int mExtraRefractoryBlocks;
   int mBlocksSinceLastTrigger;
   int mBlocksToFreezeBackground;
   int mTriggerDurationBlocks;
@@ -83,6 +85,7 @@ class BackgroundTriggerFilter : public GenericFilter
   double mMonitoringGain;
   double mMonitoringOffset;
   RandomGenerator mRandomGenerator;
+  int RandomN;
 
   void ChooseNumberOfSegments();
   void ZeroSignal( GenericSignal * signal );
